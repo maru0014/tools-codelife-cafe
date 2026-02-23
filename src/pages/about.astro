@@ -3,77 +3,121 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout
-  title="このサイトについて"
-  description="CODE:LIFE Toolsは、仕事で安心して使える高速・軽量なWebツール集です。すべてのツールがブラウザ内で完結します。"
+  title="CODE:LIFE Tools について"
+  description="CODE:LIFE Toolsの概要・特徴・技術スタック・運営者情報。完全クライアントサイド処理の日本語業務特化Webツール集。"
   path="/about"
 >
-  <div class="mx-auto max-w-[800px] px-4 sm:px-6 py-12">
-    <h1 class="text-2xl font-bold mb-8">このサイトについて</h1>
+  <div class="mx-auto max-w-[960px] px-4 sm:px-6 py-12">
+    <!-- Hero Section -->
+    <div class="text-center mb-16 space-y-6">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4 flex items-center justify-center gap-3">
+        <span class="text-primary">🔒</span>
+        <span>CODE:LIFE Tools</span>
+      </h1>
 
-    <div class="space-y-8 text-[15px] leading-relaxed">
-      <section class="space-y-3">
-        <h2 class="text-lg font-semibold">CODE:LIFE Toolsとは</h2>
-        <p>CODE:LIFE Toolsは、<strong>仕事で安心して使える</strong>高速・軽量なWebツール集です。</p>
-        <p>
-          「社内データを外部のWebツールに貼り付けるのは不安…」<br />
-          「オフラインでも使えるツールが欲しい…」<br />
-          そんな声に応えるために作りました。
-        </p>
-      </section>
+      <p class="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed font-medium">
+        仕事で安心して使える、高速・軽量なWebツール集
+      </p>
 
-      <section class="space-y-3">
-        <h2 class="text-lg font-semibold">3つの特徴</h2>
-        <div class="grid gap-4">
-          <div class="rounded-xl border border-border p-4">
-            <h3 class="font-semibold mb-1">🇯🇵 日本語業務に特化</h3>
-            <p class="text-sm text-muted-foreground">全角半角変換、Shift-JISバイト数計算など、日本語でのビジネスに本当に必要な機能を備えています。</p>
-          </div>
-          <div class="rounded-xl border border-border p-4">
-            <h3 class="font-semibold mb-1">🔒 完全クライアントサイド処理</h3>
-            <p class="text-sm text-muted-foreground">すべてのデータ処理はブラウザ内のJavaScriptで完結します。入力データがサーバーに送信されることは一切ありません。</p>
-          </div>
-          <div class="rounded-xl border border-border p-4">
-            <h3 class="font-semibold mb-1">⚡ モダンUI & 高速</h3>
-            <p class="text-sm text-muted-foreground">Astro + Reactで構築されたモダンなインターフェース。サーバー通信不要で瞬時にレスポンスします。</p>
-          </div>
+      <div class="mt-4 inline-flex items-center gap-2 rounded-full border border-safety/30 bg-safety/5 px-4 py-2 text-sm text-safety font-medium">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-safety opacity-75"></span>
+          <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-safety"></span>
+        </span>
+        完全クライアントサイド処理で機密データも安心
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="mb-16">
+      <h2 class="text-2xl font-bold mb-6 text-center">3つの特徴</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Feature 1 -->
+        <div class="rounded-xl border border-border bg-card p-6 flex flex-col items-center text-center">
+          <div class="text-4xl mb-4">🔒</div>
+          <h3 class="text-lg font-bold mb-3">完全クライアントサイド処理</h3>
+          <ul class="text-sm text-muted-foreground space-y-2 text-left w-full list-disc pl-5">
+            <li>すべてのデータ処理はブラウザ内で完結</li>
+            <li>サーバーへのデータ送信は一切なし</li>
+            <li>ソースコードはGitHubで公開し透明性を確保</li>
+          </ul>
         </div>
-      </section>
 
-      <section class="space-y-3">
-        <h2 class="text-lg font-semibold">技術スタック</h2>
-        <div class="rounded-xl border border-border overflow-hidden">
-          <table class="w-full text-sm">
-            <tbody>
-              <tr class="border-b border-border">
-                <td class="px-4 py-2 font-medium bg-muted/50">フレームワーク</td>
-                <td class="px-4 py-2">Astro</td>
-              </tr>
-              <tr class="border-b border-border">
-                <td class="px-4 py-2 font-medium bg-muted/50">UIコンポーネント</td>
-                <td class="px-4 py-2">React + shadcn/ui</td>
-              </tr>
-              <tr class="border-b border-border">
-                <td class="px-4 py-2 font-medium bg-muted/50">スタイリング</td>
-                <td class="px-4 py-2">Tailwind CSS</td>
-              </tr>
-              <tr>
-                <td class="px-4 py-2 font-medium bg-muted/50">ホスティング</td>
-                <td class="px-4 py-2">Cloudflare Pages</td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- Feature 2 -->
+        <div class="rounded-xl border border-border bg-card p-6 flex flex-col items-center text-center">
+          <div class="text-4xl mb-4">🇯🇵</div>
+          <h3 class="text-lg font-bold mb-3">日本語業務に特化</h3>
+          <ul class="text-sm text-muted-foreground space-y-2 text-left w-full list-disc pl-5">
+            <li>全角半角変換、Shift-JISバイト数など日本固有の機能</li>
+            <li>UI・エラーメッセージすべて自然な日本語</li>
+          </ul>
         </div>
-      </section>
 
-      <section class="space-y-3">
-        <h2 class="text-lg font-semibold">運営者</h2>
-        <p><strong>CODE:LIFE</strong> / marumo</p>
+        <!-- Feature 3 -->
+        <div class="rounded-xl border border-border bg-card p-6 flex flex-col items-center text-center">
+          <div class="text-4xl mb-4">⚡</div>
+          <h3 class="text-lg font-bold mb-3">高速・軽量</h3>
+          <ul class="text-sm text-muted-foreground space-y-2 text-left w-full list-disc pl-5">
+            <li>サーバー通信なしのリアルタイム処理</li>
+            <li>Astroによる最適化された静的サイト</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+      <!-- Tech Stack Section -->
+      <section>
+        <h2 class="text-2xl font-bold mb-6">技術スタック</h2>
+        <div class="flex flex-wrap gap-2 mb-6">
+          <span class="inline-flex items-center rounded-md border border-border bg-muted/50 px-3 py-1 text-sm font-semibold">Astro</span>
+          <span class="inline-flex items-center rounded-md border border-border bg-muted/50 px-3 py-1 text-sm font-semibold">React</span>
+          <span class="inline-flex items-center rounded-md border border-border bg-muted/50 px-3 py-1 text-sm font-semibold">shadcn/ui</span>
+          <span class="inline-flex items-center rounded-md border border-border bg-muted/50 px-3 py-1 text-sm font-semibold">Tailwind CSS</span>
+          <span class="inline-flex items-center rounded-md border border-border bg-muted/50 px-3 py-1 text-sm font-semibold">Cloudflare Pages</span>
+        </div>
         <p class="text-sm text-muted-foreground">
-          ソースコードは
-          <a href="https://github.com/marumo/tools-codelife-cafe" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>
-          で公開しています。バグ報告や機能要望は、GitHubのIssueにてお気軽にどうぞ。
+          本サイトはオープンソースプロジェクトです。ソースコードは<a href="https://github.com/maru0014/tools-codelife-cafe" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-medium">GitHubリポジトリ</a>で公開しています。
         </p>
       </section>
+
+      <!-- Operator & Contact Section -->
+      <div class="space-y-8">
+        <section>
+          <h2 class="text-2xl font-bold mb-4">運営者</h2>
+          <ul class="space-y-3 text-sm">
+            <li class="flex items-center gap-3">
+              <span class="font-semibold w-20">運営:</span>
+              <span>marumo</span>
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="font-semibold w-20">サイト:</span>
+              <a href="https://codelife.cafe" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">CODE:LIFE (codelife.cafe)</a>
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="font-semibold w-20">GitHub:</span>
+              <a href="https://github.com/maru0014" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">github.com/maru0014</a>
+            </li>
+          </ul>
+        </section>
+
+        <section>
+          <h2 class="text-2xl font-bold mb-4">お問い合わせ・フィードバック</h2>
+          <p class="text-sm text-muted-foreground mb-4 leading-relaxed">
+            機能リクエストやバグ報告は大歓迎です。<br />
+            以下のGitHub Issuesよりお気軽にご連絡ください。
+          </p>
+          <a
+            href="https://github.com/maru0014/tools-codelife-cafe/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="mr-2"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"></path></svg>
+            GitHub Issues を開く
+          </a>
+        </section>
+      </div>
     </div>
   </div>
 </BaseLayout>
