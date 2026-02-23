@@ -1,0 +1,43 @@
+---
+import ToolLayout from '../../components/common/ToolLayout.astro';
+import ZenkakuHankaku from '../../components/tools/ZenkakuHankaku.tsx';
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "全角↔半角変換 - CODE:LIFE Tools",
+  "url": "https://tools.codelife.cafe/tools/zenkaku-hankaku",
+  "description": "カタカナ・英数字・記号の全角半角を双方向変換。カテゴリ別に変換対象を制御可能。完全ブラウザ処理。",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+  "inLanguage": "ja"
+};
+---
+
+<ToolLayout
+  title="全角↔半角変換"
+  description="カタカナ・英数字・記号の全角半角を双方向変換。カテゴリ別に変換対象を制御可能。"
+  path="/tools/zenkaku-hankaku"
+  jsonLd={jsonLd}
+>
+  <ZenkakuHankaku client:load />
+
+  <div slot="usage" class="mt-8">
+    <details class="group rounded-xl border border-border p-4">
+      <summary class="cursor-pointer text-sm font-semibold flex items-center gap-2">
+        📖 使い方・ユースケース
+        <span class="ml-auto text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+      </summary>
+      <div class="mt-4 space-y-3 text-sm text-muted-foreground">
+        <p>全角文字と半角文字を相互変換するツールです。変換対象をカテゴリ別に指定できます。</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>CSVデータの全角数字を半角に統一したい</li>
+          <li>半角カタカナを全角カタカナに変換したい</li>
+          <li>住所データの数字・記号だけを半角にしたい</li>
+          <li>メールアドレス中の全角英数字を修正したい</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+</ToolLayout>

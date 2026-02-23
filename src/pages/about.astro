@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="このサイトについて"
+  description="CODE:LIFE Toolsは、仕事で安心して使える高速・軽量なWebツール集です。すべてのツールがブラウザ内で完結します。"
+  path="/about"
+>
+  <div class="mx-auto max-w-[800px] px-4 sm:px-6 py-12">
+    <h1 class="text-2xl font-bold mb-8">このサイトについて</h1>
+
+    <div class="space-y-8 text-[15px] leading-relaxed">
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">CODE:LIFE Toolsとは</h2>
+        <p>CODE:LIFE Toolsは、<strong>仕事で安心して使える</strong>高速・軽量なWebツール集です。</p>
+        <p>
+          「社内データを外部のWebツールに貼り付けるのは不安…」<br />
+          「オフラインでも使えるツールが欲しい…」<br />
+          そんな声に応えるために作りました。
+        </p>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">3つの特徴</h2>
+        <div class="grid gap-4">
+          <div class="rounded-xl border border-border p-4">
+            <h3 class="font-semibold mb-1">🇯🇵 日本語業務に特化</h3>
+            <p class="text-sm text-muted-foreground">全角半角変換、Shift-JISバイト数計算など、日本語でのビジネスに本当に必要な機能を備えています。</p>
+          </div>
+          <div class="rounded-xl border border-border p-4">
+            <h3 class="font-semibold mb-1">🔒 完全クライアントサイド処理</h3>
+            <p class="text-sm text-muted-foreground">すべてのデータ処理はブラウザ内のJavaScriptで完結します。入力データがサーバーに送信されることは一切ありません。</p>
+          </div>
+          <div class="rounded-xl border border-border p-4">
+            <h3 class="font-semibold mb-1">⚡ モダンUI & 高速</h3>
+            <p class="text-sm text-muted-foreground">Astro + Reactで構築されたモダンなインターフェース。サーバー通信不要で瞬時にレスポンスします。</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">技術スタック</h2>
+        <div class="rounded-xl border border-border overflow-hidden">
+          <table class="w-full text-sm">
+            <tbody>
+              <tr class="border-b border-border">
+                <td class="px-4 py-2 font-medium bg-muted/50">フレームワーク</td>
+                <td class="px-4 py-2">Astro</td>
+              </tr>
+              <tr class="border-b border-border">
+                <td class="px-4 py-2 font-medium bg-muted/50">UIコンポーネント</td>
+                <td class="px-4 py-2">React + shadcn/ui</td>
+              </tr>
+              <tr class="border-b border-border">
+                <td class="px-4 py-2 font-medium bg-muted/50">スタイリング</td>
+                <td class="px-4 py-2">Tailwind CSS</td>
+              </tr>
+              <tr>
+                <td class="px-4 py-2 font-medium bg-muted/50">ホスティング</td>
+                <td class="px-4 py-2">Cloudflare Pages</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">運営者</h2>
+        <p><strong>CODE:LIFE</strong> / marumo</p>
+        <p class="text-sm text-muted-foreground">
+          ソースコードは
+          <a href="https://github.com/marumo/tools-codelife-cafe" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>
+          で公開しています。バグ報告や機能要望は、GitHubのIssueにてお気軽にどうぞ。
+        </p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

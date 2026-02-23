@@ -1,0 +1,43 @@
+---
+import ToolLayout from '../../components/common/ToolLayout.astro';
+import TextDiff from '../../components/tools/TextDiff.tsx';
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "テキスト差分比較 - CODE:LIFE Tools",
+  "url": "https://tools.codelife.cafe/tools/text-diff",
+  "description": "2つのテキストの違いをハイライト表示。行単位・文字単位の切替対応。ファイルドラッグ&ドロップ対応。完全ブラウザ処理。",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+  "inLanguage": "ja"
+};
+---
+
+<ToolLayout
+  title="テキスト差分比較"
+  description="2つのテキストの違いをハイライト表示。行単位・文字単位の切替対応。"
+  path="/tools/text-diff"
+  jsonLd={jsonLd}
+>
+  <TextDiff client:load />
+
+  <div slot="usage" class="mt-8">
+    <details class="group rounded-xl border border-border p-4">
+      <summary class="cursor-pointer text-sm font-semibold flex items-center gap-2">
+        📖 使い方・ユースケース
+        <span class="ml-auto text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+      </summary>
+      <div class="mt-4 space-y-3 text-sm text-muted-foreground">
+        <p>2つのテキストを比較して差分をハイライト表示します。</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>設定ファイルの変更箇所を確認したい</li>
+          <li>コードレビューの差分を確認したい</li>
+          <li>文書のバージョン間の違いを比較したい</li>
+          <li>翻訳テキストの差分チェック</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+</ToolLayout>

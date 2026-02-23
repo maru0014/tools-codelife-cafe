@@ -1,0 +1,43 @@
+---
+import ToolLayout from '../../components/common/ToolLayout.astro';
+import CharCount from '../../components/tools/CharCount.tsx';
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "文字数カウント - CODE:LIFE Tools",
+  "url": "https://tools.codelife.cafe/tools/char-count",
+  "description": "文字数・バイト数（UTF-8/Shift-JIS）・行数をリアルタイムカウント。原稿用紙換算やSNS文字制限表示にも対応。",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+  "inLanguage": "ja"
+};
+---
+
+<ToolLayout
+  title="文字数カウント"
+  description="文字数・バイト数（UTF-8/Shift-JIS）・行数をリアルタイムカウント。原稿用紙換算にも対応。"
+  path="/tools/char-count"
+  jsonLd={jsonLd}
+>
+  <CharCount client:load />
+
+  <div slot="usage" class="mt-8">
+    <details class="group rounded-xl border border-border p-4">
+      <summary class="cursor-pointer text-sm font-semibold flex items-center gap-2">
+        📖 使い方・ユースケース
+        <span class="ml-auto text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+      </summary>
+      <div class="mt-4 space-y-3 text-sm text-muted-foreground">
+        <p>入力した文章の文字数やバイト数をリアルタイムでカウントします。</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>レポートやブログの文字数チェック</li>
+          <li>データベースのカラム制限を確認（Shift-JISバイト数）</li>
+          <li>SNSの投稿文字数制限の確認</li>
+          <li>原稿用紙の枚数を概算したい</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+</ToolLayout>

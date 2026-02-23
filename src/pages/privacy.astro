@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="プライバシーポリシー"
+  description="CODE:LIFE Toolsのプライバシーポリシー。すべてのデータ処理はブラウザ内で完結し、サーバーへの送信は一切行いません。"
+  path="/privacy"
+>
+  <div class="mx-auto max-w-[800px] px-4 sm:px-6 py-12">
+    <h1 class="text-2xl font-bold mb-8">プライバシーポリシー</h1>
+
+    <div class="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-[15px] leading-relaxed">
+      <p class="text-muted-foreground">最終更新日: 2026年2月23日（月）</p>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">1. 基本方針</h2>
+        <p>CODE:LIFE Tools（以下「本サイト」）は、ユーザーのプライバシーを最大限に尊重します。本サイトが提供するすべてのツールは、<strong>完全にブラウザ内（クライアントサイド）で動作</strong>します。ユーザーが入力したデータは、いかなる場合もサーバーに送信されることはありません。</p>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">2. データの収集について</h2>
+        <p>本サイトでは以下のデータを<strong>収集しません</strong>。</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>ツールに入力されたテキスト・ファイル・画像などのデータ</li>
+          <li>個人を特定可能な情報（氏名、メールアドレスなど）</li>
+          <li>入力内容のサーバーログ</li>
+        </ul>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">3. Cookie・ローカルストレージ</h2>
+        <p>本サイトでは、ユーザーの利便性向上のため、以下の目的でローカルストレージを使用する場合があります。</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>ダークモード設定の保存</li>
+        </ul>
+        <p>これらのデータはユーザーのブラウザ内にのみ保存され、外部に送信されることはありません。</p>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">4. アクセス解析</h2>
+        <p>本サイトでは、サービス改善のためにアクセス解析ツールを導入する可能性があります。導入する場合は、個人を特定しないツールを使用し、本ポリシーを更新します。</p>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">5. オープンソース</h2>
+        <p>本サイトのソースコードは<a href="https://github.com/marumo/tools-codelife-cafe" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>で公開しています。データが外部に送信されないことは、どなたでもソースコードを確認して検証できます。</p>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-lg font-semibold">6. お問い合わせ</h2>
+        <p>本ポリシーに関するご質問は、GitHubのIssueにてお問い合わせください。</p>
+      </section>
+    </div>
+  </div>
+</BaseLayout>

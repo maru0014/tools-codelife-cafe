@@ -1,0 +1,111 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ToolCard from '../components/common/ToolCard.astro';
+---
+
+<BaseLayout
+  title="仕事で安心して使えるWebツール集"
+  description="すべてのツールがブラウザ内で完結。サーバーへのデータ送信は一切行わない、高速・軽量なWebツール集です。"
+  path="/"
+>
+  <!-- Hero Section -->
+  <section class="mx-auto max-w-6xl px-4 sm:px-6 pt-12 pb-8">
+    <div class="text-center mb-12">
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4">
+        仕事で<span class="text-primary">安心</span>して使える
+        <br class="hidden sm:block" />
+        Webツール集
+      </h1>
+      <p class="text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+        すべてのツールがブラウザ内で完結。
+        <br class="hidden sm:block" />
+        サーバーへのデータ送信は<strong class="text-foreground">一切ありません</strong>。
+      </p>
+      <div class="mt-6 inline-flex items-center gap-2 rounded-full border border-safety/30 bg-safety/5 px-4 py-2 text-sm text-safety font-medium">
+        <span class="relative flex h-2.5 w-2.5">
+          <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-safety opacity-75"></span>
+          <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-safety"></span>
+        </span>
+        🔒 完全クライアントサイド処理 — データはあなたのブラウザから出ません
+      </div>
+    </div>
+
+    <!-- Bento Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <ToolCard
+        title="全角↔半角変換"
+        description="カタカナ・英数字・記号の全角半角を一括変換。カテゴリ別に細かく制御できます。"
+        href="/tools/zenkaku-hankaku"
+        icon="🔄"
+        category="テキスト変換"
+        categoryColor="border-l-primary"
+        span={2}
+      />
+      <ToolCard
+        title="文字数カウント"
+        description="文字数・バイト数・行数をリアルタイムカウント。Shift-JIS対応。"
+        href="/tools/char-count"
+        icon="🔢"
+        category="テキスト解析"
+        categoryColor="border-l-accent"
+      />
+      <ToolCard
+        title="JSON整形"
+        description="JSONの整形・圧縮・構文チェック。インデント幅も選べます。"
+        href="/tools/json-formatter"
+        icon="{ }"
+        category="開発ツール"
+        categoryColor="border-l-chart-1"
+      />
+      <ToolCard
+        title="テキスト差分比較"
+        description="2つのテキストの違いをハイライト表示。 行単位・文字単位の切替対応。"
+        href="/tools/text-diff"
+        icon="📝"
+        category="テキスト解析"
+        categoryColor="border-l-accent"
+        span={2}
+      />
+      <ToolCard
+        title="QRコード生成"
+        description="URLやテキストからQRコードを即座に生成。サイズ・色のカスタマイズ可能。"
+        href="/tools/qr-generator"
+        icon="📱"
+        category="生成ツール"
+        categoryColor="border-l-chart-3"
+      />
+      <!-- Category summary card -->
+      <div class="flex flex-col justify-center items-center rounded-xl border border-border bg-card p-5 text-center">
+        <p class="text-3xl font-bold text-primary mb-1">5</p>
+        <p class="text-sm text-muted-foreground mb-3">ツールを公開中</p>
+        <div class="flex flex-wrap justify-center gap-1.5">
+          <span class="text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">テキスト変換</span>
+          <span class="text-xs rounded-full bg-accent/10 text-accent px-2 py-0.5">テキスト解析</span>
+          <span class="text-xs rounded-full bg-chart-1/10 text-chart-1 px-2 py-0.5">開発ツール</span>
+          <span class="text-xs rounded-full bg-chart-3/10 text-chart-3 px-2 py-0.5">生成ツール</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features section -->
+  <section class="mx-auto max-w-6xl px-4 sm:px-6 py-12">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div class="text-center p-6 rounded-xl bg-card border border-border">
+        <div class="text-3xl mb-3">🇯🇵</div>
+        <h3 class="font-semibold mb-2">日本語業務に特化</h3>
+        <p class="text-sm text-muted-foreground">全角半角変換、Shift-JISバイト数など、日本語業務で本当に必要な機能を搭載。</p>
+      </div>
+      <div class="text-center p-6 rounded-xl bg-card border border-border">
+        <div class="text-3xl mb-3">🔒</div>
+        <h3 class="font-semibold mb-2">完全クライアントサイド</h3>
+        <p class="text-sm text-muted-foreground">すべてのデータ処理はブラウザ内で完結。機密データも安心して扱えます。</p>
+      </div>
+      <div class="text-center p-6 rounded-xl bg-card border border-border">
+        <div class="text-3xl mb-3">⚡</div>
+        <h3 class="font-semibold mb-2">高速・軽量</h3>
+        <p class="text-sm text-muted-foreground">サーバー通信なしのリアルタイム処理。ストレスフリーに使えます。</p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

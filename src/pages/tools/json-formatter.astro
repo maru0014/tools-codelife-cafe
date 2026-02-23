@@ -1,0 +1,43 @@
+---
+import ToolLayout from '../../components/common/ToolLayout.astro';
+import JsonFormatter from '../../components/tools/JsonFormatter.tsx';
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "JSON整形 - CODE:LIFE Tools",
+  "url": "https://tools.codelife.cafe/tools/json-formatter",
+  "description": "JSONの整形・圧縮・構文チェック。インデント幅を選択可能。完全ブラウザ内処理。",
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web Browser",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
+  "inLanguage": "ja"
+};
+---
+
+<ToolLayout
+  title="JSON整形"
+  description="JSONの整形・圧縮・構文チェック。インデント幅を選択可能。"
+  path="/tools/json-formatter"
+  jsonLd={jsonLd}
+>
+  <JsonFormatter client:load />
+
+  <div slot="usage" class="mt-8">
+    <details class="group rounded-xl border border-border p-4">
+      <summary class="cursor-pointer text-sm font-semibold flex items-center gap-2">
+        📖 使い方・ユースケース
+        <span class="ml-auto text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+      </summary>
+      <div class="mt-4 space-y-3 text-sm text-muted-foreground">
+        <p>JSONデータを見やすく整形（Pretty Print）したり、圧縮（Minify）します。</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>APIレスポンスを見やすく整形したい</li>
+          <li>JSON構文エラーをチェックしたい</li>
+          <li>設定ファイルのJSONをきれいにフォーマットしたい</li>
+          <li>JSONデータを圧縮して軽量化したい</li>
+        </ul>
+      </div>
+    </details>
+  </div>
+</ToolLayout>

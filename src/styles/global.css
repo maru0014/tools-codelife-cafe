@@ -1,0 +1,166 @@
+/* ===== Google Fonts ===== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+    --radius-2xl: calc(var(--radius) + 8px);
+    --radius-3xl: calc(var(--radius) + 12px);
+    --radius-4xl: calc(var(--radius) + 16px);
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+    --color-safety: var(--safety);
+    --color-safety-foreground: var(--safety-foreground);
+
+    --font-sans: 'Inter', 'Noto Sans JP', 'Hiragino Kaku Gothic ProN', sans-serif;
+    --font-mono: 'JetBrains Mono', 'Source Code Pro', monospace;
+}
+
+/* ===== Light Mode (Default) ===== */
+:root {
+    --radius: 0.75rem;
+    --background: #FAFAF9;
+    --foreground: #1C1917;
+    --card: #FFFFFF;
+    --card-foreground: #1C1917;
+    --popover: #FFFFFF;
+    --popover-foreground: #1C1917;
+    --primary: #1E40AF;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F5F5F4;
+    --secondary-foreground: #1C1917;
+    --muted: #F5F5F4;
+    --muted-foreground: #78716C;
+    --accent: #0D9488;
+    --accent-foreground: #FFFFFF;
+    --destructive: #DC2626;
+    --border: #E7E5E4;
+    --input: #E7E5E4;
+    --ring: #1E40AF;
+    --safety: #059669;
+    --safety-foreground: #FFFFFF;
+    --chart-1: #1E40AF;
+    --chart-2: #0D9488;
+    --chart-3: #059669;
+    --chart-4: #D97706;
+    --chart-5: #DC2626;
+}
+
+/* ===== Dark Mode ===== */
+.dark {
+    --background: #0C0A09;
+    --foreground: #FAFAF9;
+    --card: #1C1917;
+    --card-foreground: #FAFAF9;
+    --popover: #1C1917;
+    --popover-foreground: #FAFAF9;
+    --primary: #60A5FA;
+    --primary-foreground: #0C0A09;
+    --secondary: #292524;
+    --secondary-foreground: #FAFAF9;
+    --muted: #292524;
+    --muted-foreground: #A8A29E;
+    --accent: #2DD4BF;
+    --accent-foreground: #0C0A09;
+    --destructive: #EF4444;
+    --border: #292524;
+    --input: #292524;
+    --ring: #60A5FA;
+    --safety: #34D399;
+    --safety-foreground: #0C0A09;
+    --chart-1: #60A5FA;
+    --chart-2: #2DD4BF;
+    --chart-3: #34D399;
+    --chart-4: #FBBF24;
+    --chart-5: #EF4444;
+}
+
+@layer base {
+    * {
+        @apply border-border outline-ring/50;
+    }
+    html {
+        transition: color 0.3s ease, background-color 0.3s ease;
+    }
+    body {
+        @apply bg-background text-foreground;
+        font-family: var(--font-sans);
+        font-size: 15px;
+        line-height: 1.7;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+}
+
+/* ===== Custom Utilities ===== */
+@layer utilities {
+    .font-mono-tool {
+        font-family: var(--font-mono);
+        font-size: 14px;
+    }
+
+    .shimmer {
+        animation: shimmer 0.3s ease-in-out;
+    }
+
+    .pulse-dot {
+        animation: pulse-dot 2s infinite;
+    }
+}
+
+/* ===== Keyframes ===== */
+@keyframes shimmer {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { opacity: 1; }
+}
+
+@keyframes pulse-dot {
+    0%, 100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.5;
+        transform: scale(1.3);
+    }
+}
+
+@keyframes copy-flash {
+    0% { background-color: transparent; }
+    50% { background-color: oklch(0.8 0.15 155); }
+    100% { background-color: transparent; }
+}
+
+.copy-flash {
+    animation: copy-flash 0.8s ease-in-out;
+}
