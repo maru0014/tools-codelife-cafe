@@ -4,52 +4,94 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
 <BaseLayout
   title="プライバシーポリシー"
-  description="CODE:LIFE Toolsのプライバシーポリシー。すべてのデータ処理はブラウザ内で完結し、サーバーへの送信は一切行いません。"
+  description="CODE:LIFE Toolsのプライバシーポリシー。データの取り扱い、Cookie、アクセス解析について。"
   path="/privacy"
 >
   <div class="mx-auto max-w-[800px] px-4 sm:px-6 py-12">
-    <h1 class="text-2xl font-bold mb-8">プライバシーポリシー</h1>
+    <h1 class="text-3xl font-bold tracking-tight mb-8">プライバシーポリシー</h1>
 
-    <div class="prose prose-neutral dark:prose-invert max-w-none space-y-6 text-[15px] leading-relaxed">
-      <p class="text-muted-foreground">最終更新日: 2026年2月23日（月）</p>
-
+    <div class="space-y-10 text-[15px] leading-relaxed text-foreground/90">
       <section class="space-y-3">
-        <h2 class="text-lg font-semibold">1. 基本方針</h2>
-        <p>CODE:LIFE Tools（以下「本サイト」）は、ユーザーのプライバシーを最大限に尊重します。本サイトが提供するすべてのツールは、<strong>完全にブラウザ内（クライアントサイド）で動作</strong>します。ユーザーが入力したデータは、いかなる場合もサーバーに送信されることはありません。</p>
+        <h2 class="text-xl font-semibold border-b border-border pb-2">1. はじめに</h2>
+        <ul class="list-disc pl-5 space-y-1 text-muted-foreground">
+          <li><strong>サイト名:</strong> CODE:LIFE Tools</li>
+          <li><strong>URL:</strong> https://tools.codelife.cafe</li>
+          <li><strong>運営者:</strong> marumo</li>
+        </ul>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-xl font-semibold border-b border-border pb-2">2. データの取り扱いについて</h2>
+        <div class="rounded-xl border border-safety/30 bg-safety/5 p-5 text-safety-foreground">
+          <p class="font-medium mb-3 flex items-center gap-2">
+            <span class="relative flex h-2.5 w-2.5">
+              <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-safety opacity-75"></span>
+              <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-safety"></span>
+            </span>
+            本サイトのツールはすべてクライアントサイド（ブラウザ内）で処理されます。
+          </p>
+          <ul class="list-disc pl-5 space-y-2 text-sm">
+            <li>ユーザーが入力したデータは<strong>一切サーバーに送信されません</strong>。</li>
+            <li>処理結果はブラウザのメモリ上にのみ存在し、ページ離脱時またはタブを閉じた際に直ちに破棄されます。</li>
+            <li>機密情報や個人情報を含むデータも、お使いの端末内で安全に処理されます。</li>
+          </ul>
+        </div>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-lg font-semibold">2. データの収集について</h2>
-        <p>本サイトでは以下のデータを<strong>収集しません</strong>。</p>
-        <ul class="list-disc pl-5 space-y-1">
-          <li>ツールに入力されたテキスト・ファイル・画像などのデータ</li>
-          <li>個人を特定可能な情報（氏名、メールアドレスなど）</li>
-          <li>入力内容のサーバーログ</li>
+        <h2 class="text-xl font-semibold border-b border-border pb-2">3. アクセス解析</h2>
+        <p>本サイトでは、サイトの利用状況を把握し、サービス向上に役立てるために <strong>Cloudflare Web Analytics</strong> を使用しています。</p>
+        <ul class="list-disc pl-5 space-y-1 text-muted-foreground">
+          <li>これは Cookie を使用しない（Cookieレス）プライバシーに配慮したアクセス解析ツールです。</li>
+          <li>収集されるデータは、ページビュー数、リファラー（参照元）、国/地域、デバイス種別、ブラウザ種別などに限定されます。</li>
+          <li>これらのデータから、<strong>ユーザー個人を特定する情報は一切収集されません</strong>。</li>
         </ul>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-lg font-semibold">3. Cookie・ローカルストレージ</h2>
-        <p>本サイトでは、ユーザーの利便性向上のため、以下の目的でローカルストレージを使用する場合があります。</p>
-        <ul class="list-disc pl-5 space-y-1">
-          <li>ダークモード設定の保存</li>
+        <h2 class="text-xl font-semibold border-b border-border pb-2">4. 広告について</h2>
+        <p>本サイトでは、第三者配信の広告サービスである <strong>Google AdSense</strong> を利用しています（導入準備中含む）。</p>
+        <ul class="list-disc pl-5 space-y-2 text-muted-foreground">
+          <li>Google などの第三者配信事業者は、Cookie を使用して、ユーザーが本サイトや他のウェブサイトに過去にアクセスした際の情報に基づいて広告を配信します。</li>
+          <li>Google が広告 Cookie を使用することにより、ユーザーが本サイトや他のサイトにアクセスした際の情報に基づいて、Google やそのパートナーが適切な広告をユーザーに表示できることになります。</li>
+          <li>ユーザーは、<a href="https://myadcenter.google.com/home" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">広告設定</a>でパーソナライズ広告を無効にすることができます。</li>
+          <li>また、<a href="https://www.aboutads.info/choices/" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">www.aboutads.info</a> にアクセスして、パーソナライズ広告に使われる第三者配信事業者の Cookie を無効にすることもできます。</li>
+          <li>詳細は <a href="https://policies.google.com/technologies/ads" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">Google のプライバシー ポリシーと規約</a> をご確認ください。</li>
         </ul>
-        <p>これらのデータはユーザーのブラウザ内にのみ保存され、外部に送信されることはありません。</p>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-lg font-semibold">4. アクセス解析</h2>
-        <p>本サイトでは、サービス改善のためにアクセス解析ツールを導入する可能性があります。導入する場合は、個人を特定しないツールを使用し、本ポリシーを更新します。</p>
+        <h2 class="text-xl font-semibold border-b border-border pb-2">5. Cookie の使用</h2>
+        <p>本サイトでは、以下の目的で Cookie およびローカルストレージ（localStorage）を使用する場合があります。</p>
+        <ul class="list-disc pl-5 space-y-2 text-muted-foreground">
+          <li><strong>本サイト自体が使用するデータ:</strong> ダークモードの設定保存などのためにローカルストレージを使用します。</li>
+          <li><strong>第三者が使用する Cookie:</strong> Google AdSense による広告配信のためにサードパーティ Cookie が使用されます（前項の「広告について」をご参照ください）。なお、アクセス解析（Cloudflare Analytics）では Cookie は使用されません。</li>
+        </ul>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-lg font-semibold">5. オープンソース</h2>
-        <p>本サイトのソースコードは<a href="https://github.com/marumo/tools-codelife-cafe" class="text-primary hover:underline" target="_blank" rel="noopener noreferrer">GitHub</a>で公開しています。データが外部に送信されないことは、どなたでもソースコードを確認して検証できます。</p>
+        <h2 class="text-xl font-semibold border-b border-border pb-2">6. 免責事項</h2>
+        <ul class="list-disc pl-5 space-y-2 text-muted-foreground">
+          <li>本サイトが提供するツールの処理結果の正確性・妥当性について、可能な限り注意を払っておりますが、その内容を保証するものではありません。</li>
+          <li>本サイトの各種ツール・サービスを利用したこと、または利用できなかったことによって生じたトラブルや損害（間接的、付随的、派生的、特別損害を含む）について、運営者は一切の責任を負いかねます。ご自身の責任においてご利用ください。</li>
+        </ul>
       </section>
 
       <section class="space-y-3">
-        <h2 class="text-lg font-semibold">6. お問い合わせ</h2>
-        <p>本ポリシーに関するご質問は、GitHubのIssueにてお問い合わせください。</p>
+        <h2 class="text-xl font-semibold border-b border-border pb-2">7. お問い合わせ</h2>
+        <p>
+          本ポリシーに関するご質問、または本サイトに関するお問い合わせは、以下の GitHub Issues よりお願いいたします。<br />
+          <a href="https://github.com/maru0014/tools-codelife-cafe/issues" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">
+            https://github.com/maru0014/tools-codelife-cafe/issues
+          </a>
+        </p>
+      </section>
+
+      <section class="space-y-3">
+        <h2 class="text-xl font-semibold border-b border-border pb-2">8. 改定履歴</h2>
+        <ul class="list-disc pl-5 text-muted-foreground">
+          <li>制定日: 2026年2月24日</li>
+        </ul>
       </section>
     </div>
   </div>
