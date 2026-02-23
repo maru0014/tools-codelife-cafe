@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import CharCount from '../../components/tools/CharCount.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import CharCount from '../components/tools/CharCount.tsx';
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "文字数カウント - CODE:LIFE Tools",
-  "url": "https://tools.codelife.cafe/tools/char-count",
+  "url": "https://tools.codelife.cafe/char-count",
   "description": "文字数・バイト数（UTF-8/Shift-JIS）・行数をリアルタイムカウント。原稿用紙換算やSNS文字制限表示にも対応。",
   "applicationCategory": "UtilityApplication",
   "operatingSystem": "Web Browser",
@@ -18,7 +18,7 @@ const jsonLd = {
 <ToolLayout
   title="文字数カウント"
   description="文字数・バイト数（UTF-8/Shift-JIS）・行数をリアルタイムカウント。原稿用紙換算にも対応。"
-  path="/tools/char-count"
+  path="/char-count"
   jsonLd={jsonLd}
 >
   <CharCount client:load />

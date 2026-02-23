@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import TextDiff from '../../components/tools/TextDiff.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import TextDiff from '../components/tools/TextDiff.tsx';
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "テキスト差分比較 - CODE:LIFE Tools",
-  "url": "https://tools.codelife.cafe/tools/text-diff",
+  "url": "https://tools.codelife.cafe/text-diff",
   "description": "2つのテキストの違いをハイライト表示。行単位・文字単位の切替対応。ファイルドラッグ&ドロップ対応。完全ブラウザ処理。",
   "applicationCategory": "UtilityApplication",
   "operatingSystem": "Web Browser",
@@ -18,7 +18,7 @@ const jsonLd = {
 <ToolLayout
   title="テキスト差分比較"
   description="2つのテキストの違いをハイライト表示。行単位・文字単位の切替対応。"
-  path="/tools/text-diff"
+  path="/text-diff"
   jsonLd={jsonLd}
 >
   <TextDiff client:load />

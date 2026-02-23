@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import ZenkakuHankaku from '../../components/tools/ZenkakuHankaku.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import ZenkakuHankaku from '../components/tools/ZenkakuHankaku.tsx';
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "全角↔半角変換 - CODE:LIFE Tools",
-  "url": "https://tools.codelife.cafe/tools/zenkaku-hankaku",
+  "url": "https://tools.codelife.cafe/zenkaku-hankaku",
   "description": "カタカナ・英数字・記号の全角半角を双方向変換。カテゴリ別に変換対象を制御可能。完全ブラウザ処理。",
   "applicationCategory": "UtilityApplication",
   "operatingSystem": "Web Browser",
@@ -18,7 +18,7 @@ const jsonLd = {
 <ToolLayout
   title="全角↔半角変換"
   description="カタカナ・英数字・記号の全角半角を双方向変換。カテゴリ別に変換対象を制御可能。"
-  path="/tools/zenkaku-hankaku"
+  path="/zenkaku-hankaku"
   jsonLd={jsonLd}
 >
   <ZenkakuHankaku client:load />

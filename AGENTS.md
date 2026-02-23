@@ -27,7 +27,7 @@ src/
 │   └── BaseLayout.astro # 全ページ共通レイアウト（SEO, OG, View Transitions）
 ├── pages/
 │   ├── index.astro      # トップページ（Bento Grid）
-│   ├── tools/           # 各ツールのAstroページ
+│   ├── [tool-name].astro # 各ツールのAstroページ（直下に配置）
 │   ├── privacy.astro
 │   └── about.astro
 ├── lib/
@@ -48,7 +48,7 @@ src/
 
 1. `src/lib/tools/[tool-name].ts` — ビジネスロジックを純粋関数として実装
 2. `src/components/tools/[ToolName].tsx` — React UIコンポーネントを作成
-3. `src/pages/tools/[tool-name].astro` — `ToolLayout.astro` でラップするAstroページを作成
+3. `src/pages/[tool-name].astro` — `ToolLayout.astro` でラップするAstroページを作成
 4. `src/pages/index.astro` に `ToolCard` を追加
 
 ## デザインシステム

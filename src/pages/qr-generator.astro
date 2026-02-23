@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import QrGenerator from '../../components/tools/QrGenerator.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import QrGenerator from '../components/tools/QrGenerator.tsx';
 
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "QRコード生成 - CODE:LIFE Tools",
-  "url": "https://tools.codelife.cafe/tools/qr-generator",
+  "url": "https://tools.codelife.cafe/qr-generator",
   "description": "URLやテキストからQRコードを即座に生成。サイズ・色のカスタマイズ、PNG/SVGダウンロード対応。完全ブラウザ処理。",
   "applicationCategory": "UtilityApplication",
   "operatingSystem": "Web Browser",
@@ -18,7 +18,7 @@ const jsonLd = {
 <ToolLayout
   title="QRコード生成"
   description="URLやテキストからQRコードを即座に生成。サイズ・色のカスタマイズ、PNG/SVGダウンロード対応。"
-  path="/tools/qr-generator"
+  path="/qr-generator"
   jsonLd={jsonLd}
 >
   <QrGenerator client:load />
