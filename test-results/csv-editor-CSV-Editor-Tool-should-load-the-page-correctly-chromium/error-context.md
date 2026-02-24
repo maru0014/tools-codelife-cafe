@@ -1,0 +1,96 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "🔒 CODE:LIFE Tools" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: 🔒
+        - generic [ref=e6]: CODE:LIFE Tools
+      - button "ツールを検索... Ctrl+K" [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: ツールを検索...
+        - generic [ref=e13]: Ctrl+K
+      - generic [ref=e14]:
+        - generic [ref=e15]: オフライン対応
+        - button "ダークモードに切替" [ref=e18]:
+          - img [ref=e19]
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "CSVビューア/エディタ" [level=1] [ref=e24]
+        - paragraph [ref=e25]: ブラウザ上でCSV/TSVをテーブル形式で閲覧・編集。データの加工からエクスポートまで完結。
+        - generic [ref=e26]:
+          - button "セキュリティ情報を表示" [ref=e28] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e35]: このツールはサーバーと通信しません
+            - img [ref=e36]
+          - link "ソースコード" [ref=e38] [cursor=pointer]:
+            - /url: https://github.com/marumo/tools-codelife-cafe
+            - img [ref=e39]
+            - text: ソースコード
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - generic [ref=e45]:
+              - generic [ref=e46]: 区切り文字
+              - combobox [ref=e47]:
+                - img
+              - combobox [ref=e48]
+            - button "ファイル読み込み" [ref=e50]:
+              - img
+              - text: ファイル読み込み
+          - generic [ref=e51]:
+            - button [disabled]:
+              - img
+        - generic [ref=e52]:
+          - tablist [ref=e53]:
+            - tab "テキスト入力" [selected] [ref=e54]
+            - tab "テーブル編集" [disabled]
+          - tabpanel "テキスト入力" [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: テキストデータ
+              - button "パースして編集へ" [disabled]
+            - textbox "A,B,C 1,2,3 4,5,6" [ref=e58]:
+              - /placeholder: "A,B,C\n1,2,3\n4,5,6"
+      - generic [ref=e61]: AdSense Placeholder (rectangle)
+      - group [ref=e63]:
+        - generic "📖 使い方・ユースケース ▼" [ref=e64] [cursor=pointer]:
+          - text: 📖 使い方・ユースケース
+          - generic [ref=e65]: ▼
+      - generic [ref=e68]: AdSense Placeholder (horizontal)
+  - contentinfo [ref=e69]:
+    - generic [ref=e71]:
+      - generic [ref=e72]:
+        - link "プライバシーポリシー" [ref=e73] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e74]: "|"
+        - link "このサイトについて" [ref=e75] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e76]: "|"
+        - link "GitHub" [ref=e77] [cursor=pointer]:
+          - /url: https://github.com/marumo/tools-codelife-cafe
+          - img [ref=e78]
+          - text: GitHub
+      - paragraph [ref=e80]:
+        - text: © 2026
+        - link "CODE:LIFE" [ref=e81] [cursor=pointer]:
+          - /url: https://codelife.cafe
+        - text: / marumo
+  - generic [ref=e84]:
+    - button "Menu" [ref=e85]:
+      - img [ref=e87]
+      - generic: Menu
+    - button "Inspect" [ref=e91]:
+      - img [ref=e93]
+      - generic: Inspect
+    - button "Audit" [ref=e95]:
+      - generic [ref=e96]:
+        - img [ref=e97]
+        - img [ref=e100]
+      - generic: Audit
+    - button "Settings" [ref=e103]:
+      - img [ref=e105]
+      - generic: Settings
+```

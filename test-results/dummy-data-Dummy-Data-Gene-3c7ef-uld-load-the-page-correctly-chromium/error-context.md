@@ -1,0 +1,167 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "🔒 CODE:LIFE Tools" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: 🔒
+        - generic [ref=e6]: CODE:LIFE Tools
+      - button "ツールを検索... Ctrl+K" [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: ツールを検索...
+        - generic [ref=e13]: Ctrl+K
+      - generic [ref=e14]:
+        - generic [ref=e15]: オフライン対応
+        - button "ダークモードに切替" [ref=e18]:
+          - img [ref=e19]
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "ダミーデータ生成（日本語）" [level=1] [ref=e24]
+        - paragraph [ref=e25]: 日本語の氏名・住所・電話番号等のダミーデータを一括生成。JSON/CSV/TSV出力対応。
+        - generic [ref=e26]:
+          - button "セキュリティ情報を表示" [ref=e28] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e35]: このツールはサーバーと通信しません
+            - img [ref=e36]
+          - link "ソースコード" [ref=e38] [cursor=pointer]:
+            - /url: https://github.com/marumo/tools-codelife-cafe
+            - img [ref=e39]
+            - text: ソースコード
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - generic [ref=e48]:
+                - img [ref=e49]
+                - text: フィールド設定
+              - combobox [ref=e50]:
+                - generic: プリセット
+                - img
+              - combobox [ref=e51]
+            - generic [ref=e52]: ドラッグ&ドロップで並べ替えできます
+            - generic [ref=e53]:
+              - generic [ref=e54]:
+                - img [ref=e55]
+                - checkbox "氏名" [checked] [ref=e62]:
+                  - generic:
+                    - img
+                - checkbox [checked]
+                - generic [ref=e63] [cursor=pointer]: 氏名
+              - generic [ref=e64]:
+                - img [ref=e65]
+                - checkbox "フリガナ" [checked] [ref=e72]:
+                  - generic:
+                    - img
+                - checkbox [checked]
+                - generic [ref=e73] [cursor=pointer]: フリガナ
+              - generic [ref=e74]:
+                - img [ref=e75]
+                - checkbox "メールアドレス" [checked] [ref=e82]:
+                  - generic:
+                    - img
+                - checkbox [checked]
+                - generic [ref=e83] [cursor=pointer]: メールアドレス
+              - generic [ref=e84]:
+                - img [ref=e85]
+                - checkbox "電話番号" [checked] [ref=e92]:
+                  - generic:
+                    - img
+                - checkbox [checked]
+                - generic [ref=e93] [cursor=pointer]: 電話番号
+              - generic [ref=e94]:
+                - img [ref=e95]
+                - checkbox "郵便番号" [ref=e102]
+                - checkbox
+                - generic [ref=e103] [cursor=pointer]: 郵便番号
+              - generic [ref=e104]:
+                - img [ref=e105]
+                - checkbox "住所" [ref=e112]
+                - checkbox
+                - generic [ref=e113] [cursor=pointer]: 住所
+              - generic [ref=e114]:
+                - img [ref=e115]
+                - checkbox "会社名" [ref=e122]
+                - checkbox
+                - generic [ref=e123] [cursor=pointer]: 会社名
+              - generic [ref=e124]:
+                - img [ref=e125]
+                - checkbox "部署名" [ref=e132]
+                - checkbox
+                - generic [ref=e133] [cursor=pointer]: 部署名
+              - generic [ref=e134]:
+                - img [ref=e135]
+                - checkbox "日付" [ref=e142]
+                - checkbox
+                - generic [ref=e143] [cursor=pointer]: 日付
+              - generic [ref=e144]:
+                - img [ref=e145]
+                - checkbox "数値" [ref=e152]
+                - checkbox
+                - generic [ref=e153] [cursor=pointer]: 数値
+          - generic [ref=e155]:
+            - generic [ref=e156]:
+              - generic [ref=e157]: 生成件数 (1〜1000)
+              - spinbutton [ref=e158]: "10"
+            - generic [ref=e159]:
+              - generic [ref=e160]: 出力形式
+              - tablist [ref=e162]:
+                - tab "JSON" [selected] [ref=e163]
+                - tab "CSV" [ref=e164]
+                - tab "TSV" [ref=e165]
+            - button "再生成" [ref=e166]:
+              - img
+              - text: 再生成
+        - generic [ref=e167]:
+          - generic [ref=e168]:
+            - generic [ref=e169]: データプレビュー (最大20件)
+            - generic [ref=e170]:
+              - button "保存" [ref=e171]:
+                - img
+                - text: 保存
+              - button "コピー" [ref=e172]:
+                - img
+                - generic [ref=e173]: コピー
+          - generic [ref=e175]: "[ { \"name\": \"中村 健太\", \"kana\": \"ナカムラ ケンタ\", \"email\": \"kenta.nakamura@test.co.jp\", \"phone\": \"080-9038-6237\" }, { \"name\": \"山口 結那\", \"kana\": \"ヤマグチ ユイナ\", \"email\": \"yuina.yamaguchi@example.com\", \"phone\": \"080-8397-1238\" }, { \"name\": \"中村 美咲\", \"kana\": \"ナカムラ ミサキ\", \"email\": \"misaki.nakamura@example.com\", \"phone\": \"090-6524-2184\" }, { \"name\": \"渡辺 拓海\", \"kana\": \"ワタナベ タクミ\", \"email\": \"takumi.watanabe@example.com\", \"phone\": \"090-5149-1283\" }, { \"name\": \"伊藤 美咲\", \"kana\": \"イトウ ミサキ\", \"email\": \"misaki.ito@dummy.jp\", \"phone\": \"090-7433-9296\" }, { \"name\": \"小林 紬\", \"kana\": \"コバヤシ ツムギ\", \"email\": \"tsumugi.kobayashi@example.net\", \"phone\": \"080-1445-1456\" }, { \"name\": \"小林 一郎\", \"kana\": \"コバヤシ イチロウ\", \"email\": \"ichiro.kobayashi@test.co.jp\", \"phone\": \"070-8059-3287\" }, { \"name\": \"伊藤 悠真\", \"kana\": \"イトウ ユウマ\", \"email\": \"yuma.ito@test.co.jp\", \"phone\": \"070-1068-8984\" }, { \"name\": \"中村 蓮\", \"kana\": \"ナカムラ レン\", \"email\": \"ren.nakamura@example.net\", \"phone\": \"070-7221-3872\" }, { \"name\": \"小林 一郎\", \"kana\": \"コバヤシ イチロウ\", \"email\": \"ichiro.kobayashi@example.net\", \"phone\": \"080-4296-9431\" } ]"
+      - generic [ref=e178]: AdSense Placeholder (rectangle)
+      - group [ref=e180]:
+        - generic "📖 使い方・ユースケース ▼" [ref=e181] [cursor=pointer]:
+          - text: 📖 使い方・ユースケース
+          - generic [ref=e182]: ▼
+      - generic [ref=e185]: AdSense Placeholder (horizontal)
+  - contentinfo [ref=e186]:
+    - generic [ref=e188]:
+      - generic [ref=e189]:
+        - link "プライバシーポリシー" [ref=e190] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e191]: "|"
+        - link "このサイトについて" [ref=e192] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e193]: "|"
+        - link "GitHub" [ref=e194] [cursor=pointer]:
+          - /url: https://github.com/marumo/tools-codelife-cafe
+          - img [ref=e195]
+          - text: GitHub
+      - paragraph [ref=e197]:
+        - text: © 2026
+        - link "CODE:LIFE" [ref=e198] [cursor=pointer]:
+          - /url: https://codelife.cafe
+        - text: / marumo
+  - generic [ref=e201]:
+    - button "Menu" [ref=e202]:
+      - img [ref=e204]
+      - generic: Menu
+    - button "Inspect" [ref=e208]:
+      - img [ref=e210]
+      - generic: Inspect
+    - button "Audit" [ref=e212]:
+      - generic [ref=e213]:
+        - img [ref=e214]
+        - img [ref=e217]
+      - generic: Audit
+    - button "Settings" [ref=e220]:
+      - img [ref=e222]
+      - generic: Settings
+```

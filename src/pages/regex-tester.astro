@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import RegexTester from '../../components/tools/RegexTester.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import RegexTester from '../components/tools/RegexTester.tsx';
 ---
 
 <ToolLayout
   title="正規表現テスター"
   description="正規表現のリアルタイムテスト・マッチ確認・置換。よく使うパターン集付き。"
-  path="/tools/regex-tester"
+  path="/regex-tester"
 >
   <RegexTester client:load />
 

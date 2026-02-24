@@ -1,0 +1,113 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "🔒 CODE:LIFE Tools" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: 🔒
+        - generic [ref=e6]: CODE:LIFE Tools
+      - button "ツールを検索... Ctrl+K" [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: ツールを検索...
+        - generic [ref=e13]: Ctrl+K
+      - generic [ref=e14]:
+        - generic [ref=e15]: オフライン対応
+        - button "ダークモードに切替" [ref=e18]:
+          - img [ref=e19]
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "全角↔半角変換" [level=1] [ref=e24]
+        - paragraph [ref=e25]: カタカナ・英数字・記号の全角半角を双方向変換。カテゴリ別に変換対象を制御可能。
+        - generic [ref=e26]:
+          - button "セキュリティ情報を表示" [ref=e28] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e35]: このツールはサーバーと通信しません
+            - img [ref=e36]
+          - link "ソースコード" [ref=e38] [cursor=pointer]:
+            - /url: https://github.com/marumo/tools-codelife-cafe
+            - img [ref=e39]
+            - text: ソースコード
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]:
+            - generic [ref=e45]: 全角 → 半角
+            - switch [ref=e46]
+            - img [ref=e47]
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - checkbox "カナ" [checked] [ref=e52]:
+                - generic:
+                  - img
+              - generic [ref=e53] [cursor=pointer]: カナ
+            - generic [ref=e54]:
+              - checkbox "英字" [checked] [ref=e55]:
+                - generic:
+                  - img
+              - generic [ref=e56] [cursor=pointer]: 英字
+            - generic [ref=e57]:
+              - checkbox "数字" [checked] [ref=e58]:
+                - generic:
+                  - img
+              - generic [ref=e59] [cursor=pointer]: 数字
+            - generic [ref=e60]:
+              - checkbox "記号" [checked] [ref=e61]:
+                - generic:
+                  - img
+              - generic [ref=e62] [cursor=pointer]: 記号
+        - generic [ref=e63]:
+          - generic [ref=e64]: 入力テキスト
+          - textbox "ＡＢＣ１２３カタカナ（全角）→ ABC123ｶﾀｶﾅ（半角）" [active] [ref=e65]: ＡＢＣ１２３アイウ
+        - generic [ref=e66]:
+          - generic [ref=e67]:
+            - generic [ref=e68]: 変換結果
+            - generic [ref=e69]:
+              - button "コピー" [ref=e70]:
+                - img
+                - generic [ref=e71]: コピー
+              - button "クリア" [disabled]:
+                - img
+                - text: クリア
+          - textbox "変換結果がここに表示されます..." [ref=e72]
+      - generic [ref=e75]: AdSense Placeholder (rectangle)
+      - group [ref=e77]:
+        - generic "📖 使い方・ユースケース ▼" [ref=e78] [cursor=pointer]:
+          - text: 📖 使い方・ユースケース
+          - generic [ref=e79]: ▼
+      - generic [ref=e82]: AdSense Placeholder (horizontal)
+  - contentinfo [ref=e83]:
+    - generic [ref=e85]:
+      - generic [ref=e86]:
+        - link "プライバシーポリシー" [ref=e87] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e88]: "|"
+        - link "このサイトについて" [ref=e89] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e90]: "|"
+        - link "GitHub" [ref=e91] [cursor=pointer]:
+          - /url: https://github.com/marumo/tools-codelife-cafe
+          - img [ref=e92]
+          - text: GitHub
+      - paragraph [ref=e94]:
+        - text: © 2026
+        - link "CODE:LIFE" [ref=e95] [cursor=pointer]:
+          - /url: https://codelife.cafe
+        - text: / marumo
+  - generic [ref=e98]:
+    - button "Menu" [ref=e99]:
+      - img [ref=e101]
+      - generic: Menu
+    - button "Inspect" [ref=e105]:
+      - img [ref=e107]
+      - generic: Inspect
+    - button "Audit" [ref=e109]:
+      - generic [ref=e110]:
+        - img [ref=e111]
+        - img [ref=e114]
+      - generic: Audit
+    - button "Settings" [ref=e117]:
+      - img [ref=e119]
+      - generic: Settings
+```

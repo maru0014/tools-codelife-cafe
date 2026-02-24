@@ -11,8 +11,8 @@ const TOOLS = [
 
 test.describe('Smoke Tests - Tools', () => {
   for (const toolSlug of TOOLS) {
-    test(`Tool page /tools/${toolSlug} should load and show safety badge`, async ({ page, createToolPage }) => {
-      const response = await page.goto(`/tools/${toolSlug}`);
+    test(`Tool page /${toolSlug} should load and show safety badge`, async ({ page, createToolPage }) => {
+      const response = await page.goto(`/${toolSlug}`);
       expect(response?.status()).toBe(200);
 
       const toolPage = createToolPage(toolSlug);

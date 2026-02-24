@@ -1,0 +1,87 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "🔒 CODE:LIFE Tools" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: 🔒
+        - generic [ref=e6]: CODE:LIFE Tools
+      - button "ツールを検索... Ctrl+K" [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: ツールを検索...
+        - generic [ref=e13]: Ctrl+K
+      - generic [ref=e14]:
+        - generic [ref=e15]: オフライン対応
+        - button "ダークモードに切替" [ref=e18]:
+          - img [ref=e19]
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "文字数カウント" [level=1] [ref=e24]
+        - paragraph [ref=e25]: 文字数・バイト数（UTF-8/Shift-JIS）・行数をリアルタイムカウント。原稿用紙換算にも対応。
+        - generic [ref=e26]:
+          - button "セキュリティ情報を表示" [ref=e28] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e35]: このツールはサーバーと通信しません
+            - img [ref=e36]
+          - link "ソースコード" [ref=e38] [cursor=pointer]:
+            - /url: https://github.com/marumo/tools-codelife-cafe
+            - img [ref=e39]
+            - text: ソースコード
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: 入力テキスト
+          - textbox "ここに文章を入力すると、リアルタイムで文字数がカウントされます。" [active] [ref=e45]: こんにちは 世界
+        - generic [ref=e46]:
+          - generic [ref=e48]:
+            - paragraph [ref=e49]: 文字数（空白含む）
+            - paragraph [ref=e50]: "0"
+            - paragraph [ref=e51]: 文字
+          - generic [ref=e53]:
+            - paragraph [ref=e54]: 文字数（空白除く）
+            - paragraph [ref=e55]: "0"
+            - paragraph [ref=e56]: 文字
+          - generic [ref=e58]:
+            - paragraph [ref=e59]: バイト数（UTF-8）
+            - paragraph [ref=e60]: "0"
+            - paragraph [ref=e61]: bytes
+          - generic [ref=e63]:
+            - paragraph [ref=e64]: バイト数（Shift-JIS）
+            - paragraph [ref=e65]: "0"
+            - paragraph [ref=e66]: bytes
+          - generic [ref=e68]:
+            - paragraph [ref=e69]: 行数
+            - paragraph [ref=e70]: "0"
+            - paragraph [ref=e71]: 行
+          - generic [ref=e73]:
+            - paragraph [ref=e74]: 原稿用紙（400字）
+            - paragraph [ref=e75]: "0"
+            - paragraph [ref=e76]: 枚
+        - generic [ref=e79]:
+          - paragraph [ref=e80]: X（旧Twitter）文字数制限
+          - paragraph [ref=e81]: 残り 140 文字
+      - group [ref=e84]:
+        - generic "📖 使い方・ユースケース ▼" [ref=e85] [cursor=pointer]:
+          - text: 📖 使い方・ユースケース
+          - generic [ref=e86]: ▼
+  - contentinfo [ref=e87]:
+    - generic [ref=e89]:
+      - generic [ref=e90]:
+        - link "プライバシーポリシー" [ref=e91] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e92]: "|"
+        - link "このサイトについて" [ref=e93] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e94]: "|"
+        - link "GitHub" [ref=e95] [cursor=pointer]:
+          - /url: https://github.com/marumo/tools-codelife-cafe
+          - img [ref=e96]
+          - text: GitHub
+      - paragraph [ref=e98]:
+        - text: © 2026
+        - link "CODE:LIFE" [ref=e99] [cursor=pointer]:
+          - /url: https://codelife.cafe
+        - text: / marumo
+```

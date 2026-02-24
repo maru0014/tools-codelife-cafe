@@ -1,0 +1,195 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "🔒 CODE:LIFE Tools" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: 🔒
+        - generic [ref=e6]: CODE:LIFE Tools
+      - button "ツールを検索... Ctrl+K" [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: ツールを検索...
+        - generic [ref=e13]: Ctrl+K
+      - generic [ref=e14]:
+        - generic [ref=e15]: オフライン対応
+        - button "ダークモードに切替" [ref=e18]:
+          - img [ref=e19]
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "仕事で安心して使える Webツール集" [level=1] [ref=e24]:
+          - text: 仕事で安心して使える
+          - text: Webツール集
+        - paragraph [ref=e25]:
+          - text: すべてのツールがブラウザ内で完結。
+          - text: サーバーへのデータ送信は
+          - strong [ref=e26]: 一切ありません
+          - text: 。
+        - generic [ref=e27]: 🔒 完全クライアントサイド処理 — データはあなたのブラウザから出ません
+      - generic [ref=e31]:
+        - link "🔄 テキスト変換 全角↔半角変換 カタカナ・英数字・記号の全角半角を一括変換。カテゴリ別に細かく制御できます。 使ってみる →" [ref=e32] [cursor=pointer]:
+          - /url: /zenkaku-hankaku
+          - generic [ref=e33]:
+            - generic [ref=e34]:
+              - generic [ref=e35]: 🔄
+              - generic [ref=e36]: テキスト変換
+            - heading "全角↔半角変換" [level=3] [ref=e37]
+            - paragraph [ref=e38]: カタカナ・英数字・記号の全角半角を一括変換。カテゴリ別に細かく制御できます。
+          - generic [ref=e39]: 使ってみる →
+        - link "🔢 テキスト解析 文字数カウント 文字数・バイト数・行数をリアルタイムカウント。Shift-JIS対応。 使ってみる →" [ref=e40] [cursor=pointer]:
+          - /url: /char-count
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]: 🔢
+              - generic [ref=e44]: テキスト解析
+            - heading "文字数カウント" [level=3] [ref=e45]
+            - paragraph [ref=e46]: 文字数・バイト数・行数をリアルタイムカウント。Shift-JIS対応。
+          - generic [ref=e47]: 使ってみる →
+        - 'link "{ } 開発ツール JSON整形 JSONの整形・圧縮・構文チェック。インデント幅も選べます。 使ってみる →" [ref=e48] [cursor=pointer]':
+          - /url: /json-formatter
+          - generic [ref=e49]:
+            - generic [ref=e50]:
+              - generic [ref=e51]: "{ }"
+              - generic [ref=e52]: 開発ツール
+            - heading "JSON整形" [level=3] [ref=e53]
+            - paragraph [ref=e54]: JSONの整形・圧縮・構文チェック。インデント幅も選べます。
+          - generic [ref=e55]: 使ってみる →
+        - link "📝 テキスト解析 テキスト差分比較 2つのテキストの違いをハイライト表示。 行単位・文字単位の切替対応。 使ってみる →" [ref=e56] [cursor=pointer]:
+          - /url: /text-diff
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - generic [ref=e59]: 📝
+              - generic [ref=e60]: テキスト解析
+            - heading "テキスト差分比較" [level=3] [ref=e61]
+            - paragraph [ref=e62]: 2つのテキストの違いをハイライト表示。 行単位・文字単位の切替対応。
+          - generic [ref=e63]: 使ってみる →
+        - link "📱 生成ツール QRコード生成 URLやテキストからQRコードを即座に生成。サイズ・色のカスタマイズ可能。 使ってみる →" [ref=e64] [cursor=pointer]:
+          - /url: /qr-generator
+          - generic [ref=e65]:
+            - generic [ref=e66]:
+              - generic [ref=e67]: 📱
+              - generic [ref=e68]: 生成ツール
+            - heading "QRコード生成" [level=3] [ref=e69]
+            - paragraph [ref=e70]: URLやテキストからQRコードを即座に生成。サイズ・色のカスタマイズ可能。
+          - generic [ref=e71]: 使ってみる →
+        - link "🎌 ユーティリティ 和暦↔西暦変換 明治〜令和の和暦と西暦を相互変換。干支・年齢も同時表示。 使ってみる →" [ref=e72] [cursor=pointer]:
+          - /url: /wareki-converter
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - generic [ref=e75]: 🎌
+              - generic [ref=e76]: ユーティリティ
+            - heading "和暦↔西暦変換" [level=3] [ref=e77]
+            - paragraph [ref=e78]: 明治〜令和の和暦と西暦を相互変換。干支・年齢も同時表示。
+          - generic [ref=e79]: 使ってみる →
+        - link "🔐 ユーティリティ Base64エンコード/デコード テキスト・ファイルのBase64エンコード/デコードをブラウザ内で実行。 使ってみる →" [ref=e80] [cursor=pointer]:
+          - /url: /base64
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - generic [ref=e83]: 🔐
+              - generic [ref=e84]: ユーティリティ
+            - heading "Base64エンコード/デコード" [level=3] [ref=e85]
+            - paragraph [ref=e86]: テキスト・ファイルのBase64エンコード/デコードをブラウザ内で実行。
+          - generic [ref=e87]: 使ってみる →
+        - link "✨ 開発ツール 正規表現テスター 正規表現のリアルタイムテスト・マッチ確認・置換。よく使うパターン集付き。 使ってみる →" [ref=e88] [cursor=pointer]:
+          - /url: /regex-tester
+          - generic [ref=e89]:
+            - generic [ref=e90]:
+              - generic [ref=e91]: ✨
+              - generic [ref=e92]: 開発ツール
+            - heading "正規表現テスター" [level=3] [ref=e93]
+            - paragraph [ref=e94]: 正規表現のリアルタイムテスト・マッチ確認・置換。よく使うパターン集付き。
+          - generic [ref=e95]: 使ってみる →
+        - link "💾 開発ツール SQL整形・フォーマッター SQLの整形・圧縮をブラウザ内で実行。MySQL/PostgreSQL等の方言対応。 使ってみる →" [ref=e96] [cursor=pointer]:
+          - /url: /sql-formatter
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - generic [ref=e99]: 💾
+              - generic [ref=e100]: 開発ツール
+            - heading "SQL整形・フォーマッター" [level=3] [ref=e101]
+            - paragraph [ref=e102]: SQLの整形・圧縮をブラウザ内で実行。MySQL/PostgreSQL等の方言対応。
+          - generic [ref=e103]: 使ってみる →
+        - link "🎲 生成ツール ダミーデータ生成 日本語の氏名・住所・電話番号等のダミーデータを一括生成。JSON/CSVなど出力。 使ってみる →" [ref=e104] [cursor=pointer]:
+          - /url: /dummy-data
+          - generic [ref=e105]:
+            - generic [ref=e106]:
+              - generic [ref=e107]: 🎲
+              - generic [ref=e108]: 生成ツール
+            - heading "ダミーデータ生成" [level=3] [ref=e109]
+            - paragraph [ref=e110]: 日本語の氏名・住所・電話番号等のダミーデータを一括生成。JSON/CSVなど出力。
+          - generic [ref=e111]: 使ってみる →
+        - link "🛡️ データ処理 個人情報マスキング メール・電話番号・カード番号等の個人情報を自動検出してマスキング。 使ってみる →" [ref=e112] [cursor=pointer]:
+          - /url: /masking
+          - generic [ref=e113]:
+            - generic [ref=e114]:
+              - generic [ref=e115]: 🛡️
+              - generic [ref=e116]: データ処理
+            - heading "個人情報マスキング" [level=3] [ref=e117]
+            - paragraph [ref=e118]: メール・電話番号・カード番号等の個人情報を自動検出してマスキング。
+          - generic [ref=e119]: 使ってみる →
+        - link "📊 データ処理 CSVビューア/エディタ ブラウザ上でCSV/TSVをテーブル形式で閲覧・編集。データの加工からエクスポートまで。 使ってみる →" [ref=e120] [cursor=pointer]:
+          - /url: /csv-editor
+          - generic [ref=e121]:
+            - generic [ref=e122]:
+              - generic [ref=e123]: 📊
+              - generic [ref=e124]: データ処理
+            - heading "CSVビューア/エディタ" [level=3] [ref=e125]
+            - paragraph [ref=e126]: ブラウザ上でCSV/TSVをテーブル形式で閲覧・編集。データの加工からエクスポートまで。
+          - generic [ref=e127]: 使ってみる →
+        - generic [ref=e128]:
+          - paragraph [ref=e129]: "12"
+          - paragraph [ref=e130]: ツールを公開中
+          - generic [ref=e131]:
+            - generic [ref=e132]: テキスト変換
+            - generic [ref=e133]: テキスト解析
+            - generic [ref=e134]: 開発ツール
+            - generic [ref=e135]: 生成ツール
+            - generic [ref=e136]: ユーティリティ
+            - generic [ref=e137]: データ処理
+      - generic [ref=e140]: AdSense Placeholder (auto)
+    - generic [ref=e142]:
+      - generic [ref=e143]:
+        - generic [ref=e144]: 🇯🇵
+        - heading "日本語業務に特化" [level=3] [ref=e145]
+        - paragraph [ref=e146]: 全角半角変換、Shift-JISバイト数など、日本語業務で本当に必要な機能を搭載。
+      - generic [ref=e147]:
+        - generic [ref=e148]: 🔒
+        - heading "完全クライアントサイド" [level=3] [ref=e149]
+        - paragraph [ref=e150]: すべてのデータ処理はブラウザ内で完結。機密データも安心して扱えます。
+      - generic [ref=e151]:
+        - generic [ref=e152]: ⚡
+        - heading "高速・軽量" [level=3] [ref=e153]
+        - paragraph [ref=e154]: サーバー通信なしのリアルタイム処理。ストレスフリーに使えます。
+  - contentinfo [ref=e155]:
+    - generic [ref=e157]:
+      - generic [ref=e158]:
+        - link "プライバシーポリシー" [ref=e159] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e160]: "|"
+        - link "このサイトについて" [ref=e161] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e162]: "|"
+        - link "GitHub" [ref=e163] [cursor=pointer]:
+          - /url: https://github.com/marumo/tools-codelife-cafe
+          - img [ref=e164]
+          - text: GitHub
+      - paragraph [ref=e166]:
+        - text: © 2026
+        - link "CODE:LIFE" [ref=e167] [cursor=pointer]:
+          - /url: https://codelife.cafe
+        - text: / marumo
+  - generic [ref=e170]:
+    - button "Menu" [ref=e171]:
+      - img [ref=e173]
+      - generic: Menu
+    - button "Inspect" [ref=e177]:
+      - img [ref=e179]
+      - generic: Inspect
+    - button "Audit" [ref=e181]:
+      - img [ref=e183]
+      - generic: Audit
+    - button "Settings" [ref=e186]:
+      - img [ref=e188]
+      - generic: Settings
+```

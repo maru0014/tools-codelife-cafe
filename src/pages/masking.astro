@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import Masking from '../../components/tools/Masking.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import Masking from '../components/tools/Masking.tsx';
 ---
 
 <ToolLayout
   title="個人情報マスキング"
   description="メール・電話番号・カード番号等の個人情報を自動検出してマスキング。ブラウザ内処理で安心。"
-  path="/tools/masking"
+  path="/masking"
 >
   <Masking client:load />
 

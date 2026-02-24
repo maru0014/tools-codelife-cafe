@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import DummyDataGenerator from '../../components/tools/DummyDataGenerator.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import DummyDataGenerator from '../components/tools/DummyDataGenerator.tsx';
 ---
 
 <ToolLayout
   title="ダミーデータ生成（日本語）"
   description="日本語の氏名・住所・電話番号等のダミーデータを一括生成。JSON/CSV/TSV出力対応。"
-  path="/tools/dummy-data"
+  path="/dummy-data"
 >
   <DummyDataGenerator client:load />
 

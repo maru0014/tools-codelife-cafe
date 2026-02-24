@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import Base64Converter from '../../components/tools/Base64Converter.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import Base64Converter from '../components/tools/Base64Converter.tsx';
 ---
 
 <ToolLayout
   title="Base64エンコード/デコード"
   description="テキスト・ファイルのBase64エンコード/デコードをブラウザ内で実行。Data URI出力対応。"
-  path="/tools/base64"
+  path="/base64"
 >
   <Base64Converter client:load />
 

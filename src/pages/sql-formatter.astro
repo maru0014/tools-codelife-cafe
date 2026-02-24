@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import SqlFormatter from '../../components/tools/SqlFormatter.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import SqlFormatter from '../components/tools/SqlFormatter.tsx';
 ---
 
 <ToolLayout
   title="SQL整形・フォーマッター"
   description="SQLの整形・圧縮をブラウザ内で実行。MySQL/PostgreSQL/T-SQL等の方言対応。"
-  path="/tools/sql-formatter"
+  path="/sql-formatter"
 >
   <SqlFormatter client:load />
 

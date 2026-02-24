@@ -1,0 +1,96 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "🔒 CODE:LIFE Tools" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: 🔒
+        - generic [ref=e6]: CODE:LIFE Tools
+      - button "ツールを検索... Ctrl+K" [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: ツールを検索...
+        - generic [ref=e13]: Ctrl+K
+      - generic [ref=e14]:
+        - generic [ref=e15]: オフライン対応
+        - button "ダークモードに切替" [ref=e18]:
+          - img [ref=e19]
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "Base64エンコード/デコード" [level=1] [ref=e24]
+        - paragraph [ref=e25]: テキスト・ファイルのBase64エンコード/デコードをブラウザ内で実行。Data URI出力対応。
+        - generic [ref=e26]:
+          - button "セキュリティ情報を表示" [ref=e28] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e35]: このツールはサーバーと通信しません
+            - img [ref=e36]
+          - link "ソースコード" [ref=e38] [cursor=pointer]:
+            - /url: https://github.com/marumo/tools-codelife-cafe
+            - img [ref=e39]
+            - text: ソースコード
+      - generic [ref=e43]:
+        - tablist [ref=e45]:
+          - tab "テキスト変換" [selected] [ref=e46]
+          - tab "ファイル変換" [ref=e47]
+        - tabpanel "テキスト変換" [ref=e48]:
+          - generic [ref=e49]:
+            - generic [ref=e50]: テキスト → Base64
+            - switch [ref=e51]
+            - img [ref=e52]
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e58]: 入力 (プレーンテキスト)
+              - textbox "こんにちは世界" [ref=e59]
+            - generic [ref=e60]:
+              - generic [ref=e61]:
+                - generic [ref=e62]: 変換結果
+                - generic [ref=e63]:
+                  - button "コピー" [ref=e64]:
+                    - img
+                    - generic [ref=e65]: コピー
+                  - button "クリア" [disabled]:
+                    - img
+                    - text: クリア
+              - textbox [ref=e66]
+      - generic [ref=e69]: AdSense Placeholder (rectangle)
+      - group [ref=e71]:
+        - generic "📖 使い方・ユースケース ▼" [ref=e72] [cursor=pointer]:
+          - text: 📖 使い方・ユースケース
+          - generic [ref=e73]: ▼
+      - generic [ref=e76]: AdSense Placeholder (horizontal)
+  - contentinfo [ref=e77]:
+    - generic [ref=e79]:
+      - generic [ref=e80]:
+        - link "プライバシーポリシー" [ref=e81] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e82]: "|"
+        - link "このサイトについて" [ref=e83] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e84]: "|"
+        - link "GitHub" [ref=e85] [cursor=pointer]:
+          - /url: https://github.com/marumo/tools-codelife-cafe
+          - img [ref=e86]
+          - text: GitHub
+      - paragraph [ref=e88]:
+        - text: © 2026
+        - link "CODE:LIFE" [ref=e89] [cursor=pointer]:
+          - /url: https://codelife.cafe
+        - text: / marumo
+  - generic [ref=e92]:
+    - button "Menu" [ref=e93]:
+      - img [ref=e95]
+      - generic: Menu
+    - button "Inspect" [ref=e99]:
+      - img [ref=e101]
+      - generic: Inspect
+    - button "Audit" [ref=e103]:
+      - generic [ref=e104]:
+        - img [ref=e105]
+        - img [ref=e108]
+      - generic: Audit
+    - button "Settings" [ref=e111]:
+      - img [ref=e113]
+      - generic: Settings
+```

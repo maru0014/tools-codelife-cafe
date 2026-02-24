@@ -4,7 +4,7 @@ export class ToolPage {
   constructor(private page: Page, private path: string) {}
 
   async goto() {
-    await this.page.goto(`/tools/${this.path}`);
+    await this.page.goto(`/${this.path}`);
   }
 
   async expectSafetyBadge() {

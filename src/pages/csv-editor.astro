@@ -1,12 +1,12 @@
 ---
-import ToolLayout from '../../components/common/ToolLayout.astro';
-import CsvEditor from '../../components/tools/CsvEditor.tsx';
+import ToolLayout from '../components/common/ToolLayout.astro';
+import CsvEditor from '../components/tools/CsvEditor.tsx';
 ---
 
 <ToolLayout
   title="CSVビューア/エディタ"
   description="ブラウザ上でCSV/TSVをテーブル形式で閲覧・編集。データの加工からエクスポートまで完結。"
-  path="/tools/csv-editor"
+  path="/csv-editor"
 >
   <CsvEditor client:load />
 

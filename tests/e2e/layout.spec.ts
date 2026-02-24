@@ -7,7 +7,7 @@ test.describe('Layout & Navigation', () => {
 
   test('Header logo navigates to top', async ({ page }) => {
     // Navigate to a tool page first
-    await page.goto('/tools/char-count');
+    await page.goto('/char-count');
 
     // Click logo
     await page.getByRole('link', { name: /CODE:LIFE/i }).first().click();

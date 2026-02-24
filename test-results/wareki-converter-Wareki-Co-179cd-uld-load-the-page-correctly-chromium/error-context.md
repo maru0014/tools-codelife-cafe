@@ -1,0 +1,113 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "🔒 CODE:LIFE Tools" [ref=e4] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e5]: 🔒
+        - generic [ref=e6]: CODE:LIFE Tools
+      - button "ツールを検索... Ctrl+K" [ref=e8]:
+        - img [ref=e9]
+        - generic [ref=e12]: ツールを検索...
+        - generic [ref=e13]: Ctrl+K
+      - generic [ref=e14]:
+        - generic [ref=e15]: オフライン対応
+        - button "ダークモードに切替" [ref=e18]:
+          - img [ref=e19]
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - generic [ref=e23]:
+        - heading "和暦↔西暦変換" [level=1] [ref=e24]
+        - paragraph [ref=e25]: 明治〜令和の和暦と西暦を相互変換。干支・年齢も同時表示。ブラウザ内処理でデータ送信なし。
+        - generic [ref=e26]:
+          - button "セキュリティ情報を表示" [ref=e28] [cursor=pointer]:
+            - img [ref=e32]
+            - generic [ref=e35]: このツールはサーバーと通信しません
+            - img [ref=e36]
+          - link "ソースコード" [ref=e38] [cursor=pointer]:
+            - /url: https://github.com/marumo/tools-codelife-cafe
+            - img [ref=e39]
+            - text: ソースコード
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - generic [ref=e44]: 西暦 → 和暦
+          - switch [ref=e45]
+          - checkbox
+          - img [ref=e46]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]: 西暦（年）
+            - spinbutton [ref=e52]: "2026"
+          - generic [ref=e53]:
+            - generic [ref=e54]: 月
+            - combobox [ref=e55]:
+              - img
+            - combobox [ref=e56]
+          - generic [ref=e57]:
+            - generic [ref=e58]: 日
+            - combobox [ref=e59]:
+              - img
+            - combobox [ref=e60]
+        - generic [ref=e61]:
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - img [ref=e64]
+              - generic [ref=e66]: 変換結果
+            - button "コピー" [ref=e67]:
+              - img
+              - generic [ref=e68]: コピー
+          - generic [ref=e70]:
+            - generic [ref=e71]:
+              - generic [ref=e72]: 和暦
+              - generic [ref=e73]: 令和8年
+            - generic [ref=e74]:
+              - generic [ref=e75]: 西暦
+              - generic [ref=e76]: 2026年
+            - generic [ref=e77]:
+              - generic [ref=e78]: 干支
+              - generic [ref=e79]: 午年
+            - generic [ref=e80]:
+              - generic [ref=e81]: 年齢
+              - generic [ref=e82]: 0歳
+      - generic [ref=e85]: AdSense Placeholder (rectangle)
+      - group [ref=e87]:
+        - generic "📖 使い方・ユースケース ▼" [ref=e88] [cursor=pointer]:
+          - text: 📖 使い方・ユースケース
+          - generic [ref=e89]: ▼
+      - generic [ref=e92]: AdSense Placeholder (horizontal)
+  - contentinfo [ref=e93]:
+    - generic [ref=e95]:
+      - generic [ref=e96]:
+        - link "プライバシーポリシー" [ref=e97] [cursor=pointer]:
+          - /url: /privacy
+        - generic [ref=e98]: "|"
+        - link "このサイトについて" [ref=e99] [cursor=pointer]:
+          - /url: /about
+        - generic [ref=e100]: "|"
+        - link "GitHub" [ref=e101] [cursor=pointer]:
+          - /url: https://github.com/marumo/tools-codelife-cafe
+          - img [ref=e102]
+          - text: GitHub
+      - paragraph [ref=e104]:
+        - text: © 2026
+        - link "CODE:LIFE" [ref=e105] [cursor=pointer]:
+          - /url: https://codelife.cafe
+        - text: / marumo
+  - generic [ref=e108]:
+    - button "Menu" [ref=e109]:
+      - img [ref=e111]
+      - generic: Menu
+    - button "Inspect" [ref=e115]:
+      - img [ref=e117]
+      - generic: Inspect
+    - button "Audit" [ref=e119]:
+      - generic [ref=e120]:
+        - img [ref=e121]
+        - img [ref=e124]
+      - generic: Audit
+    - button "Settings" [ref=e127]:
+      - img [ref=e129]
+      - generic: Settings
+```
