@@ -5,7 +5,7 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 4 : undefined,
   reporter: process.env.CI ? 'html' : 'list',
   use: {
     baseURL: 'http://localhost:4321',
@@ -17,8 +17,9 @@ export default defineConfig({
     { name: 'mobile-chrome', use: { ...devices['Pixel 5'] } },
   ],
   webServer: {
-    command: 'npm run preview',
+    command: process.env.CI ? 'npm run preview:ci' : 'npm run preview',
     port: 4321,
     reuseExistingServer: !process.env.CI,
+    timeout: 60_000,
   },
 });
