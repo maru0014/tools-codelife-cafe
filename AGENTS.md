@@ -48,8 +48,12 @@ src/
 
 1. `src/lib/tools/[tool-name].ts` — ビジネスロジックを純粋関数として実装
 2. `src/components/tools/[ToolName].tsx` — React UIコンポーネントを作成
-3. `src/pages/[tool-name].astro` — `ToolLayout.astro` でラップするAstroページを作成
-4. `src/pages/index.astro` に `ToolCard` を追加
+3. `src/pages/[tool-name].astro` — `ToolLayout.astro` でラップするAstroページを作成（`src/pages/` 直下に配置）
+4. `src/pages/index.astro` に `ToolCard` を追加（Bento Grid）
+5. `src/components/layout/Navigation.astro` にリンクを追加
+6. `src/components/common/SearchModal.tsx` の `TOOLS` 配列にエントリを追加
+7. `tests/e2e/[tool-name].spec.ts` — E2Eテストを作成
+8. `README.md` のツール一覧を更新
 
 ## デザインシステム
 
@@ -61,10 +65,24 @@ src/
 ## ビルド・開発
 
 ```bash
-npm run dev      # 開発サーバー（http://localhost:4321）
-npm run build    # 静的ビルド（dist/）
-npm run preview  # ビルド結果プレビュー
+npm run dev          # 開発サーバー（http://localhost:4321）
+npm run build        # 静的ビルド（dist/）
+npm run preview      # ビルド結果プレビュー（--host 付き、LAN上の他デバイスからアクセス可能）
+npm run preview:ci   # ビルド結果プレビュー（--host なし、テスト用）
 ```
+
+## E2Eテスト（Playwright）
+
+```bash
+npx playwright test --project=chromium --headed   # ローカル実行（headed推奨）
+npx playwright test --project=chromium --headed --reporter=list  # 詳細表示
+```
+
+- **ローカル注意:** Windows環境ではヘッドレスモードでファイアウォールにブロックされる場合あり。`--headed` を使うこと
+- **CI:** PR作成時に `.github/workflows/e2e.yml` で自動実行。chromium + mobile-chrome の2プロジェクト
+- **テストファイル:** `tests/e2e/` に配置
+- **共通フィクスチャ:** `tests/e2e/fixtures/base.ts` — 広告ブロック、`createToolPage` ヘルパー
+- **ページヘルパー:** `tests/e2e/helpers/tool-page.ts` — `ToolPage` クラス（goto, expectSafetyBadge等）
 
 ## デプロイ
 
