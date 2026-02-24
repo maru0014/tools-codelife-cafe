@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from '../common/ThemeToggle.tsx';
+import SearchModal from '../common/SearchModal.tsx';
 ---
 
 <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
@@ -20,7 +21,7 @@ import ThemeToggle from '../common/ThemeToggle.tsx';
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
         <span>ツールを検索...</span>
-        <kbd class="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-xs font-mono">⌘K</kbd>
+        <kbd id="search-kbd" class="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-xs font-mono">⌘K</kbd>
       </button>
     </div>
 
@@ -33,4 +34,22 @@ import ThemeToggle from '../common/ThemeToggle.tsx';
       <ThemeToggle client:load />
     </div>
   </div>
+  <SearchModal client:load />
 </header>
+
+<script>
+  // Setup click listener for the search button
+  const searchTrigger = document.getElementById('search-trigger');
+  if (searchTrigger) {
+    searchTrigger.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('open-search'));
+    });
+  }
+
+  // Set OS specific keyboard shortcut
+  const kbdElement = document.getElementById('search-kbd');
+  if (kbdElement) {
+    const isMac = navigator.userAgent.includes('Mac');
+    kbdElement.textContent = isMac ? '⌘K' : 'Ctrl+K';
+  }
+</script>
