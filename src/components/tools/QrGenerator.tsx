@@ -80,8 +80,8 @@ export default function QrGenerator() {
 						<img
 							src={qrDataUrl}
 							alt="QRコード"
-							className="max-w-full rounded-lg shimmer"
-							style={{ width: options.size, height: options.size }}
+							className="max-w-full rounded-lg shimmer aspect-square"
+							style={{ width: options.size, height: 'auto' }}
 						/>
 					) : (
 						<div className="flex flex-col items-center justify-center text-muted-foreground py-12">
