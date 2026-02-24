@@ -39,13 +39,31 @@ const adsenseId = import.meta.env.PUBLIC_ADSENSE_ID;
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <ViewTransitions />
   <script is:inline>
-    // Dark mode initialization - runs before paint to prevent flash
-    (function() {
+    const setDarkMode = () => {
       const stored = localStorage.getItem('theme');
       if (stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
       }
-    })();
+    };
+
+    // Dark mode initialization - runs before paint to prevent flash
+    setDarkMode();
+
+    // Re-apply theme after view transitions navigation
+    document.addEventListener('astro:after-swap', setDarkMode);
+
+    // Listen for OS theme changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('theme')) {
+        if (e.matches) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+    });
   </script>
 
   {adsenseId && (

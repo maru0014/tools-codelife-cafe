@@ -5,9 +5,29 @@ export default function ThemeToggle() {
 	const [isDark, setIsDark] = useState(false);
 
 	useEffect(() => {
-		setIsDark(document.documentElement.classList.contains('dark'));
-	}, []);
+		const updateTheme = () => {
+			setIsDark(document.documentElement.classList.contains('dark'));
+		};
 
+		// Init
+		updateTheme();
+
+		// Observe html class changes
+		const observer = new MutationObserver((mutations) => {
+			for (const mutation of mutations) {
+				if (mutation.attributeName === 'class') {
+					updateTheme();
+				}
+			}
+		});
+
+		observer.observe(document.documentElement, {
+			attributes: true,
+			attributeFilter: ['class'],
+		});
+
+		return () => observer.disconnect();
+	}, []);
 	const toggle = () => {
 		const next = !isDark;
 		setIsDark(next);
