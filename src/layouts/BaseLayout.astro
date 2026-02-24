@@ -28,7 +28,11 @@ const fullTitle = `${title} | ${siteName}`;
   <meta property="og:type" content="website" />
   <meta property="og:url" content={`${siteUrl}${path}`} />
   <meta property="og:image" content={`${siteUrl}/og-image.png`} />
+  <meta property="og:locale" content="ja_JP" />
+  <meta property="og:site_name" content={siteName} />
   <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={fullTitle} />
+  <meta name="twitter:description" content={description} />
   <link rel="canonical" href={`${siteUrl}${path}`} />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <ViewTransitions />
@@ -41,6 +45,7 @@ const fullTitle = `${title} | ${siteName}`;
       }
     })();
   </script>
+  <slot name="head" />
 </head>
 <body class="min-h-screen flex flex-col">
   <Header />

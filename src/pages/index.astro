@@ -1,6 +1,14 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ToolCard from '../components/common/ToolCard.astro';
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "CODE:LIFE Tools",
+  "url": "https://tools.codelife.cafe",
+  "description": "仕事で安心して使える、高速・軽量なWebツール集",
+  "inLanguage": "ja"
+};
 ---
 
 <BaseLayout
@@ -8,6 +16,10 @@ import ToolCard from '../components/common/ToolCard.astro';
   description="すべてのツールがブラウザ内で完結。サーバーへのデータ送信は一切行わない、高速・軽量なWebツール集です。"
   path="/"
 >
+  <Fragment slot="head">
+    <script type="application/ld+json" set:html={JSON.stringify(schema)} />
+  </Fragment>
+
   <!-- Hero Section -->
   <section class="mx-auto max-w-6xl px-4 sm:px-6 pt-12 pb-8">
     <div class="text-center mb-12">

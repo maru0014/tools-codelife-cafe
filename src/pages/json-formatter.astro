@@ -2,24 +2,13 @@
 import ToolLayout from '../components/common/ToolLayout.astro';
 import JsonFormatter from '../components/tools/JsonFormatter.tsx';
 
-const jsonLd = {
-  "@context": "https://schema.org",
-  "@type": "WebApplication",
-  "name": "JSON整形 - CODE:LIFE Tools",
-  "url": "https://tools.codelife.cafe/json-formatter",
-  "description": "JSONの整形・圧縮・構文チェック。インデント幅を選択可能。完全ブラウザ内処理。",
-  "applicationCategory": "UtilityApplication",
-  "operatingSystem": "Web Browser",
-  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "JPY" },
-  "inLanguage": "ja"
-};
+
 ---
 
 <ToolLayout
   title="JSON整形"
   description="JSONの整形・圧縮・構文チェック。インデント幅を選択可能。"
   path="/json-formatter"
-  jsonLd={jsonLd}
 >
   <JsonFormatter client:load />
 

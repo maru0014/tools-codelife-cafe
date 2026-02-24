@@ -1,0 +1,27 @@
+---
+interface Props {
+  name: string;
+  url: string;
+  description: string;
+}
+
+const { name, url, description } = Astro.props;
+
+const schema = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": `${name} - CODE:LIFE Tools`,
+  "url": url,
+  "description": description,
+  "applicationCategory": "UtilityApplication",
+  "operatingSystem": "Web Browser",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "JPY"
+  },
+  "inLanguage": "ja"
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schema)} />

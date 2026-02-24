@@ -1,18 +1,22 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SafetyBadge from '../layout/SafetyBadge.tsx';
+import ToolJsonLd from '../common/ToolJsonLd.astro';
 
 interface Props {
   title: string;
   description: string;
   path: string;
-  jsonLd?: Record<string, unknown>;
 }
 
-const { title, description, path, jsonLd } = Astro.props;
+const { title, description, path } = Astro.props;
 ---
 
 <BaseLayout title={title} description={description} path={path}>
+  <Fragment slot="head">
+    <ToolJsonLd name={title} description={description} url={`https://tools.codelife.cafe${path}`} />
+  </Fragment>
+
   <div class="mx-auto max-w-[800px] px-4 sm:px-6 py-8">
     <!-- Tool Header -->
     <div class="mb-6">
@@ -38,8 +42,4 @@ const { title, description, path, jsonLd } = Astro.props;
     <!-- Usage / Tips section -->
     <slot name="usage" />
   </div>
-
-  {jsonLd && (
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
-  )}
 </BaseLayout>
