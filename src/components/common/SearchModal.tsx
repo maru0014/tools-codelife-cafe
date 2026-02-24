@@ -16,6 +16,13 @@ const TOOLS: Tool[] = [
 	{ id: 'json-formatter', name: 'JSON整形', description: 'JSONの整形・圧縮・構文チェック', href: '/json-formatter', icon: '{ }', category: '開発ツール' },
 	{ id: 'text-diff', name: 'テキスト差分比較', description: '2つのテキストの違いをハイライト表示', href: '/text-diff', icon: '📝', category: 'テキスト解析' },
 	{ id: 'qr-generator', name: 'QRコード生成', description: 'URLやテキストからQRコードを即座に生成', href: '/qr-generator', icon: '📱', category: '生成ツール' },
+	{ id: 'wareki-converter', name: '和暦↔西暦変換', description: '明治〜令和の和暦と西暦を相互変換。干支・年齢も同時表示', href: '/wareki-converter', icon: '🎌', category: 'ユーティリティ' },
+	{ id: 'base64', name: 'Base64変換', description: 'テキスト・ファイルのBase64エンコード/デコード', href: '/base64', icon: '🔐', category: 'ユーティリティ' },
+	{ id: 'regex-tester', name: '正規表現テスター', description: '正規表現のリアルタイムテスト・マッチ確認・置換', href: '/regex-tester', icon: '✨', category: '開発ツール' },
+	{ id: 'sql-formatter', name: 'SQL整形・フォーマッター', description: 'SQLの整形・圧縮。MySQL/PostgreSQL等の方言対応', href: '/sql-formatter', icon: '💾', category: '開発ツール' },
+	{ id: 'dummy-data', name: 'ダミーデータ生成', description: '日本語の氏名・電話番号等のダミーデータを一括生成', href: '/dummy-data', icon: '🎲', category: '生成ツール' },
+	{ id: 'masking', name: '個人情報マスキング', description: 'メール・電話番号・カード番号等を自動検出してマスキング', href: '/masking', icon: '🛡️', category: 'データ処理' },
+	{ id: 'csv-editor', name: 'CSVビューア/エディタ', description: 'CSV/TSVをテーブル形式で閲覧・編集・加工', href: '/csv-editor', icon: '📊', category: 'データ処理' },
 ];
 
 export default function SearchModal() {
@@ -129,8 +136,8 @@ export default function SearchModal() {
 									key={tool.id}
 									href={tool.href}
 									className={`flex flex-col gap-1 px-4 py-3 rounded-lg transition-colors ${index === activeIndex
-											? 'bg-primary/10 text-foreground'
-											: 'hover:bg-muted text-muted-foreground hover:text-foreground'
+										? 'bg-primary/10 text-foreground'
+										: 'hover:bg-muted text-muted-foreground hover:text-foreground'
 										}`}
 									onMouseEnter={() => setActiveIndex(index)}
 									onClick={() => setIsOpen(false)}
