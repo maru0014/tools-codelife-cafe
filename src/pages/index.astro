@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ToolCard from '../components/common/ToolCard.astro';
+import AdSlot from '../components/common/AdSlot.tsx';
 const schema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -97,6 +98,11 @@ const schema = {
           <span class="text-xs rounded-full bg-chart-3/10 text-chart-3 px-2 py-0.5">生成ツール</span>
         </div>
       </div>
+    </div>
+
+    <!-- ツール一覧の間 -->
+    <div class="mt-12">
+      <AdSlot slotId="auto-slot" format="auto" client:only="react" />
     </div>
   </section>
 

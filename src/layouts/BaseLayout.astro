@@ -14,6 +14,8 @@ const { title, description, path } = Astro.props;
 const siteName = "CODE:LIFE Tools";
 const siteUrl = "https://tools.codelife.cafe";
 const fullTitle = `${title} | ${siteName}`;
+
+const adsenseId = import.meta.env.PUBLIC_ADSENSE_ID;
 ---
 
 <!DOCTYPE html>
@@ -45,6 +47,16 @@ const fullTitle = `${title} | ${siteName}`;
       }
     })();
   </script>
+
+  {adsenseId && (
+    <script
+      is:inline
+      async
+      src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseId}`}
+      crossorigin="anonymous"
+    />
+  )}
+
   <slot name="head" />
 </head>
 <body class="min-h-screen flex flex-col">

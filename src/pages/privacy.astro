@@ -22,15 +22,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       <section class="space-y-4">
         <h2 class="text-xl font-semibold border-b border-border pb-2">2. データの取り扱いについて</h2>
-        <div class="rounded-xl border border-safety/30 bg-safety/5 p-5 text-safety-foreground">
-          <p class="font-medium mb-3 flex items-center gap-2">
+        <div class="rounded-xl border border-safety/30 bg-safety/5 p-5">
+          <p class="font-medium mb-3 flex items-center gap-2 text-safety">
             <span class="relative flex h-2.5 w-2.5">
               <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-safety opacity-75"></span>
               <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-safety"></span>
             </span>
             本サイトのツールはすべてクライアントサイド（ブラウザ内）で処理されます。
           </p>
-          <ul class="list-disc pl-5 space-y-2 text-sm">
+          <ul class="list-disc pl-5 space-y-2 text-sm text-foreground/90">
             <li>ユーザーが入力したデータは<strong>一切サーバーに送信されません</strong>。</li>
             <li>処理結果はブラウザのメモリ上にのみ存在し、ページ離脱時またはタブを閉じた際に直ちに破棄されます。</li>
             <li>機密情報や個人情報を含むデータも、お使いの端末内で安全に処理されます。</li>
