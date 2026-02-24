@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ToolCard from '../components/common/ToolCard.astro';
 import AdSlot from '../components/common/AdSlot.tsx';
+import { ShieldCheck } from 'lucide-react';
 const schema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
@@ -35,11 +36,8 @@ const schema = {
         サーバーへのデータ送信は<strong class="text-foreground">一切ありません</strong>。
       </p>
       <div class="mt-6 inline-flex items-center gap-2 rounded-full border border-safety/30 bg-safety/5 px-4 py-2 text-sm text-safety font-medium">
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-safety opacity-75"></span>
-          <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-safety"></span>
-        </span>
-        🔒 完全クライアントサイド処理 — データはあなたのブラウザから出ません
+        <ShieldCheck className="h-4 w-4" />
+        完全クライアントサイド処理 — 入力データはサーバーへ送信されません
       </div>
     </div>
 
