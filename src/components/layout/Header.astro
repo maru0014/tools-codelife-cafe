@@ -1,5 +1,6 @@
 ---
 import ThemeToggle from '../common/ThemeToggle.tsx';
+import SearchModal from '../common/SearchModal.tsx';
 ---
 
 <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
@@ -33,4 +34,15 @@ import ThemeToggle from '../common/ThemeToggle.tsx';
       <ThemeToggle client:load />
     </div>
   </div>
+  <SearchModal client:load />
 </header>
+
+<script>
+  // Setup click listener for the search button
+  const searchTrigger = document.getElementById('search-trigger');
+  if (searchTrigger) {
+    searchTrigger.addEventListener('click', () => {
+      window.dispatchEvent(new CustomEvent('open-search'));
+    });
+  }
+</script>
