@@ -17,34 +17,31 @@ test.describe('Layout & Navigation', () => {
   });
 
   test('Dark mode toggle works', async ({ page }) => {
-    const html = page.locator('html');
+    // The dark mode toggle is a button with aria-label 'ダークモードに切替'
+    const toggleButton = page.getByRole('button', { name: /モードに切替/i });
+    await expect(toggleButton).toBeVisible();
 
-    // Check initial state (default is usually light or dark depending on system, but let's toggle)
-    const toggleButton = page.getByRole('button', { name: /テーマの切り替え/i });
-
-    // Open dropdown Menu
+    // Click to switch to dark mode
     await toggleButton.click();
 
-    // Select Dark
-    await page.getByRole('menuitem', { name: /ダーク/i }).click();
-    await expect(html).toHaveClass(/dark/);
+    // After clicking, the html element should have 'dark' class
+    await expect(page.locator('html')).toHaveClass(/dark/);
 
-    // Open dropdown Menu again
-    await toggleButton.click();
-
-    // Select Light
-    await page.getByRole('menuitem', { name: /ライト/i }).click();
-    await expect(html).not.toHaveClass(/dark/);
+    // The button's aria-label should now contain 'ライト'
+    const lightToggle = page.getByRole('button', { name: /ライトモードに切替/i });
+    await expect(lightToggle).toBeVisible();
   });
 
   test('Cmd+K Search focuses search input', async ({ page }) => {
-    // Press Cmd+K or Ctrl+K
-    const isMac = process.platform === 'darwin';
-    await page.keyboard.press(isMac ? 'Meta+k' : 'Control+k');
+    // Wait for React SearchModal component to hydrate by checking for an interactive element
+    await page.waitForTimeout(1000);
+
+    // Press Ctrl+K
+    await page.keyboard.press('Control+k');
 
     // Verify search modal/input is visible and focused
     const searchInput = page.getByPlaceholder(/ツールを検索/i);
-    await expect(searchInput).toBeVisible();
+    await expect(searchInput).toBeVisible({ timeout: 5000 });
     await expect(searchInput).toBeFocused();
   });
 

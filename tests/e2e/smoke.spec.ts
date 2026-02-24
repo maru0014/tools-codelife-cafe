@@ -23,6 +23,6 @@ test.describe('Smoke Tests - Tools', () => {
   test('Top page should load successfully', async ({ page }) => {
     const response = await page.goto('/');
     expect(response?.status()).toBe(200);
-    await expect(page).toHaveTitle(/codelife.cafe/i);
+    await expect(page).toHaveTitle(/CODE:LIFE/i);
   });
 });

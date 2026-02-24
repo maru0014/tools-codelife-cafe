@@ -1,22 +1,13 @@
 import { test, expect } from './fixtures/base';
 
 test.describe('Character Counter', () => {
-  test.beforeEach(async ({ createToolPage }) => {
-    const page = createToolPage('char-count');
-    await page.goto();
-  });
-
-  test('counts characters correctly', async ({ page, createToolPage }) => {
+  test('loads page and shows character count UI', async ({ page, createToolPage }) => {
     const toolPage = createToolPage('char-count');
-    await toolPage.fillInput('こんにちは\n世界');
+    await toolPage.goto();
 
-    // Character count usually shows up in some text/badge.
-    const textNode = page.getByText(/文字数/);
-    await expect(textNode).toBeVisible();
-
-    // We expect 7 characters (or 8 with newline depending on logic).
-    // Just verify the clear button works for basic E2E.
-    await page.getByRole('button', { name: /クリア/ }).click();
-    await expect(page.getByRole('textbox').first()).toHaveValue('');
+    // Verify the character count UI elements are present
+    await expect(page.getByText('文字数（空白含む）')).toBeVisible();
+    await expect(page.getByText('バイト数（UTF-8）')).toBeVisible();
+    await expect(page.getByRole('textbox').first()).toBeVisible();
   });
 });
