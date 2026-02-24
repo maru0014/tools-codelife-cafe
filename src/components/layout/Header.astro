@@ -21,7 +21,7 @@ import SearchModal from '../common/SearchModal.tsx';
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
         <span>ツールを検索...</span>
-        <kbd id="search-kbd" class="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-xs font-mono">⌘K</kbd>
+        <kbd id="search-kbd" class="ml-2 rounded border border-border bg-background px-1.5 py-0.5 text-xs font-mono">Ctrl+K</kbd>
       </button>
     </div>
 
@@ -38,18 +38,26 @@ import SearchModal from '../common/SearchModal.tsx';
 </header>
 
 <script>
-  // Setup click listener for the search button
-  const searchTrigger = document.getElementById('search-trigger');
-  if (searchTrigger) {
-    searchTrigger.addEventListener('click', () => {
-      window.dispatchEvent(new CustomEvent('open-search'));
-    });
+  function setupSearchTrigger() {
+    const searchTrigger = document.getElementById('search-trigger');
+    if (searchTrigger) {
+      // 既存リスナーの重複を防ぐためclone & replace
+      const newTrigger = searchTrigger.cloneNode(true) as Element;
+      searchTrigger.parentNode?.replaceChild(newTrigger, searchTrigger);
+      newTrigger.addEventListener('click', () => {
+        window.dispatchEvent(new CustomEvent('open-search'));
+      });
+    }
+
+    // OS判定でショートカットキー表記を設定
+    const kbdElement = document.getElementById('search-kbd');
+    if (kbdElement) {
+      const isMac = navigator.userAgent.includes('Mac');
+      kbdElement.textContent = isMac ? '⌘K' : 'Ctrl+K';
+    }
   }
 
-  // Set OS specific keyboard shortcut
-  const kbdElement = document.getElementById('search-kbd');
-  if (kbdElement) {
-    const isMac = navigator.userAgent.includes('Mac');
-    kbdElement.textContent = isMac ? '⌘K' : 'Ctrl+K';
-  }
+  // 初回ロード時とView Transitionsによるページ遷移時の両方で実行
+  setupSearchTrigger();
+  document.addEventListener('astro:page-load', setupSearchTrigger);
 </script>
