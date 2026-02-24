@@ -13,7 +13,7 @@ test.describe('Text Diff', () => {
 
     // Check if diff summary appears
     await expect(page.getByText(/差分サマリー/i)).toBeVisible();
-    await expect(page.getByText('追加: 1行')).toBeVisible();
-    await expect(page.getByText('削除: 1行')).toBeVisible();
+    await expect(page.getByText(/追加:\s*1行/)).toBeVisible();
+    await expect(page.getByText(/削除:\s*1行/)).toBeVisible();
   });
 });
