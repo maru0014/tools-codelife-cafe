@@ -1,0 +1,104 @@
+export type MaskTarget = 'email' | 'phone' | 'zipcode' | 'card' | 'mynumber' | 'name';
+export type MaskChar = '*' | '●';
+export type MaskStrength = 'partial' | 'full';
+
+export interface MaskOptions {
+  targets: Set<MaskTarget>;
+  maskChar: MaskChar;
+  strength: MaskStrength;
+}
+
+export interface MaskResult {
+  maskedText: string;
+  counts: Record<MaskTarget, number>;
+}
+
+// Common Surnames for simplistic name detection (簡易版)
+const SURNAMES = '佐藤|鈴木|高橋|田中|伊藤|渡辺|山本|中村|小林|加藤|吉田|山田|佐々木|山口|松本|井上|木村|林|斎藤|清水|山崎|森|池田|橋本|阿部|石川|山下|中島|石井|小川';
+
+const PATTERNS = {
+  email: /([a-zA-Z0-9_.+-]+)@([a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+)/g,
+  phone: /(?:0[789]0-\d{4}-\d{4}|0\d{1,4}-\d{1,4}-\d{4}|0\d{9,10})/g,
+  zipcode: /\b\d{3}-\d{4}\b/g,
+  card: /\b(?:\d{4}[ -]?){3}\d{4}\b/g,
+  mynumber: /\b\d{12}\b/g,
+  name: new RegExp(`\\b(?:氏名|名前)[:：\\s]*([一-龯ぁ-んァ-ン]{2,10})|(${SURNAMES})([一-龯ぁ-んァ-ン]{1,3})\\b`, 'g')
+};
+
+export function maskText(text: string, options: MaskOptions): MaskResult {
+  let masked = text;
+  const counts: Record<MaskTarget, number> = {
+    email: 0, phone: 0, zipcode: 0, card: 0, mynumber: 0, name: 0
+  };
+
+  const { maskChar, strength } = options;
+
+  if (options.targets.has('email')) {
+    masked = masked.replace(PATTERNS.email, (match, local, domain) => {
+      counts.email++;
+      if (strength === 'full') return maskChar.repeat(match.length);
+      const mLocal = local.charAt(0) + maskChar.repeat(Math.max(1, local.length - 1));
+      return `${mLocal}@${domain}`;
+    });
+  }
+
+  if (options.targets.has('card')) {
+    masked = masked.replace(PATTERNS.card, (match) => {
+      counts.card++;
+      if (strength === 'full') return maskChar.repeat(match.length);
+      // Keep last 4 digits
+      const digits = match.replace(/[ -]/g, '');
+      const last4 = digits.slice(-4);
+      return match.replace(/\d/g, (d, idx, full) => {
+        // If it's in the last 4 characters of the cleaned string?
+        // Actually simpler: replace all but last 4 digits
+        return maskChar;
+      }).slice(0, -4) + last4;
+    });
+  }
+
+  if (options.targets.has('phone')) {
+    masked = masked.replace(PATTERNS.phone, (match) => {
+      // Don't double count if it was part of a card
+      counts.phone++;
+      if (strength === 'full') return maskChar.repeat(match.length);
+      const parts = match.split('-');
+      if (parts.length === 3) {
+        return `${parts[0]}-${maskChar.repeat(parts[1].length)}-${parts[2]}`;
+      }
+      // For no-hyphen phone
+      return match.slice(0, 3) + maskChar.repeat(Math.max(0, match.length - 7)) + match.slice(-4);
+    });
+  }
+
+  if (options.targets.has('zipcode')) {
+    masked = masked.replace(PATTERNS.zipcode, (match) => {
+      counts.zipcode++;
+      if (strength === 'full') return maskChar.repeat(match.length);
+      return `${maskChar.repeat(3)}-${maskChar.repeat(4)}`; // Zipcode is usually fully masked in partial too, per prompt "***-****"
+    });
+  }
+
+  if (options.targets.has('mynumber')) {
+    masked = masked.replace(PATTERNS.mynumber, (match) => {
+      counts.mynumber++;
+      return maskChar.repeat(match.length); // MyNumber is always fully masked
+    });
+  }
+
+  if (options.targets.has('name')) {
+    masked = masked.replace(PATTERNS.name, (match, labeledName, surname, givenName) => {
+      counts.name++;
+      if (labeledName) {
+        const pfx = match.slice(0, match.indexOf(labeledName));
+        if (strength === 'full') return pfx + maskChar.repeat(labeledName.length);
+        return pfx + labeledName.charAt(0) + maskChar.repeat(labeledName.length - 1);
+      } else {
+        if (strength === 'full') return maskChar.repeat(match.length);
+        return surname.charAt(0) + maskChar.repeat(match.length - 1);
+      }
+    });
+  }
+
+  return { maskedText: masked, counts };
+}

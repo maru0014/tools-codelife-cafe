@@ -1,0 +1,33 @@
+---
+import ToolLayout from '../../components/common/ToolLayout.astro';
+import CsvEditor from '../../components/tools/CsvEditor.tsx';
+---
+
+<ToolLayout
+  title="CSVビューア/エディタ"
+  description="ブラウザ上でCSV/TSVをテーブル形式で閲覧・編集。データの加工からエクスポートまで完結。"
+  path="/tools/csv-editor"
+>
+  <CsvEditor client:load />
+
+  <div slot="usage" class="mt-8">
+    <details class="group rounded-xl border border-border p-4">
+      <summary class="cursor-pointer text-sm font-semibold flex items-center gap-2">
+        📖 使い方・ユースケース
+        <span class="ml-auto text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+      </summary>
+      <div class="mt-4 space-y-3 text-sm text-muted-foreground">
+        <p>Excelなどの専用ソフトを立ち上げずに、ブラウザ上で素早くCSVやTSVファイルを閲覧・編集できます。</p>
+        <ul class="list-disc pl-5 space-y-1">
+          <li>ダウンロードしたログやデータのフォーマットが崩れていないか確認</li>
+          <li>テキストファイル上のカンマ区切りデータを直接テーブル形式で確認・修正</li>
+          <li>不要な列(カラム)や行をパッと削除してからシステムへ再インポート</li>
+          <li>区切り文字をカンマからタブに変換（CSV → TSV）</li>
+        </ul>
+        <div class="mt-2 text-xs bg-muted/50 p-2 rounded">
+          ⚠️ ブラウザのメモリ制限のため、極端に大きなファイル（数十万行、数百MB以上）の場合は表示が遅くなる、または開けない場合があります。
+        </div>
+      </div>
+    </details>
+  </div>
+</ToolLayout>

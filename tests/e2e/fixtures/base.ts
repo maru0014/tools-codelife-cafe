@@ -1,0 +1,14 @@
+import { test as baseTest, expect } from '@playwright/test';
+import { ToolPage } from '../helpers/tool-page';
+
+type MyFixtures = {
+  createToolPage: (path: string) => ToolPage;
+};
+
+export const test = baseTest.extend<MyFixtures>({
+  createToolPage: async ({ page }, use) => {
+    await use((path: string) => new ToolPage(page, path));
+  },
+});
+
+export { expect };
