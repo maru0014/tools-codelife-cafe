@@ -1,0 +1,110 @@
+
+> tools-codelife-cafe@1.0.0 build
+> astro build
+
+[2m21:30:12[22m [34m[content][39m Syncing content
+[2m21:30:12[22m [34m[content][39m Synced content
+[2m21:30:12[22m [34m[types][39m Generated [2m45ms[22m
+[2m21:30:12[22m [34m[build][39m output: [34m"static"[39m
+[2m21:30:12[22m [34m[build][39m mode: [34m"static"[39m
+[2m21:30:12[22m [34m[build][39m directory: [34mD:\tools-codelife-cafe\dist\[39m
+[2m21:30:12[22m [34m[build][39m Collecting build info...
+[2m21:30:12[22m [34m[build][39m [32m笨・Completed in 71ms.[39m
+[2m21:30:12[22m [34m[build][39m Building static entrypoints...
+[33m[1m21:30:13[22m [WARN] [vite][39m [33m"ShieldAlert" and "CheckCircle2" are imported from external module "lucide-react" but never used in "src/components/tools/Masking.tsx" and "src/components/tools/RegexTester.tsx".[39m
+[2m21:30:13[22m [34m[vite][39m [32m笨・built in 976ms[39m
+[2m21:30:13[22m [34m[build][39m [32m笨・Completed in 1.01s.[39m
+
+[42m[30m building client (vite) [39m[49m
+[2m21:30:13[22m [34m[vite][39m transforming...
+[2m21:30:15[22m [34m[vite][39m [32m笨・[39m 1936 modules transformed.
+[2m21:30:15[22m [34m[vite][39m rendering chunks...
+[2m21:30:15[22m [34m[vite][39m computing gzip size...
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.CE42yGu3.js                                              [39m[1m[2m  0.23 kB[22m[1m[22m[2m 笏・gzip:  0.17 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.Dy3P4Ayq.js                                              [39m[1m[2m  0.38 kB[22m[1m[22m[2m 笏・gzip:  0.28 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/copy.c-Du9Bdi.js                                               [39m[1m[2m  0.42 kB[22m[1m[22m[2m 笏・gzip:  0.32 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/download.BGArRtd8.js                                           [39m[1m[2m  0.42 kB[22m[1m[22m[2m 笏・gzip:  0.30 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/card.CaYrTKCE.js                                               [39m[1m[2m  0.42 kB[22m[1m[22m[2m 笏・gzip:  0.27 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/arrow-left-right.CNVQVcD7.js                                   [39m[1m[2m  0.43 kB[22m[1m[22m[2m 笏・gzip:  0.31 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/trash-2.CSr33Xvm.js                                            [39m[1m[2m  0.54 kB[22m[1m[22m[2m 笏・gzip:  0.36 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.CnmLL07d.js                                              [39m[1m[2m  0.54 kB[22m[1m[22m[2m 笏・gzip:  0.35 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/AdSlot.aDkFEO4q.js                                             [39m[1m[2m  0.55 kB[22m[1m[22m[2m 笏・gzip:  0.38 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/label.CHg-drgZ.js                                              [39m[1m[2m  0.68 kB[22m[1m[22m[2m 笏・gzip:  0.44 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/textarea.CmAAcFBu.js                                           [39m[1m[2m  0.69 kB[22m[1m[22m[2m 笏・gzip:  0.42 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/jsx-runtime.D_zvdyIk.js                                        [39m[1m[2m  0.73 kB[22m[1m[22m[2m 笏・gzip:  0.46 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/input.Bbf0itUV.js                                              [39m[1m[2m  0.87 kB[22m[1m[22m[2m 笏・gzip:  0.48 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/CopyButton.CUYw9jZl.js                                         [39m[1m[2m  1.05 kB[22m[1m[22m[2m 笏・gzip:  0.62 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/badge.B7nV9C8D.js                                              [39m[1m[2m  1.37 kB[22m[1m[22m[2m 笏・gzip:  0.65 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.Dlp0Hi69.js                                              [39m[1m[2m  1.38 kB[22m[1m[22m[2m 笏・gzip:  0.68 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/ThemeToggle.CYjbQCX8.js                                        [39m[1m[2m  1.62 kB[22m[1m[22m[2m 笏・gzip:  0.83 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/createLucideIcon.D9YRsT8a.js                                   [39m[1m[2m  1.86 kB[22m[1m[22m[2m 笏・gzip:  0.80 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.DQ6iZeJ-.js                                              [39m[1m[2m  2.10 kB[22m[1m[22m[2m 笏・gzip:  0.93 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.B6F6wCbw.js                                              [39m[1m[2m  2.14 kB[22m[1m[22m[2m 笏・gzip:  1.07 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/check.mI29_48y.js                                              [39m[1m[2m  2.77 kB[22m[1m[22m[2m 笏・gzip:  1.31 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/switch.CDLButyA.js                                             [39m[1m[2m  2.90 kB[22m[1m[22m[2m 笏・gzip:  1.37 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/CharCount.BMd30a0p.js                                          [39m[1m[2m  2.95 kB[22m[1m[22m[2m 笏・gzip:  1.43 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.CrJHwP2r.js                                              [39m[1m[2m  3.89 kB[22m[1m[22m[2m 笏・gzip:  1.52 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/SearchModal.DBDOHzFG.js                                        [39m[1m[2m  4.16 kB[22m[1m[22m[2m 笏・gzip:  2.04 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/checkbox.Bt2PRmFv.js                                           [39m[1m[2m  4.26 kB[22m[1m[22m[2m 笏・gzip:  1.83 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/ZenkakuHankaku.D3CINyCy.js                                     [39m[1m[2m  4.88 kB[22m[1m[22m[2m 笏・gzip:  2.28 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/JsonFormatter.BAauQRUc.js                                      [39m[1m[2m  5.23 kB[22m[1m[22m[2m 笏・gzip:  2.15 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/Masking.DhKFDmJ6.js                                            [39m[1m[2m  6.39 kB[22m[1m[22m[2m 笏・gzip:  2.73 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/WarekiConverter.D0WivPX9.js                                    [39m[1m[2m  6.57 kB[22m[1m[22m[2m 笏・gzip:  2.30 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/Base64Converter.DM-dbhVC.js                                    [39m[1m[2m  7.58 kB[22m[1m[22m[2m 笏・gzip:  3.06 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/SafetyBadge.DswHHGbu.js                                        [39m[1m[2m  8.23 kB[22m[1m[22m[2m 笏・gzip:  3.22 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.DwQS_Y10.js                                              [39m[1m[2m  8.37 kB[22m[1m[22m[2m 笏・gzip:  3.28 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/RegexTester.e9hBt2u0.js                                        [39m[1m[2m  8.44 kB[22m[1m[22m[2m 笏・gzip:  3.33 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/tabs.aZfPK21D.js                                               [39m[1m[2m  8.54 kB[22m[1m[22m[2m 笏・gzip:  3.13 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/TextDiff.DbdJH7wD.js                                           [39m[1m[2m  9.65 kB[22m[1m[22m[2m 笏・gzip:  3.84 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/DummyDataGenerator.dLkVBW_F.js                                 [39m[1m[2m 11.10 kB[22m[1m[22m[2m 笏・gzip:  4.73 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/ClientRouter.astro_astro_type_script_index_0_lang.CDGfc0hd.js  [39m[1m[2m 15.36 kB[22m[1m[22m[2m 笏・gzip:  5.28 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/select.BdhLFMXy.js                                             [39m[1m[2m 22.40 kB[22m[1m[22m[2m 笏・gzip:  7.83 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/index.DReOrTZy.js                                              [39m[1m[2m 29.06 kB[22m[1m[22m[2m 笏・gzip:  9.48 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/CsvEditor.CWabPNcJ.js                                          [39m[1m[2m 29.39 kB[22m[1m[22m[2m 笏・gzip: 10.76 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/QrGenerator.C4BeY7Oi.js                                        [39m[1m[2m 30.52 kB[22m[1m[22m[2m 笏・gzip: 11.85 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/Combination.BV7dJgHJ.js                                        [39m[1m[2m 47.50 kB[22m[1m[22m[2m 笏・gzip: 17.36 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/client.CrFkE78Q.js                                             [39m[1m[2m182.74 kB[22m[1m[22m[2m 笏・gzip: 57.61 kB[22m
+[2m21:30:15[22m [34m[vite][39m [2mdist/[22m[36m_astro/SqlFormatter.CgGqoC9H.js                                       [39m[1m[2m299.44 kB[22m[1m[22m[2m 笏・gzip: 78.64 kB[22m
+[2m21:30:15[22m [34m[vite][39m [32m笨・built in 2.53s[39m
+
+[42m[30m generating static routes [39m[49m
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/about.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/about/index.html[22m [2m(+17ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/char-count.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/char-count/index.html[22m [2m(+19ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/json-formatter.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/json-formatter/index.html[22m [2m(+8ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/privacy.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/privacy/index.html[22m [2m(+2ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/qr-generator.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/qr-generator/index.html[22m [2m(+6ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/text-diff.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/text-diff/index.html[22m [2m(+6ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/tools/base64.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/tools/base64/index.html[22m [2m(+7ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/tools/csv-editor.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/tools/csv-editor/index.html[22m [2m(+5ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/tools/dummy-data.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/tools/dummy-data/index.html[22m [2m(+9ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/tools/masking.astro
+[2m21:30:16[22m   [34m笏披楳[39m [2m/tools/masking/index.html[22m [2m(+6ms)[22m 
+[2m21:30:16[22m [32m笆ｶ[39m src/pages/tools/regex-tester.astro
+ReferenceError: Button is not defined
+    at RegexTester (file:///D:/tools-codelife-cafe/dist/pages/tools/regex-tester.astro.mjs?time=1771936216404:177:30)
+    at renderWithHooks (D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:4647:18)
+    at renderElement (D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:4785:14)
+    at retryNode (D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:5503:16)
+    at performWork (D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:6344:13)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:7021:27
+    at node:internal/process/task_queues:151:7
+    at AsyncResource.runInAsyncScope (node:async_hooks:211:14)
+    at AsyncResource.runMicrotask (node:internal/process/task_queues:148:8)
+Button is not defined
+  Stack trace:
+    at RegexTester (file:///D:/tools-codelife-cafe/dist/pages/tools/regex-tester.astro.mjs?time=1771936216404:177:30)
+    at renderElement (D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:4785:14)
+    at performWork (D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:6344:13)
+    at D:\tools-codelife-cafe\node_modules\react-dom\cjs\react-dom-server.node.production.js:7021:27
+    at AsyncResource.runInAsyncScope (node:async_hooks:211:14)
+[2m21:30:16[22m   [34m笏披楳[39m [2m/tools/regex-tester/index.html[22m

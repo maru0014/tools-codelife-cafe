@@ -5,6 +5,7 @@ import {
 	type RegexMatch
 } from '@/lib/tools/regex-tester';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -19,7 +20,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import CopyButton from '@/components/common/CopyButton';
-import { Trash2, CheckCircle2, XCircle } from 'lucide-react';
+import { Trash2, XCircle } from 'lucide-react';
 
 export default function RegexTester() {
 	const [pattern, setPattern] = useState('\\d{3}-\\d{4}');

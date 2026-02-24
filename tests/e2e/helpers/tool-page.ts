@@ -1,4 +1,4 @@
-import { Page, expect } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 
 export class ToolPage {
   constructor(private page: Page, private path: string) {}
@@ -8,7 +8,7 @@ export class ToolPage {
   }
 
   async expectSafetyBadge() {
-    await expect(this.page.getByText('サーバーと通信しません')).toBeVisible();
+    await expect(this.page.getByRole('button', { name: 'セキュリティ情報を表示' })).toBeVisible();
   }
 
   async expectTitle(title: string) {

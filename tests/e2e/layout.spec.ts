@@ -10,7 +10,7 @@ test.describe('Layout & Navigation', () => {
     await page.goto('/tools/char-count');
 
     // Click logo
-    await page.getByRole('link', { name: /codelife\.cafe/i }).first().click();
+    await page.getByRole('link', { name: /CODE:LIFE/i }).first().click();
 
     // Verify we are back on top page
     await expect(page).toHaveURL(/\/$/);
@@ -54,6 +54,6 @@ test.describe('Layout & Navigation', () => {
 
     // Check for standard footer links
     await expect(footer.getByRole('link', { name: /プライバシーポリシー/i })).toBeVisible();
-    await expect(footer.getByRole('link', { name: /運営者情報/i })).toBeVisible();
+    await expect(footer.getByRole('link', { name: /このサイトについて/i })).toBeVisible();
   });
 });

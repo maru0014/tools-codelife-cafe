@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import CopyButton from '@/components/common/CopyButton';
-import { Trash2, Download, ShieldAlert } from 'lucide-react';
+import { Trash2, Download } from 'lucide-react';
 import {
 	Select,
 	SelectContent,

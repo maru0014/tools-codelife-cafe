@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
 import { Download, Upload, Trash2, Plus, Copy, FileSpreadsheet } from 'lucide-react';
-import { toast } from 'sonner';
+
 
 const ROWS_PER_PAGE = 50;
 
@@ -87,7 +87,6 @@ export default function CsvEditor() {
 		if (!csvData) return;
 		const result = exportCsv(csvData, delimiter);
 		navigator.clipboard.writeText(result);
-		toast.success('コピーしました');
 	};
 
 	// Editor Actions
