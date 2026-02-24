@@ -1,6 +1,9 @@
 import { test, expect } from './fixtures/base';
 
 test.describe('Search after page navigation', () => {
+  // 検索ボタンはデスクトップサイズでのみ表示されるため、モバイルテストはスキップ
+  test.skip(({ isMobile }) => isMobile, 'Search button is only visible on desktop');
+
   test('Search button works after navigating to a tool page', async ({ page }) => {
     // 1. トップページにアクセス
     await page.goto('/');
