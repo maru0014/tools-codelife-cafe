@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { ShieldCheck } from 'lucide-react';
 ---
 
 <BaseLayout
@@ -11,7 +12,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <!-- Hero Section -->
     <div class="text-center mb-16 space-y-6">
       <h1 class="text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight mb-4 flex items-center justify-center gap-3">
-        <span class="text-primary">🔒</span>
+        <span class="text-primary"><ShieldCheck className="h-10 w-10 sm:h-12 sm:w-12" /></span>
         <span>CODE:LIFE Tools</span>
       </h1>
 
@@ -20,10 +21,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </p>
 
       <div class="mt-4 inline-flex items-center gap-2 rounded-full border border-safety/30 bg-safety/5 px-4 py-2 text-sm text-safety font-medium">
-        <span class="relative flex h-2.5 w-2.5">
-          <span class="pulse-dot absolute inline-flex h-full w-full rounded-full bg-safety opacity-75"></span>
-          <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-safety"></span>
-        </span>
+        <ShieldCheck className="h-4 w-4" />
         完全クライアントサイド処理で機密データも安心
       </div>
     </div>
@@ -34,7 +32,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Feature 1 -->
         <div class="rounded-xl border border-border bg-card p-6 flex flex-col items-center text-center">
-          <div class="text-4xl mb-4">🔒</div>
+          <div class="mb-4"><ShieldCheck className="h-10 w-10" /></div>
           <h3 class="text-lg font-bold mb-3">完全クライアントサイド処理</h3>
           <ul class="text-sm text-muted-foreground space-y-2 text-left w-full list-disc pl-5">
             <li>すべてのデータ処理はブラウザ内で完結</li>

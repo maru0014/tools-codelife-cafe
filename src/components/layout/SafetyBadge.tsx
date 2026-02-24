@@ -16,10 +16,6 @@ export default function SafetyBadge() {
 					className="inline-flex items-center gap-2 rounded-lg border border-safety/30 bg-safety/5 px-3 py-1.5 text-sm font-medium text-safety hover:bg-safety/10 transition-colors cursor-pointer"
 					aria-label="セキュリティ情報を表示"
 				>
-					<span className="relative flex h-2.5 w-2.5">
-						<span className="pulse-dot absolute inline-flex h-full w-full rounded-full bg-safety opacity-75"></span>
-						<span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-safety"></span>
-					</span>
 					<ShieldCheck className="h-4 w-4" />
 					<span className="hidden sm:inline">このツールはサーバーと通信しません</span>
 					<span className="sm:hidden">ローカル処理</span>
