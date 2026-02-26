@@ -1,0 +1,58 @@
+name: "🐛 バグ報告 (Bug Report)"
+description: "動作しない機能や想定外の動作について報告します"
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: "バグのご報告ありがとうございます！問題の把握のため、以下の項目にご記入をお願いします。"
+  - type: textarea
+    id: description
+    attributes:
+      label: "発生している問題の概要"
+      description: "何が起きましたか？期待していた動作となにが違うのか具体的に書いてください。"
+      placeholder: "例：〇〇のボタンを押しても画面が切り替わらず、コンソールにエラーが出ます。"
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: "再現手順"
+      description: "問題を再現するための手順をステップ・バイ・ステップで書いてください。"
+      placeholder: |
+        1. '...' にアクセスする
+        2. '....' をクリックする
+        3. '....' までスクロールする
+        4. エラーが発生する
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "期待される動作"
+      description: "本来はどう動くべきだと考えていましたか？"
+      placeholder: "ボタンを押したら〇〇の画面に遷移するべき。"
+    validations:
+      required: true
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "スクリーンショット"
+      description: "問題がわかる画像があれば、ここにドラッグ＆ドロップで貼り付けてください。"
+  - type: input
+    id: os
+    attributes:
+      label: "OS"
+      description: "お使いのOSを選んでください。"
+      placeholder: "例：Windows 11 / macOS Sonoma / iOS 17"
+  - type: input
+    id: browser
+    attributes:
+      label: "ブラウザ"
+      description: "お使いのWebブラウザとそのバージョンを教えてください。"
+      placeholder: "例：Chrome 120 / Safari 17.2 / Firefox 121"
+  - type: textarea
+    id: context
+    attributes:
+      label: "その他のコンテキスト"
+      description: "その他、問題解決に役立ちそうな情報があれば記載してください。"
