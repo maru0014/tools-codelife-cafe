@@ -1,0 +1,34 @@
+name: "❓ 質問 (Question)"
+description: "使い方、仕様、その他について質問します"
+title: "[QUESTION]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: "ご質問ありがとうございます！わかる範囲で以下の項目にご記入をお願いします。"
+  - type: textarea
+    id: question
+    attributes:
+      label: "質問の内容"
+      description: "何について知りたいですか？具体的に教えてください。"
+      placeholder: "例：〇〇ツールの〇〇という機能は、どのように設定すれば使えますか？"
+    validations:
+      required: true
+  - type: textarea
+    id: expected-outcome
+    attributes:
+      label: "達成したいこと（目的）"
+      description: "最終的にどのような結果を得たいのか教えてください。"
+    validations:
+      required: false
+  - type: textarea
+    id: tried
+    attributes:
+      label: "試したこと"
+      description: "すでに試した設定や操作、または調べたことがあれば教えてください。"
+      placeholder: "例：〇〇の画面で〇〇を入力してみましたが、エラーになりました。"
+  - type: textarea
+    id: context
+    attributes:
+      label: "その他のコンテキスト"
+      description: "スクリーンショットや環境情報など、回答に役立つ情報があれば記載してください。"

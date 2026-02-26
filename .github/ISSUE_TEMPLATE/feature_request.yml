@@ -1,0 +1,34 @@
+name: "✨ 機能追加・改善の要望 (Feature Request)"
+description: "新しい機能や既存機能の改善について提案します"
+title: "[FEATURE]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: "ご提案ありがとうございます！機能追加や改善について、以下の項目にご記入をお願いします。"
+  - type: textarea
+    id: problem
+    attributes:
+      label: "解決したい課題の概要"
+      description: "どのような問題に直面していますか？なぜその機能が必要だと感じましたか？"
+      placeholder: "例：現状、〇〇の機能がないため、手作業で〇〇をしなければならず不便です。"
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: "提案する解決策"
+      description: "どのように解決（実装）してほしいか、具体的なアイデアを教えてください。"
+      placeholder: "例：〇〇の画面に「〇〇ボタン」を追加し、クリックで〇〇できるようにしてほしい。"
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: "検討した代替案"
+      description: "他に考えられる解決策や、現在行っている回避策があれば教えてください。"
+  - type: textarea
+    id: context
+    attributes:
+      label: "その他のコンテキスト"
+      description: "参考になるリンク、スクリーンショット、またはその他の情報があれば記載してください。"

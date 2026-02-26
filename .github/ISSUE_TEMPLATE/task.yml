@@ -1,0 +1,33 @@
+name: "📋 タスク (Task)"
+description: "開発者向けの内部タスクやTODOを管理します"
+title: "[TASK]: "
+labels: ["task"]
+body:
+  - type: markdown
+    attributes:
+      value: "内部タスク管理用のテンプレートです。"
+  - type: textarea
+    id: task-description
+    attributes:
+      label: "タスクの概要"
+      description: "このタスクの目的と、完了条件を明確に記載してください。"
+      placeholder: "目的：〇〇\n完了条件：〇〇が実装されていること"
+    validations:
+      required: true
+  - type: textarea
+    id: checklist
+    attributes:
+      label: "チェックリスト (TODO)"
+      description: "必要な作業をMarkdownのチェックボックス形式で洗い出してください。"
+      value: |
+        - [ ] 作業項目1
+        - [ ] 作業項目2
+        - [ ] テストの追加
+        - [ ] ドキュメントの更新
+    validations:
+      required: false
+  - type: textarea
+    id: notes
+    attributes:
+      label: "備考・関連情報"
+      description: "関連するIssue、PR、参考リンク、または実装上の注意点などを記載します。"
