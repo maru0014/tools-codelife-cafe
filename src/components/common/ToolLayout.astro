@@ -18,7 +18,7 @@ const { title, description, path } = Astro.props;
     <ToolJsonLd name={title} description={description} url={`https://tools.codelife.cafe${path}`} />
   </Fragment>
 
-  <div class="mx-auto max-w-[800px] px-4 sm:px-6 py-8">
+  <div id="tool-layout-container" class="transition-all duration-300 mx-auto max-w-[800px] px-4 sm:px-6 py-8">
     <!-- Tool Header -->
     <div class="mb-6">
       <h1 class="text-2xl font-bold mb-2">{title}</h1>

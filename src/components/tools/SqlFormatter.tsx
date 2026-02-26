@@ -12,7 +12,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import CopyButton from '@/components/common/CopyButton';
-import { Trash2, Download, Code2 } from 'lucide-react';
+import { Trash2, Download, Code2, Maximize2, Minimize2 } from 'lucide-react';
 
 const SQL_KEYWORDS = [
 	'SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON',
@@ -28,10 +28,26 @@ export default function SqlFormatter() {
 	const [indent, setIndent] = useState<IndentStyle>('2spaces');
 	const [uppercase, setUppercase] = useState(true);
 	const [compress, setCompress] = useState(false);
+	const [isExpanded, setIsExpanded] = useState(false);
 
 	const options: SqlFormatOptions = { dialect, indent, uppercase, compress };
 
 	const { output, error } = useMemo(() => formatSql(input, options), [input, options]);
+
+	const toggleExpand = () => {
+		const newExpanded = !isExpanded;
+		setIsExpanded(newExpanded);
+		const container = document.getElementById('tool-layout-container');
+		if (container) {
+			if (newExpanded) {
+				container.classList.remove('max-w-[800px]');
+				container.classList.add('max-w-full');
+			} else {
+				container.classList.remove('max-w-full');
+				container.classList.add('max-w-[800px]');
+			}
+		}
+	};
 
 	// Basic syntax highlighter
 	const highlightedOutput = useMemo(() => {
@@ -112,7 +128,7 @@ export default function SqlFormatter() {
 					</div>
 				)}
 
-				<div className="flex items-center gap-4 ml-2 mt-4 sm:mt-0">
+				<div className="flex items-center gap-4 ml-auto mt-4 sm:mt-0">
 					<div className="flex items-center gap-2">
 						<Switch id="opt-uppercase" checked={uppercase} onCheckedChange={setUppercase} />
 						<Label htmlFor="opt-uppercase" className="text-sm cursor-pointer whitespace-nowrap">大文字化</Label>
@@ -122,7 +138,33 @@ export default function SqlFormatter() {
 						<Switch id="opt-compress" checked={compress} onCheckedChange={setCompress} />
 						<Label htmlFor="opt-compress" className="text-sm cursor-pointer whitespace-nowrap">圧縮 (1行化)</Label>
 					</div>
+
+					<div className="w-px h-6 bg-border mx-2 hidden sm:block"></div>
+
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={toggleExpand}
+						className="hidden sm:flex"
+						title={isExpanded ? "標準サイズに戻す" : "画面幅を広げる"}
+					>
+						{isExpanded ? <Minimize2 className="h-4 w-4 mr-2" /> : <Maximize2 className="h-4 w-4 mr-2" />}
+						{isExpanded ? "標準幅" : "フルサイズ"}
+					</Button>
 				</div>
+			</div>
+
+			{/* スマホレイアウト用フルサイズボタン (小さい画面では非表示でもよいが、一応用意しておきたい場合は配置。現状は sm:hidden で出さない or ここで出す) */}
+			<div className="sm:hidden flex justify-end">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={toggleExpand}
+					className="w-full"
+				>
+					{isExpanded ? <Minimize2 className="h-4 w-4 mr-2" /> : <Maximize2 className="h-4 w-4 mr-2" />}
+					{isExpanded ? "標準サイズに戻す" : "画面幅を広げる (フルサイズ)"}
+				</Button>
 			</div>
 
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
