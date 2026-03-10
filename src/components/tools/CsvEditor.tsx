@@ -6,7 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Input } from '@/components/ui/input';
-import { Download, Upload, Trash2, Plus, Copy, FileSpreadsheet } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Download, Upload, Trash2, Plus, Copy, FileSpreadsheet, Braces } from 'lucide-react';
 
 
 const ROWS_PER_PAGE = 50;
@@ -18,9 +19,17 @@ export default function CsvEditor() {
 
 	const [csvData, setCsvData] = useState<CsvData | null>(null);
 	const [error, setError] = useState<string>('');
+	const [hasHeader, setHasHeader] = useState(true);
 
 	const [currentPage, setCurrentPage] = useState(1);
 	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	// Sync table edits to text area
+	useEffect(() => {
+		if (csvData && activeTab === 'edit') {
+			setInputText(exportCsv(csvData, delimiter));
+		}
+	}, [csvData, delimiter, activeTab]);
 
 	// Apply CSV parsing
 	const handleParse = () => {
@@ -77,6 +86,34 @@ export default function CsvEditor() {
 		const a = document.createElement('a');
 		a.href = url;
 		a.download = `edited.${delimiter === '\t' ? 'tsv' : 'csv'}`;
+		document.body.appendChild(a);
+		a.click();
+		document.body.removeChild(a);
+		URL.revokeObjectURL(url);
+	};
+
+	const handleDownloadJson = () => {
+		if (!csvData) return;
+		let resultStr = '';
+		if (hasHeader && csvData.rows.length > 1) {
+			const headers = csvData.rows[0];
+			const jsonArray = csvData.rows.slice(1).map(row => {
+				const obj: Record<string, string> = {};
+				headers.forEach((h, i) => {
+					obj[h || `Column${i + 1}`] = row[i];
+				});
+				return obj;
+			});
+			resultStr = JSON.stringify(jsonArray, null, 2);
+		} else {
+			resultStr = JSON.stringify(csvData.rows, null, 2);
+		}
+
+		const blob = new Blob([resultStr], { type: 'application/json;charset=utf-8' });
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = `exported.json`;
 		document.body.appendChild(a);
 		a.click();
 		document.body.removeChild(a);
@@ -157,7 +194,7 @@ export default function CsvEditor() {
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-muted/30 p-4 rounded-xl border">
-				<div className="flex items-center gap-4">
+				<div className="flex items-center gap-4 flex-wrap">
 					<div>
 						<Label className="text-xs mb-1 block text-muted-foreground">区切り文字</Label>
 						<Select value={delimiter} onValueChange={setDelimiter}>
@@ -173,6 +210,11 @@ export default function CsvEditor() {
 						</Select>
 					</div>
 
+					<div className="pt-5 hidden sm:flex items-center gap-2">
+						<Checkbox id="has-header" checked={hasHeader} onCheckedChange={(v) => setHasHeader(!!v)} />
+						<Label htmlFor="has-header" className="text-sm cursor-pointer whitespace-nowrap">1行目をヘッダーとする</Label>
+					</div>
+
 					<div className="pt-5">
 						<input
 							type="file"
@@ -182,8 +224,8 @@ export default function CsvEditor() {
 							onChange={handleFileUpload}
 						/>
 						<Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-8">
-							<Upload className="h-4 w-4 mr-2" />
-							ファイル読み込み
+							<Upload className="h-4 w-4 sm:mr-2" />
+							<span className="hidden sm:inline">読込</span>
 						</Button>
 					</div>
 				</div>
@@ -192,12 +234,16 @@ export default function CsvEditor() {
 					{csvData && (
 						<>
 							<Button variant="outline" size="sm" onClick={handleCopy} className="h-8 flex-1 sm:flex-none">
-								<Copy className="h-4 w-4 mr-2" />
-								コピー
+								<Copy className="h-4 w-4 sm:mr-2" />
+								<span className="hidden sm:inline">コピー</span>
+							</Button>
+							<Button variant="outline" size="sm" onClick={handleDownloadJson} className="h-8 flex-1 sm:flex-none">
+								<Braces className="h-4 w-4 sm:mr-2" />
+								<span className="hidden sm:inline">JSON</span>
 							</Button>
 							<Button variant="default" size="sm" onClick={handleDownload} className="h-8 flex-1 sm:flex-none">
-								<Download className="h-4 w-4 mr-2" />
-								保存
+								<Download className="h-4 w-4 sm:mr-2" />
+								<span className="hidden sm:inline">CSV</span>
 							</Button>
 						</>
 					)}

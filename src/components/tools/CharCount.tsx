@@ -3,6 +3,9 @@ import { countChars, getTwitterProgress } from '@/lib/tools/char-count';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import CopyButton from '@/components/common/CopyButton';
+import { Trash2, Info } from 'lucide-react';
 
 function formatNumber(n: number): string {
 	return n.toLocaleString('ja-JP');
@@ -27,7 +30,21 @@ export default function CharCount() {
 		<div className="space-y-6">
 			{/* Input Textarea */}
 			<div>
-				<Label className="text-sm font-medium mb-2 block">入力テキスト</Label>
+				<div className="flex items-center justify-between mb-2">
+					<Label className="text-sm font-medium">入力テキスト</Label>
+					<div className="flex gap-2">
+						<CopyButton text={text} />
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setText('')}
+							disabled={!text}
+						>
+							<Trash2 className="h-4 w-4 sm:mr-1" />
+							<span className="hidden sm:inline">クリア</span>
+						</Button>
+					</div>
+				</div>
 				<Textarea
 					value={text}
 					onChange={(e) => setText(e.target.value)}
@@ -52,9 +69,17 @@ export default function CharCount() {
 			{/* Twitter Character Limit Bar */}
 			<Card className="rounded-xl">
 				<CardContent className="p-4">
-					<div className="flex items-center justify-between mb-2">
-						<p className="text-sm font-medium">X（旧Twitter）文字数制限</p>
-						<p className={`text-sm font-mono tabular-nums ${twitter.isOver ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
+					<div className="flex items-center justify-between mb-2 gap-2 flex-wrap">
+						<div className="flex items-center gap-1.5 text-sm font-medium">
+							X（旧Twitter）文字数制限
+							<span className="group relative flex items-center justify-center cursor-help">
+								<Info className="h-4 w-4 text-muted-foreground" />
+								<div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden w-64 rounded bg-popover text-popover-foreground text-xs p-2 shadow-md group-hover:block z-50">
+									※全角・半角区別なく単純に1文字として計算しています。（公式の短縮URL計算等には対応していません）
+								</div>
+							</span>
+						</div>
+						<p className={`text-sm font-mono tabular-nums whitespace-nowrap ${twitter.isOver ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
 							{twitter.remaining >= 0 ? `残り ${formatNumber(twitter.remaining)} 文字` : `${formatNumber(Math.abs(twitter.remaining))} 文字オーバー`}
 						</p>
 					</div>

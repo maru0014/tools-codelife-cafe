@@ -11,6 +11,7 @@ export interface MaskOptions {
 export interface MaskResult {
   maskedText: string;
   counts: Record<MaskTarget, number>;
+  ranges: { start: number; end: number; type: MaskTarget }[];
 }
 
 // Common Surnames for simplistic name detection (簡易版)
@@ -30,75 +31,75 @@ export function maskText(text: string, options: MaskOptions): MaskResult {
   const counts: Record<MaskTarget, number> = {
     email: 0, phone: 0, zipcode: 0, card: 0, mynumber: 0, name: 0
   };
+  const ranges: { start: number; end: number; type: MaskTarget }[] = [];
 
   const { maskChar, strength } = options;
 
   if (options.targets.has('email')) {
-    masked = masked.replace(PATTERNS.email, (match, local, domain) => {
+    masked = masked.replace(PATTERNS.email, (match, local, domain, offset) => {
       counts.email++;
+      ranges.push({ start: offset, end: offset + match.length, type: 'email' });
       if (strength === 'full') return maskChar.repeat(match.length);
-      const mLocal = local.charAt(0) + maskChar.repeat(Math.max(1, local.length - 1));
+      const mLocal = local.charAt(0) + maskChar.repeat(Math.max(0, local.length - 1));
       return `${mLocal}@${domain}`;
     });
   }
 
   if (options.targets.has('card')) {
-    masked = masked.replace(PATTERNS.card, (match) => {
+    masked = masked.replace(PATTERNS.card, (match, offset) => {
       counts.card++;
+      ranges.push({ start: offset, end: offset + match.length, type: 'card' });
       if (strength === 'full') return maskChar.repeat(match.length);
-      // Keep last 4 digits
       const digits = match.replace(/[ -]/g, '');
       const last4 = digits.slice(-4);
-      return match.replace(/\d/g, (d, idx, full) => {
-        // If it's in the last 4 characters of the cleaned string?
-        // Actually simpler: replace all but last 4 digits
-        return maskChar;
-      }).slice(0, -4) + last4;
+      return match.replace(/\d/g, () => maskChar).slice(0, -4) + last4;
     });
   }
 
   if (options.targets.has('phone')) {
-    masked = masked.replace(PATTERNS.phone, (match) => {
-      // Don't double count if it was part of a card
+    masked = masked.replace(PATTERNS.phone, (match, offset) => {
       counts.phone++;
+      ranges.push({ start: offset, end: offset + match.length, type: 'phone' });
       if (strength === 'full') return maskChar.repeat(match.length);
       const parts = match.split('-');
       if (parts.length === 3) {
         return `${parts[0]}-${maskChar.repeat(parts[1].length)}-${parts[2]}`;
       }
-      // For no-hyphen phone
       return match.slice(0, 3) + maskChar.repeat(Math.max(0, match.length - 7)) + match.slice(-4);
     });
   }
 
   if (options.targets.has('zipcode')) {
-    masked = masked.replace(PATTERNS.zipcode, (match) => {
+    masked = masked.replace(PATTERNS.zipcode, (match, offset) => {
       counts.zipcode++;
+      ranges.push({ start: offset, end: offset + match.length, type: 'zipcode' });
       if (strength === 'full') return maskChar.repeat(match.length);
-      return `${maskChar.repeat(3)}-${maskChar.repeat(4)}`; // Zipcode is usually fully masked in partial too, per prompt "***-****"
+      return `${maskChar.repeat(3)}-${maskChar.repeat(4)}`;
     });
   }
 
   if (options.targets.has('mynumber')) {
-    masked = masked.replace(PATTERNS.mynumber, (match) => {
+    masked = masked.replace(PATTERNS.mynumber, (match, offset) => {
       counts.mynumber++;
-      return maskChar.repeat(match.length); // MyNumber is always fully masked
+      ranges.push({ start: offset, end: offset + match.length, type: 'mynumber' });
+      return maskChar.repeat(match.length);
     });
   }
 
   if (options.targets.has('name')) {
-    masked = masked.replace(PATTERNS.name, (match, labeledName, surname, givenName) => {
+    masked = masked.replace(PATTERNS.name, (match, labeledName, surname, givenName, offset) => {
       counts.name++;
+      ranges.push({ start: offset, end: offset + match.length, type: 'name' });
       if (labeledName) {
         const pfx = match.slice(0, match.indexOf(labeledName));
         if (strength === 'full') return pfx + maskChar.repeat(labeledName.length);
-        return pfx + labeledName.charAt(0) + maskChar.repeat(labeledName.length - 1);
+        return pfx + labeledName.charAt(0) + maskChar.repeat(Math.max(0, labeledName.length - 1));
       } else {
         if (strength === 'full') return maskChar.repeat(match.length);
-        return surname.charAt(0) + maskChar.repeat(match.length - 1);
+        return surname.charAt(0) + maskChar.repeat(Math.max(0, match.length - 1));
       }
     });
   }
 
-  return { maskedText: masked, counts };
+  return { maskedText: masked, counts, ranges };
 }

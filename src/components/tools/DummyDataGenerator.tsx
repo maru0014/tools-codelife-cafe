@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { generateDummyData, parsePreviewData, type FieldType, type ExportFormat } from '@/lib/tools/dummy-data';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,7 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CopyButton from '@/components/common/CopyButton';
-import { GripVertical, Download, RefreshCw, ListPlus } from 'lucide-react';
+import { GripVertical, Download, RefreshCw, ListPlus, Loader2 } from 'lucide-react';
 import {
 	Select,
 	SelectContent,
@@ -53,10 +53,20 @@ export default function DummyDataGenerator() {
 		return fields.filter(f => selectedFields.has(f.id)).map(f => f.id);
 	}, [fields, selectedFields]);
 
-	const outputData = useMemo(() => {
-		if (activeFields.length === 0 || count < 1) return '';
-		// Use refreshKey inside dependency array to regenerate
-		return refreshKey || !refreshKey ? generateDummyData(activeFields, Math.min(count, 1000), format) : '';
+	const [outputData, setOutputData] = useState('');
+	const [isGenerating, setIsGenerating] = useState(false);
+
+	useEffect(() => {
+		setIsGenerating(true);
+		const timer = setTimeout(() => {
+			if (activeFields.length === 0 || count < 1) {
+				setOutputData('');
+			} else {
+				setOutputData(generateDummyData(activeFields, Math.min(count, 1000), format));
+			}
+			setIsGenerating(false);
+		}, 50);
+		return () => clearTimeout(timer);
 	}, [activeFields, count, format, refreshKey]);
 
 	const previewData = useMemo(() => {
@@ -159,7 +169,7 @@ export default function DummyDataGenerator() {
 								ドラッグ&ドロップで並べ替えできます
 							</div>
 
-							<div className="space-y-2 border rounded-md p-2 bg-muted/20">
+							<div className="flex flex-col gap-2 border rounded-md p-2 bg-muted/20">
 								{fields.map((f, i) => (
 									<div
 										key={f.id}
@@ -169,13 +179,14 @@ export default function DummyDataGenerator() {
 										onDrop={(e) => handleDrop(e, i)}
 										className="flex items-center gap-2 p-2 bg-card border rounded-md shadow-sm cursor-grab active:cursor-grabbing hover:border-primary/50 transition-colors"
 									>
-										<GripVertical className="h-4 w-4 text-muted-foreground" />
+										<GripVertical className="h-4 w-4 flex-shrink-0 text-muted-foreground" />
 										<Checkbox
 											id={`field-${f.id}`}
 											checked={selectedFields.has(f.id)}
 											onCheckedChange={() => toggleField(f.id)}
+											className="flex-shrink-0"
 										/>
-										<Label htmlFor={`field-${f.id}`} className="text-sm cursor-pointer flex-1">
+										<Label htmlFor={`field-${f.id}`} className="text-sm cursor-pointer flex-1 whitespace-nowrap overflow-hidden text-ellipsis" title={f.label}>
 											{f.label}
 										</Label>
 									</div>
@@ -233,7 +244,13 @@ export default function DummyDataGenerator() {
 						</div>
 					</div>
 
-					<div className="flex-1 rounded-xl border border-input shadow-sm bg-card overflow-hidden flex flex-col min-h-[500px]">
+					<div className="flex-1 rounded-xl border border-input shadow-sm bg-card overflow-hidden flex flex-col min-h-[500px] relative">
+						{isGenerating && (
+							<div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[1px] flex flex-col items-center justify-center">
+								<Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+								<span className="text-primary text-sm font-medium">生成中...</span>
+							</div>
+						)}
 						{activeFields.length === 0 ? (
 							<div className="flex-1 flex items-center justify-center text-muted-foreground p-8 text-center">
 								左側のパネルから出力したいフィールドを選択してください

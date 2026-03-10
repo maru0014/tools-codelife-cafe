@@ -30,14 +30,17 @@ export default function ZenkakuHankaku() {
 			<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
 				{/* Direction toggle */}
 				<div className="flex items-center gap-3">
-					<Label className="text-sm font-medium whitespace-nowrap">
-						{direction === 'toHankaku' ? '全角 → 半角' : '半角 → 全角'}
+					<Label className={`text-sm font-medium whitespace-nowrap transition-colors ${direction === 'toHankaku' ? 'text-primary' : 'text-muted-foreground'}`}>
+						全角 → 半角
 					</Label>
 					<Switch
 						checked={direction === 'toZenkaku'}
 						onCheckedChange={(checked) => setDirection(checked ? 'toZenkaku' : 'toHankaku')}
+						className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-primary"
 					/>
-					<ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
+					<Label className={`text-sm font-medium whitespace-nowrap transition-colors ${direction === 'toZenkaku' ? 'text-primary' : 'text-muted-foreground'}`}>
+						半角 → 全角
+					</Label>
 				</div>
 
 				{/* Category checkboxes */}

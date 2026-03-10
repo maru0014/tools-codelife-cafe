@@ -54,9 +54,10 @@ export function formatSql(
     });
     return { output: formatted };
   } catch (error: any) {
+    const msg = error.message || String(error);
     return {
       output: sql,
-      error: `SQLの構文エラー: 該当行付近を確認してください。`,
+      error: `SQLの構文エラー:\n${msg}`,
     };
   }
 }
