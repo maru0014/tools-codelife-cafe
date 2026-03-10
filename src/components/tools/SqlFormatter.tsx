@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, type UIEvent } from 'react';
+import { useState, useMemo, useEffect, useCallback, type UIEvent } from 'react';
 import { formatSql, type SqlDialect, type IndentStyle, type SqlFormatOptions } from '@/lib/tools/sql-formatter';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
@@ -23,6 +23,7 @@ const SQL_KEYWORDS = [
 
 export default function SqlFormatter() {
 	const [input, setInput] = useState('');
+	const [autoFormat, setAutoFormat] = useState(true);
 
 	const [dialect, setDialect] = useState<SqlDialect>('sql');
 	const [indent, setIndent] = useState<IndentStyle>('2spaces');
@@ -30,9 +31,28 @@ export default function SqlFormatter() {
 	const [compress, setCompress] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
 
+	const [manualOutput, setManualOutput] = useState('');
+	const [manualError, setManualError] = useState<string | null>(null);
+
 	const options: SqlFormatOptions = { dialect, indent, uppercase, compress };
 
-	const { output, error } = useMemo(() => formatSql(input, options), [input, options]);
+	const { output, error } = useMemo(() => {
+		if (autoFormat) return formatSql(input, options);
+		return { output: manualOutput, error: manualError };
+	}, [input, options, autoFormat, manualOutput, manualError]);
+
+	const handleFormat = useCallback(() => {
+		const res = formatSql(input, options);
+		setManualOutput(res.output);
+		setManualError(res.error || null);
+	}, [input, options]);
+
+	useEffect(() => {
+		if (autoFormat) {
+			setManualOutput('');
+			setManualError(null);
+		}
+	}, [autoFormat]);
 
 	const toggleExpand = () => {
 		const newExpanded = !isExpanded;
@@ -50,21 +70,38 @@ export default function SqlFormatter() {
 	};
 
 	// Basic syntax highlighter
-	const highlightedOutput = useMemo(() => {
-		if (!output) return '';
-		let html = output
-			// Escape HTML
-			.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-			// Strings
-			.replace(/('.*?')/g, '<span class="text-green-600 dark:text-green-400">$1</span>')
-			// Numbers
-			.replace(/\b(\d+)\b/g, '<span class="text-blue-600 dark:text-blue-400">$1</span>');
+	const highlightedNodes = useMemo(() => {
+		if (!output) return null;
 
-		// Keywords
-		const keywordRegex = new RegExp(`\\b(${SQL_KEYWORDS.join('|')})\\b`, 'ig');
-		html = html.replace(keywordRegex, '<span class="text-purple-600 dark:text-purple-400 font-bold">$1</span>');
+		const parts = [];
+		let lastIndex = 0;
+		const keywordPattern = SQL_KEYWORDS.join('|');
+		const regex = new RegExp(`('.*?')|\\b(\\d+)\\b|\\b(${keywordPattern})\\b`, 'ig');
 
-		return html;
+		const matches = Array.from(output.matchAll(regex));
+
+		for (let i = 0; i < matches.length; i++) {
+			const m = matches[i];
+			const index = m.index;
+			if (index !== undefined && index > lastIndex) {
+				parts.push(output.slice(lastIndex, index));
+			}
+
+			if (m[1]) {
+				parts.push(<span key={i} className="text-green-600 dark:text-green-400">{m[1]}</span>);
+			} else if (m[2]) {
+				parts.push(<span key={i} className="text-blue-600 dark:text-blue-400">{m[2]}</span>);
+			} else if (m[3]) {
+				parts.push(<span key={i} className="text-purple-600 dark:text-purple-400 font-bold">{m[3]}</span>);
+			}
+			lastIndex = index !== undefined ? index + m[0].length : lastIndex;
+		}
+
+		if (lastIndex < output.length) {
+			parts.push(output.slice(lastIndex));
+		}
+
+		return parts;
 	}, [output]);
 
 	// Line numbers setup
@@ -130,6 +167,11 @@ export default function SqlFormatter() {
 
 				<div className="flex items-center gap-4 ml-auto mt-4 sm:mt-0">
 					<div className="flex items-center gap-2">
+						<Switch id="auto-format" checked={autoFormat} onCheckedChange={setAutoFormat} />
+						<Label htmlFor="auto-format" className="text-sm cursor-pointer whitespace-nowrap">自動整形</Label>
+					</div>
+
+					<div className="flex items-center gap-2">
 						<Switch id="opt-uppercase" checked={uppercase} onCheckedChange={setUppercase} />
 						<Label htmlFor="opt-uppercase" className="text-sm cursor-pointer whitespace-nowrap">大文字化</Label>
 					</div>
@@ -172,16 +214,24 @@ export default function SqlFormatter() {
 				<div>
 					<div className="flex items-center justify-between mb-2">
 						<Label className="text-sm font-medium">整形前SQL</Label>
-						<Button
-							variant="ghost"
-							size="sm"
-							onClick={() => setInput('')}
-							disabled={!input}
-							className="h-8 text-muted-foreground hover:text-foreground"
-						>
-							<Trash2 className="h-4 w-4 mr-1" />
-							クリア
-						</Button>
+						<div className="flex gap-2">
+							{!autoFormat && (
+								<Button size="sm" onClick={handleFormat} className="h-8">
+									<Code2 className="h-4 w-4 mr-1" />
+									整形を実行
+								</Button>
+							)}
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => setInput('')}
+								disabled={!input}
+								className="h-8 text-muted-foreground hover:text-foreground"
+							>
+								<Trash2 className="h-4 w-4 mr-1" />
+								クリア
+							</Button>
+						</div>
 					</div>
 					<div className="relative rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden flex h-[400px]">
 						{/* Gutter */}
@@ -222,13 +272,13 @@ export default function SqlFormatter() {
 					<div className={`rounded-xl border shadow-sm h-[400px] overflow-auto bg-card relative ${error ? 'border-red-500 border-2' : ''
 						} ${output ? 'shimmer' : ''}`}>
 						{error ? (
-							<div className="p-4 text-red-500 font-medium whitespace-pre-wrap flex items-start gap-2">
+							<div className="p-4 text-red-500 font-medium font-mono-tool text-sm whitespace-pre-wrap flex items-start gap-2 max-w-full">
 								<Code2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
-								{error}
+								<div className="break-all">{error}</div>
 							</div>
-						) : output ? (
+						) : output && (autoFormat || manualOutput) ? (
 							<pre className="p-4 m-0 font-mono-tool text-sm text-foreground overflow-auto w-full h-full">
-								<code dangerouslySetInnerHTML={{ __html: highlightedOutput }} />
+								<code>{highlightedNodes}</code>
 							</pre>
 						) : (
 							<div className="flex h-full items-center justify-center text-muted-foreground p-6 text-center">

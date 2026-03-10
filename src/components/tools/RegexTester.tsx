@@ -19,6 +19,12 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 import CopyButton from '@/components/common/CopyButton';
 import { Trash2, XCircle } from 'lucide-react';
 
@@ -193,23 +199,27 @@ export default function RegexTester() {
 				</div>
 			</div>
 
-			<div className="flex items-center gap-3">
-				<Label className="text-sm font-medium whitespace-nowrap">置換モード</Label>
+			<div className="flex items-center gap-3 mb-2">
 				<Switch
+					id="replace-mode-switch"
 					checked={showReplace}
 					onCheckedChange={setShowReplace}
 				/>
+				<Label htmlFor="replace-mode-switch" className="text-sm font-medium whitespace-nowrap cursor-pointer">
+					置換モードを有効にする
+				</Label>
 			</div>
 
-			{showReplace && (
-				<div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-in fade-in slide-in-from-top-4">
+			<div className="relative">
+				<div className={`grid grid-cols-1 md:grid-cols-2 gap-6 transition-all duration-300 ${!showReplace && 'opacity-30 grayscale blur-[1px] select-none pointer-events-none'}`}>
 					<div>
 						<Label className="text-sm font-medium mb-2 block">置換文字列</Label>
 						<Input
 							value={replacement}
 							onChange={(e) => setReplacement(e.target.value)}
 							placeholder="***-**** または $1 など"
-							className="font-mono-tool rounded-xl"
+							className="font-mono-tool rounded-xl bg-background"
+							disabled={!showReplace}
 						/>
 						<p className="text-xs text-muted-foreground mt-2">
 							キャプチャグループは <code>$1</code>, <code>$2</code> などで参照できます。
@@ -227,39 +237,64 @@ export default function RegexTester() {
 						/>
 					</div>
 				</div>
-			)}
+				{!showReplace && (
+					<div
+						className="absolute inset-0 z-10 cursor-pointer rounded-xl flex items-center justify-center hover:bg-muted/5 transition-colors group"
+						onClick={() => setShowReplace(true)}
+						title="クリックして置換モードを有効化"
+					>
+						<div className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 px-4 py-2 rounded-lg font-medium shadow-sm border border-border text-sm">
+							クリックして有効化
+						</div>
+					</div>
+				)}
+			</div>
 
 			{/* Match Results Panel */}
 			{result.matches.length > 0 && (
-				<div className="space-y-3 pt-4 border-t">
-					<Label className="text-sm font-medium">マッチ詳細</Label>
-					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-						{result.matches.map((match, i) => (
-							<Card key={i} className="rounded-xl overflow-hidden text-sm">
-								<div className="bg-muted px-3 py-1.5 border-b flex justify-between items-center text-xs">
-									<span className="font-semibold text-muted-foreground">Match #{i + 1}</span>
-									<span className="text-muted-foreground">Index: {match.index}</span>
-								</div>
-								<CardContent className="p-3 bg-card font-mono-tool">
-									<div className="break-all font-medium text-foreground">{match.value}</div>
-
-									{match.groups.length > 0 && (
-										<div className="mt-3 space-y-1.5 border-t pt-2 border-border/50">
-											{match.groups.map((group, gi) => (
-												<div key={gi} className="flex gap-2 text-xs items-start">
-													<Badge variant="secondary" className="px-1 text-[10px] h-4 leading-4 flex-shrink-0">
-														Group {gi + 1}
-													</Badge>
-													<span className="break-all opacity-80">{group ?? '(undefined)'}</span>
-												</div>
-											))}
+				<Accordion type="single" collapsible className="w-full pt-4 border-t mt-4 border-none" defaultValue="matches">
+					<AccordionItem value="matches" className="border-none">
+						<AccordionTrigger className="hover:no-underline py-2">
+							<div className="flex items-center gap-2">
+								<span className="text-sm font-medium">マッチ詳細</span>
+								<Badge variant="secondary" className="rounded-full px-2.5 font-mono">{result.matches.length}件</Badge>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="pt-2">
+							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto px-1 pb-2 scrollbar-thin">
+								{result.matches.slice(0, 500).map((match, i) => (
+									<Card key={i} className="rounded-xl overflow-hidden text-sm">
+										<div className="bg-muted px-3 py-1.5 border-b flex justify-between items-center text-xs">
+											<span className="font-semibold text-muted-foreground">Match #{i + 1}</span>
+											<span className="text-muted-foreground">Index: {match.index}</span>
 										</div>
-									)}
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				</div>
+										<CardContent className="p-3 bg-card font-mono-tool">
+											<div className="break-all font-medium text-foreground">{match.value}</div>
+
+											{match.groups.length > 0 && (
+												<div className="mt-3 space-y-1.5 border-t pt-2 border-border/50">
+													{match.groups.map((group, gi) => (
+														<div key={gi} className="flex gap-2 text-xs items-start">
+															<Badge variant="secondary" className="px-1 text-[10px] h-4 leading-4 flex-shrink-0">
+																Group {gi + 1}
+															</Badge>
+															<span className="break-all opacity-80">{group ?? '(undefined)'}</span>
+														</div>
+													))}
+												</div>
+											)}
+										</CardContent>
+									</Card>
+								))}
+								{result.matches.length > 500 && (
+									<div className="col-span-full text-center text-xs text-muted-foreground py-4">
+										... 以降の {result.matches.length - 500} 件は省略されています（最大500件表示）
+									</div>
+								)}
+							</div>
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>
 			)}
 
 		</div>

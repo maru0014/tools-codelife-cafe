@@ -84,9 +84,19 @@ export default function Base64Converter() {
 		<div className="space-y-6">
 			<Tabs value={tab} onValueChange={setTab}>
 				<div className="flex justify-center sm:justify-start">
-					<TabsList className="mb-4">
-						<TabsTrigger value="text">テキスト変換</TabsTrigger>
-						<TabsTrigger value="file">ファイル変換</TabsTrigger>
+					<TabsList className="mb-4 bg-muted/50 p-1 rounded-xl">
+						<TabsTrigger
+							value="text"
+							className="rounded-lg px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all font-medium"
+						>
+							テキスト変換
+						</TabsTrigger>
+						<TabsTrigger
+							value="file"
+							className="rounded-lg px-6 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md transition-all font-medium"
+						>
+							ファイル変換
+						</TabsTrigger>
 					</TabsList>
 				</div>
 
@@ -183,11 +193,18 @@ export default function Base64Converter() {
 									}`}
 							>
 								{loading ? (
-									<div className="text-muted-foreground animate-pulse">読み込み中...</div>
+									<div className="text-muted-foreground animate-pulse p-6">読み込み中...</div>
 								) : fileName ? (
-									<div className="text-center">
-										<div className="font-medium text-primary mb-1">{fileName}</div>
-										<div className="text-xs text-muted-foreground mt-2">別のファイルをドロップして上書き</div>
+									<div className="flex flex-col items-center p-4">
+										{fileOutput && fileOutput.startsWith('data:image/') && (
+											<img
+												src={fileOutput}
+												alt={fileName}
+												className="max-h-32 max-w-full rounded-md object-contain mb-3 shadow-sm border border-border"
+											/>
+										)}
+										<div className="font-medium text-primary mb-1 text-center break-all line-clamp-2 px-2">{fileName}</div>
+										<div className="text-xs text-muted-foreground mt-2 text-center">別のファイルをドロップして上書き</div>
 									</div>
 								) : (
 									<div className="text-center p-6 text-muted-foreground">

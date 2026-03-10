@@ -11,8 +11,10 @@ export interface DiffPart {
 
 export interface DiffResult {
   parts: DiffPart[];
-  addedCount: number;
-  removedCount: number;
+  addedLines: number;
+  removedLines: number;
+  addedChars: number;
+  removedChars: number;
 }
 
 function mapChanges(changes: Change[]): DiffPart[] {
@@ -26,21 +28,26 @@ export function computeDiff(textA: string, textB: string, mode: DiffMode): DiffR
   const changes = mode === 'lines' ? diffLines(textA, textB) : diffChars(textA, textB);
   const parts = mapChanges(changes);
 
-  let addedCount = 0;
-  let removedCount = 0;
+  let addedLines = 0;
+  let removedLines = 0;
+  let addedChars = 0;
+  let removedChars = 0;
 
   for (const part of parts) {
-    if (mode === 'lines') {
-      const lineCount = part.value.split('\n').filter((l) => l !== '').length;
-      if (part.type === 'added') addedCount += lineCount;
-      if (part.type === 'removed') removedCount += lineCount;
-    } else {
-      if (part.type === 'added') addedCount += [...part.value].length;
-      if (part.type === 'removed') removedCount += [...part.value].length;
+    const lineCount = part.value.split('\n').filter((l) => l !== '').length;
+    const charCount = [...part.value].length;
+
+    if (part.type === 'added') {
+      addedLines += lineCount;
+      addedChars += charCount;
+    }
+    if (part.type === 'removed') {
+      removedLines += lineCount;
+      removedChars += charCount;
     }
   }
 
-  return { parts, addedCount, removedCount };
+  return { parts, addedLines, removedLines, addedChars, removedChars };
 }
 
 export function readFileAsText(file: File): Promise<string> {

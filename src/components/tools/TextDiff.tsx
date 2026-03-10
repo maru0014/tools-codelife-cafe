@@ -6,12 +6,13 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import CopyButton from '@/components/common/CopyButton';
-import { GitCompareArrows, FileText } from 'lucide-react';
+import { GitCompareArrows, FileText, Trash2 } from 'lucide-react';
 
 export default function TextDiff() {
 	const [textA, setTextA] = useState('');
 	const [textB, setTextB] = useState('');
 	const [mode, setMode] = useState<DiffMode>('lines');
+	const [viewMode, setViewMode] = useState<'unified' | 'split'>('unified');
 	const [dragOverA, setDragOverA] = useState(false);
 	const [dragOverB, setDragOverB] = useState(false);
 
@@ -50,23 +51,36 @@ export default function TextDiff() {
 	return (
 		<div className="space-y-6">
 			{/* Mode Toggle */}
-			<div className="flex items-center justify-between">
+			<div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
 				<div className="flex items-center gap-2">
 					<GitCompareArrows className="h-5 w-5 text-muted-foreground" />
 					<span className="text-sm font-medium">比較モード:</span>
 				</div>
-				<Tabs value={mode} onValueChange={(v) => setMode(v as DiffMode)}>
-					<TabsList>
-						<TabsTrigger value="lines">行単位</TabsTrigger>
-						<TabsTrigger value="chars">文字単位</TabsTrigger>
-					</TabsList>
-				</Tabs>
+				<div className="flex items-center gap-4 w-full sm:w-auto overflow-x-auto">
+					<Tabs value={mode} onValueChange={(v) => setMode(v as DiffMode)}>
+						<TabsList>
+							<TabsTrigger value="lines">行単位</TabsTrigger>
+							<TabsTrigger value="chars">文字単位</TabsTrigger>
+						</TabsList>
+					</Tabs>
+					<Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'unified' | 'split')} className="hidden sm:block">
+						<TabsList>
+							<TabsTrigger value="unified">Unified</TabsTrigger>
+							<TabsTrigger value="split">Split</TabsTrigger>
+						</TabsList>
+					</Tabs>
+				</div>
 			</div>
 
 			{/* Two-pane input */}
 			<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 				<div>
-					<Label className="text-sm font-medium mb-2 block">テキストA（変更前）</Label>
+					<div className="flex items-center justify-between mb-2">
+						<Label className="text-sm font-medium">テキストA（変更前）</Label>
+						<Button variant="outline" size="sm" onClick={() => setTextA('')} disabled={!textA} className="h-6 px-2 text-xs">
+							<Trash2 className="h-3 w-3 mr-1" />クリア
+						</Button>
+					</div>
 					<Textarea
 						value={textA}
 						onChange={(e) => setTextA(e.target.value)}
@@ -83,7 +97,12 @@ export default function TextDiff() {
 					</p>
 				</div>
 				<div>
-					<Label className="text-sm font-medium mb-2 block">テキストB（変更後）</Label>
+					<div className="flex items-center justify-between mb-2">
+						<Label className="text-sm font-medium">テキストB（変更後）</Label>
+						<Button variant="outline" size="sm" onClick={() => setTextB('')} disabled={!textB} className="h-6 px-2 text-xs">
+							<Trash2 className="h-3 w-3 mr-1" />クリア
+						</Button>
+					</div>
 					<Textarea
 						value={textB}
 						onChange={(e) => setTextB(e.target.value)}
@@ -101,16 +120,18 @@ export default function TextDiff() {
 			{result && (
 				<Card className="rounded-xl">
 					<CardContent className="p-4">
-						<div className="flex items-center gap-4 text-sm">
-							<span className="font-medium">差分サマリー:</span>
-							<span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400">
-								<span className="inline-block h-3 w-3 rounded-sm bg-green-500/20 border border-green-500/50"></span>
-								追加: {result.addedCount}{mode === 'lines' ? '行' : '文字'}
-							</span>
-							<span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400">
-								<span className="inline-block h-3 w-3 rounded-sm bg-red-500/20 border border-red-500/50"></span>
-								削除: {result.removedCount}{mode === 'lines' ? '行' : '文字'}
-							</span>
+						<div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
+							<span className="font-medium">差分統計:</span>
+							<div className="flex items-center gap-4">
+								<span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
+									<span className="inline-block h-3 w-3 rounded-sm bg-green-500/20 border border-green-500/50"></span>
+									追加: {result.addedLines}行 ({result.addedChars}文字)
+								</span>
+								<span className="inline-flex items-center gap-1 text-red-600 dark:text-red-400 font-medium">
+									<span className="inline-block h-3 w-3 rounded-sm bg-red-500/20 border border-red-500/50"></span>
+									削除: {result.removedLines}行 ({result.removedChars}文字)
+								</span>
+							</div>
 						</div>
 					</CardContent>
 				</Card>
@@ -123,24 +144,53 @@ export default function TextDiff() {
 						<Label className="text-sm font-medium">差分結果</Label>
 						<CopyButton text={diffText} />
 					</div>
-					<div className="rounded-xl border border-border bg-card overflow-hidden font-mono-tool text-sm">
-						{result.parts.map((part, i) => (
-							<div
-								key={i}
-								className={`px-4 py-0.5 whitespace-pre-wrap break-all ${part.type === 'added'
+					{viewMode === 'split' ? (
+						<div className="grid grid-cols-2 gap-4">
+							<div className="rounded-xl border border-border bg-card overflow-x-auto whitespace-pre font-mono-tool text-sm min-h-[100px]">
+								<div className="bg-muted px-4 py-1.5 border-b border-border text-xs font-bold text-muted-foreground sticky top-0">テキストA（変更前）</div>
+								<div className="w-full min-w-max">
+									{result.parts.filter(p => p.type !== 'added').map((part, i) => (
+										<div key={`l-${i}`} className={`px-4 py-0.5 min-w-max ${part.type === 'removed' ? 'bg-red-500/10 text-red-700 dark:text-red-300' : ''}`}>
+											{part.type === 'removed' && <span className="select-none opacity-50">- </span>}
+											{part.type === 'unchanged' && <span className="select-none opacity-30">  </span>}
+											{part.value}
+										</div>
+									))}
+								</div>
+							</div>
+							<div className="rounded-xl border border-border bg-card overflow-x-auto whitespace-pre font-mono-tool text-sm min-h-[100px]">
+								<div className="bg-muted px-4 py-1.5 border-b border-border text-xs font-bold text-muted-foreground sticky top-0">テキストB（変更後）</div>
+								<div className="w-full min-w-max">
+									{result.parts.filter(p => p.type !== 'removed').map((part, i) => (
+										<div key={`r-${i}`} className={`px-4 py-0.5 min-w-max ${part.type === 'added' ? 'bg-green-500/10 text-green-700 dark:text-green-300' : ''}`}>
+											{part.type === 'added' && <span className="select-none opacity-50">+ </span>}
+											{part.type === 'unchanged' && <span className="select-none opacity-30">  </span>}
+											{part.value}
+										</div>
+									))}
+								</div>
+							</div>
+						</div>
+					) : (
+						<div className="rounded-xl border border-border bg-card overflow-hidden font-mono-tool text-sm">
+							{result.parts.map((part, i) => (
+								<div
+									key={i}
+									className={`px-4 py-0.5 whitespace-pre-wrap break-all ${part.type === 'added'
 										? 'bg-green-500/10 text-green-700 dark:text-green-300'
 										: part.type === 'removed'
 											? 'bg-red-500/10 text-red-700 dark:text-red-300'
 											: ''
-									}`}
-							>
-								{part.type === 'added' && <span className="select-none opacity-50">+ </span>}
-								{part.type === 'removed' && <span className="select-none opacity-50">- </span>}
-								{part.type === 'unchanged' && <span className="select-none opacity-30">  </span>}
-								{part.value}
-							</div>
-						))}
-					</div>
+										}`}
+								>
+									{part.type === 'added' && <span className="select-none opacity-50">+ </span>}
+									{part.type === 'removed' && <span className="select-none opacity-50">- </span>}
+									{part.type === 'unchanged' && <span className="select-none opacity-30">  </span>}
+									{part.value}
+								</div>
+							))}
+						</div>
+					)}
 				</div>
 			)}
 

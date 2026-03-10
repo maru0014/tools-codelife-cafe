@@ -69,7 +69,7 @@ export function seirekiToWareki(year: number, month: number, day: number): Warek
   };
 }
 
-export function warekiToSeireki(gengo: Gengo, warekiYear: number): WarekiResult {
+export function warekiToSeireki(gengo: Gengo, warekiYear: number, month?: number, day?: number): WarekiResult {
   if (warekiYear < 1) {
     return {
       gengo, warekiYear, warekiString: formatWarekiYear(gengo, warekiYear),
@@ -78,8 +78,8 @@ export function warekiToSeireki(gengo: Gengo, warekiYear: number): WarekiResult 
     };
   }
 
-  const era = ERAS.find(e => e.name === gengo);
-  if (!era) {
+  const eraIndex = ERAS.findIndex(e => e.name === gengo);
+  if (eraIndex === -1) {
     return {
       gengo, warekiYear, warekiString: formatWarekiYear(gengo, warekiYear),
       seirekiYear: 0, zodiac: '', age: 0,
@@ -87,16 +87,31 @@ export function warekiToSeireki(gengo: Gengo, warekiYear: number): WarekiResult 
     };
   }
 
+  const era = ERAS[eraIndex];
   const startYear = era.start.getFullYear();
   const seirekiYear = startYear + warekiYear - 1;
 
-  // 簡単なバリデーション (次の元号の開始年を超えるかどうかは厳密ではないが、実用上許容される範囲)
+  let error: string | undefined;
+
+  if (month !== undefined && day !== undefined) {
+    const targetDate = new Date(seirekiYear, month - 1, day);
+    const nextEra = ERAS[eraIndex - 1]; // ERAS is sorted newest to oldest
+    const fd = (d: Date) => `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+
+    if (targetDate < era.start) {
+      error = `${gengo}は${fd(era.start)}以降です`;
+    } else if (nextEra && targetDate >= nextEra.start) {
+      error = `${seirekiYear}年${month}月${day}日は${nextEra.name}です (${fd(nextEra.start)}〜)`;
+    }
+  }
+
   return {
     gengo,
     warekiYear,
     warekiString: formatWarekiYear(gengo, warekiYear),
     seirekiYear,
     zodiac: getZodiac(seirekiYear),
-    age: getAge(seirekiYear)
+    age: getAge(seirekiYear),
+    error
   };
 }

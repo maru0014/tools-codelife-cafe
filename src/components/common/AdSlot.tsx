@@ -31,7 +31,7 @@ export default function AdSlot({ slotId, format = 'auto', className = '', style 
 		if (import.meta.env.DEV) {
 			return (
 				<div
-					className={`flex items-center justify-center bg-muted/30 border border-dashed border-border rounded-lg text-sm text-muted-foreground ${className}`}
+					className={`flex w-full overflow-hidden items-center justify-center bg-muted/30 border border-dashed border-border rounded-lg text-sm text-muted-foreground ${className}`}
 					style={{ minHeight: format === 'horizontal' ? '90px' : '250px', ...style }}
 				>
 					AdSense Placeholder ({format})
@@ -42,7 +42,7 @@ export default function AdSlot({ slotId, format = 'auto', className = '', style 
 	}
 
 	return (
-		<div className={`overflow-hidden ${className}`}>
+		<div className={`overflow-hidden w-full ${className}`}>
 			<ins
 				className="adsbygoogle"
 				style={{ display: 'block', ...style }}

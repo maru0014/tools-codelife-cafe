@@ -27,12 +27,12 @@ const TARGET_TYPES: { id: MaskTarget, label: string }[] = [
 
 export default function Masking() {
 	const [text, setText] = useState('');
-	const [targets, setTargets] = useState<Set<MaskTarget>>(new Set(['email', 'phone', 'card', 'mynumber']));
+	const [targets, setTargets] = useState<Set<MaskTarget>>(new Set(['email', 'phone', 'zipcode', 'card', 'mynumber']));
 	const [maskChar, setMaskChar] = useState<MaskChar>('*');
 	const [strength, setStrength] = useState<MaskStrength>('partial');
 
-	const { maskedText, counts } = useMemo(() => {
-		if (!text) return { maskedText: '', counts: { email: 0, phone: 0, zipcode: 0, card: 0, mynumber: 0, name: 0 } };
+	const { maskedText, counts, ranges } = useMemo(() => {
+		if (!text) return { maskedText: '', counts: { email: 0, phone: 0, zipcode: 0, card: 0, mynumber: 0, name: 0 }, ranges: [] };
 		return maskText(text, { targets, maskChar, strength });
 	}, [text, targets, maskChar, strength]);
 
@@ -47,6 +47,8 @@ export default function Masking() {
 		});
 	};
 
+
+
 	const handleDownload = () => {
 		if (!maskedText) return;
 		const blob = new Blob([maskedText], { type: 'text/plain;charset=utf-8' });
@@ -59,6 +61,42 @@ export default function Masking() {
 		document.body.removeChild(a);
 		URL.revokeObjectURL(url);
 	};
+
+	const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+		const overlay = document.getElementById('mask-highlight-overlay');
+		if (overlay) {
+			overlay.scrollTop = e.currentTarget.scrollTop;
+			overlay.scrollLeft = e.currentTarget.scrollLeft;
+		}
+	};
+
+	const highlightNodes = useMemo(() => {
+		if (!text || ranges.length === 0) return <span>{text}</span>;
+
+		const nodes = [];
+		let lastIndex = 0;
+		// Sort ranges just in case
+		const sorted = [...ranges].sort((a, b) => a.start - b.start);
+
+		for (let i = 0; i < sorted.length; i++) {
+			const range = sorted[i];
+			if (range.start > lastIndex) {
+				nodes.push(<span key={`t-${i}`}>{text.slice(lastIndex, range.start)}</span>);
+			}
+			nodes.push(
+				<mark key={`m-${i}`} className="bg-primary/30 text-transparent rounded-[2px]" title={range.type}>
+					{text.slice(range.start, range.end)}
+				</mark>
+			);
+			lastIndex = Math.max(lastIndex, range.end);
+		}
+
+		if (lastIndex < text.length) {
+			nodes.push(<span key="end">{text.slice(lastIndex)}</span>);
+		}
+
+		return nodes;
+	}, [text, ranges]);
 
 	return (
 		<div className="space-y-6">
@@ -126,13 +164,23 @@ export default function Masking() {
 							<Trash2 className="h-4 w-4 mr-1" /> クリア
 						</Button>
 					</div>
-					<Textarea
-						value={text}
-						onChange={(e) => setText(e.target.value)}
-						placeholder="山田太郎 (yamada@example.com) 090-1234-5678"
-						className="min-h-[300px] font-mono-tool text-sm leading-5 rounded-xl focus:ring-2 focus:ring-primary"
-						spellCheck={false}
-					/>
+					<div className="relative rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden flex h-[300px]">
+						<div
+							id="mask-highlight-overlay"
+							className="absolute inset-0 pointer-events-none p-3 text-sm leading-5 whitespace-pre-wrap break-words font-mono-tool overflow-hidden"
+							aria-hidden={true}
+						>
+							{highlightNodes}
+						</div>
+						<Textarea
+							value={text}
+							onChange={(e) => setText(e.target.value)}
+							onScroll={handleScroll}
+							placeholder="山田太郎 (yamada@example.com) 090-1234-5678"
+							className="flex-1 min-h-[300px] h-full bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 resize-none border-none ring-0 shadow-none focus-visible:ring-0 rounded-none relative z-10"
+							spellCheck={false}
+						/>
+					</div>
 				</div>
 
 				{/* Output */}

@@ -39,7 +39,7 @@ export default function WarekiConverter() {
 		if (direction === 'toWareki') {
 			return seirekiToWareki(seirekiYear, month, day);
 		} else {
-			return warekiToSeireki(gengo, warekiYear);
+			return warekiToSeireki(gengo, warekiYear, month, day);
 		}
 	}, [direction, seirekiYear, month, day, gengo, warekiYear]);
 
@@ -63,50 +63,22 @@ export default function WarekiConverter() {
 			</div>
 
 			{/* Inputs */}
-			<div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+			<div className="grid grid-cols-1 sm:grid-cols-12 gap-4">
 				{direction === 'toWareki' ? (
-					<>
-						<div>
-							<Label className="text-sm font-medium mb-2 block">西暦（年）</Label>
-							<Input
-								type="number"
-								value={seirekiYear}
-								onChange={(e) => setSeirekiYear(Number(e.target.value))}
-								className="rounded-xl focus:ring-2 focus:ring-primary"
-								min={1868}
-								max={2100}
-							/>
-						</div>
-						<div>
-							<Label className="text-sm font-medium mb-2 block">月</Label>
-							<Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
-								<SelectTrigger className="rounded-xl">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-										<SelectItem key={m} value={String(m)}>{m}月</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-						<div>
-							<Label className="text-sm font-medium mb-2 block">日</Label>
-							<Select value={String(day)} onValueChange={(v) => setDay(Number(v))}>
-								<SelectTrigger className="rounded-xl">
-									<SelectValue />
-								</SelectTrigger>
-								<SelectContent>
-									{Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
-										<SelectItem key={d} value={String(d)}>{d}日</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						</div>
-					</>
+					<div className="sm:col-span-4">
+						<Label className="text-sm font-medium mb-2 block">西暦（年）</Label>
+						<Input
+							type="number"
+							value={seirekiYear}
+							onChange={(e) => setSeirekiYear(Number(e.target.value))}
+							className="rounded-xl focus:ring-2 focus:ring-primary"
+							min={1868}
+							max={2100}
+						/>
+					</div>
 				) : (
 					<>
-						<div>
+						<div className="sm:col-span-3">
 							<Label className="text-sm font-medium mb-2 block">元号</Label>
 							<Select value={gengo} onValueChange={(v) => setGengo(v as Gengo)}>
 								<SelectTrigger className="rounded-xl">
@@ -121,7 +93,7 @@ export default function WarekiConverter() {
 								</SelectContent>
 							</Select>
 						</div>
-						<div>
+						<div className="sm:col-span-3">
 							<Label className="text-sm font-medium mb-2 block">年 (元年 = 1)</Label>
 							<Input
 								type="number"
@@ -132,9 +104,35 @@ export default function WarekiConverter() {
 								max={100}
 							/>
 						</div>
-						<div className="hidden sm:block"></div> {/* Spacer */}
 					</>
 				)}
+
+				<div className={`sm:col-span-4 ${direction === 'toSeireki' ? 'sm:col-span-3' : ''}`}>
+					<Label className="text-sm font-medium mb-2 block">月</Label>
+					<Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+						<SelectTrigger className="rounded-xl">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							{Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
+								<SelectItem key={m} value={String(m)}>{m}月</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
+				<div className={`sm:col-span-4 ${direction === 'toSeireki' ? 'sm:col-span-3' : ''}`}>
+					<Label className="text-sm font-medium mb-2 block">日</Label>
+					<Select value={String(day)} onValueChange={(v) => setDay(Number(v))}>
+						<SelectTrigger className="rounded-xl">
+							<SelectValue />
+						</SelectTrigger>
+						<SelectContent>
+							{Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
+								<SelectItem key={d} value={String(d)}>{d}日</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 
 			{/* Result Card */}
@@ -177,6 +175,11 @@ export default function WarekiConverter() {
 									{result.age}歳
 								</div>
 							</div>
+						</div>
+					)}
+					{!result.error && (
+						<div className="mt-8 text-center sm:text-right text-xs text-muted-foreground">
+							※年齢は今年の誕生日を迎えた時点での年齢です。
 						</div>
 					)}
 				</CardContent>

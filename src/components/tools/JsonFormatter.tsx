@@ -13,19 +13,48 @@ import {
 import CopyButton from '@/components/common/CopyButton';
 import { Wand2, Minimize2, Download, AlertCircle } from 'lucide-react';
 
+function highlightJson(json: string) {
+	if (!json) return '';
+	const jsonStr = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+	return jsonStr.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+		let cls = 'text-green-600 dark:text-green-400'; // number
+		if (/^"/.test(match)) {
+			if (/:$/.test(match)) {
+				cls = 'text-blue-600 dark:text-blue-400'; // key
+			} else {
+				cls = 'text-orange-600 dark:text-orange-400'; // string
+			}
+		} else if (/true|false/.test(match)) {
+			cls = 'text-purple-600 dark:text-purple-400'; // boolean
+		} else if (/null/.test(match)) {
+			cls = 'text-gray-500 dark:text-gray-400'; // null
+		}
+		return '<span class="' + cls + '">' + match + '</span>';
+	});
+}
+
 export default function JsonFormatter() {
 	const [input, setInput] = useState('');
 	const [output, setOutput] = useState('');
 	const [indent, setIndent] = useState<IndentType>('2');
 	const [error, setError] = useState<string | null>(null);
+	const [errorPosition, setErrorPosition] = useState<number | null>(null);
+
+	const errorLine = useState<number | null>(null);
+	const currentErrorLine = errorPosition !== null && input
+		? input.substring(0, errorPosition).split('\n').length
+		: null;
 
 	const handleFormat = useCallback(() => {
 		const result = formatJson(input, indent);
 		if (result.success) {
 			setOutput(result.output);
 			setError(null);
+			setErrorPosition(null);
 		} else {
+			setOutput('');
 			setError(result.error ?? 'エラーが発生しました');
+			setErrorPosition(result.errorPosition ?? null);
 		}
 	}, [input, indent]);
 
@@ -34,7 +63,9 @@ export default function JsonFormatter() {
 		if (result.success) {
 			setOutput(result.output);
 			setError(null);
+			setErrorPosition(null);
 		} else {
+			setOutput('');
 			setError(result.error ?? 'エラーが発生しました');
 		}
 	}, [input]);
@@ -55,12 +86,20 @@ export default function JsonFormatter() {
 	const handleInputChange = useCallback((value: string) => {
 		setInput(value);
 		setError(null);
+		setErrorPosition(null);
 		// Auto-format on input change
 		if (value.trim()) {
 			const result = formatJson(value, indent);
 			if (result.success) {
 				setOutput(result.output);
 				setError(null);
+				setErrorPosition(null);
+			} else {
+				// Don't clear output immediately if they're just typing,
+				// but let's show the error state or position if it fails
+				setError(result.error ?? 'エラーが発生しました');
+				setErrorPosition(result.errorPosition ?? null);
+				setOutput('');
 			}
 		} else {
 			setOutput('');
@@ -73,7 +112,7 @@ export default function JsonFormatter() {
 			{error && (
 				<div className="flex items-start gap-2 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
 					<AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-					<p>{error}</p>
+					<p>{error} {currentErrorLine && <span className="font-bold">（{currentErrorLine}行目付近）</span>}</p>
 				</div>
 			)}
 
@@ -134,13 +173,21 @@ export default function JsonFormatter() {
 						</Button>
 					</div>
 				</div>
-				<Textarea
-					value={output}
-					readOnly
-					placeholder="整形結果がここに表示されます..."
-					className={`min-h-[200px] font-mono-tool rounded-xl bg-muted/50 ${output ? 'shimmer' : ''}`}
-					spellCheck={false}
-				/>
+				{output ? (
+					<div
+						className="min-h-[200px] font-mono-tool text-sm rounded-xl border border-border bg-muted/50 p-3 overflow-auto whitespace-pre-wrap break-all shimmer"
+						dangerouslySetInnerHTML={{ __html: highlightJson(output) }}
+					/>
+				) : (
+					<Textarea
+						value=""
+						readOnly
+						disabled={!!error}
+						placeholder={error ? "入力JSONにエラーがあります" : "整形結果がここに表示されます..."}
+						className={`min-h-[200px] font-mono-tool rounded-xl bg-muted/50`}
+						spellCheck={false}
+					/>
+				)}
 			</div>
 		</div>
 	);
