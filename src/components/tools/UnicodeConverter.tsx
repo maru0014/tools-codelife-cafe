@@ -40,7 +40,7 @@ export default function UnicodeConverter() {
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 				{/* 入力エリア */}
 				<div>
-					<div className="flex justify-between items-center mb-2">
+					<div className="flex justify-between items-center mb-2 min-h-9">
 						<Label className="text-sm font-medium block">
 							入力 ({direction === 'encode' ? 'プレーンテキスト' : 'ユニコード(\\uXXXX)'})
 						</Label>
@@ -59,7 +59,7 @@ export default function UnicodeConverter() {
 
 				{/* 出力エリア */}
 				<div>
-					<div className="flex items-center justify-between mb-2">
+					<div className="flex items-center justify-between mb-2 min-h-9">
 						<Label className="text-sm font-medium">変換結果</Label>
 						<div className="flex gap-2">
 							<CopyButton text={result.output} />

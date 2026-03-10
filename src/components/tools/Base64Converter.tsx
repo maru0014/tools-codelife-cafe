@@ -115,7 +115,7 @@ export default function Base64Converter() {
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
-							<div className="flex justify-between items-center mb-2">
+							<div className="flex justify-between items-center mb-2 min-h-9">
 								<Label className="text-sm font-medium block">
 									入力 ({direction === 'encode' ? 'プレーンテキスト' : 'Base64'})
 								</Label>
@@ -138,7 +138,7 @@ export default function Base64Converter() {
 						</div>
 
 						<div>
-							<div className="flex items-center justify-between mb-2">
+							<div className="flex items-center justify-between mb-2 min-h-9">
 								<Label className="text-sm font-medium">変換結果</Label>
 								<div className="flex gap-2">
 									{direction === 'decode' && textResult.output && !textResult.error && (
@@ -184,7 +184,9 @@ export default function Base64Converter() {
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
-							<Label className="text-sm font-medium mb-2 block">ファイル入力</Label>
+							<div className="flex items-center mb-2 min-h-9">
+								<Label className="text-sm font-medium block">ファイル入力</Label>
+							</div>
 							<div
 								onDrop={handleDrop}
 								onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -237,7 +239,7 @@ export default function Base64Converter() {
 						</div>
 
 						<div>
-							<div className="flex items-center justify-between mb-2">
+							<div className="flex items-center justify-between mb-2 min-h-9">
 								<Label className="text-sm font-medium">Base64 出力</Label>
 								<div className="flex gap-2">
 									<CopyButton text={fileOutput} />
