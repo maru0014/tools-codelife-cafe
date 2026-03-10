@@ -23,6 +23,7 @@ const TOOLS: Tool[] = [
 	{ id: 'dummy-data', name: 'ダミーデータ生成', description: '日本語の氏名・電話番号等のダミーデータを一括生成', href: '/dummy-data', icon: '🎲', category: '生成ツール' },
 	{ id: 'masking', name: '個人情報マスキング', description: 'メール・電話番号・カード番号等を自動検出してマスキング', href: '/masking', icon: '🛡️', category: 'データ処理' },
 	{ id: 'csv-editor', name: 'CSVビューア/エディタ', description: 'CSV/TSVをテーブル形式で閲覧・編集・加工', href: '/csv-editor', icon: '📊', category: 'データ処理' },
+	{ id: 'unicode-converter', name: 'ユニコード変換', description: 'テキストとユニコードエスケープシーケンスを相互変換', href: '/unicode-converter', icon: '🔣', category: 'テキスト変換' },
 ];
 
 export default function SearchModal() {

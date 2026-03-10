@@ -12,7 +12,7 @@ test.describe('Text Diff', () => {
     await textboxes.nth(1).fill('hello\nplaywright');
 
     // Check if diff summary appears
-    await expect(page.getByText(/差分サマリー/i)).toBeVisible();
+    await expect(page.getByText(/差分統計/i)).toBeVisible();
     await expect(page.getByText(/追加:\s*1行/)).toBeVisible();
     await expect(page.getByText(/削除:\s*1行/)).toBeVisible();
   });
