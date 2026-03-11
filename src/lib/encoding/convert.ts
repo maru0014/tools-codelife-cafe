@@ -7,9 +7,16 @@ export function convertEncoding(
   options: ConversionOptions,
   originalFilename: string
 ): ConversionResult {
-  const sourceBytes = new Uint8Array(buffer);
+  let sourceBytes = new Uint8Array(buffer);
 
-  // 1. Decode source buffer -> UNICODE (JS string)
+  // 1. Strip BOM if present
+  if (sourceBytes.length >= 3 && sourceBytes[0] === 0xEF && sourceBytes[1] === 0xBB && sourceBytes[2] === 0xBF) {
+    sourceBytes = sourceBytes.slice(3);
+  } else if (sourceBytes.length >= 2 && ((sourceBytes[0] === 0xFF && sourceBytes[1] === 0xFE) || (sourceBytes[0] === 0xFE && sourceBytes[1] === 0xFF))) {
+    sourceBytes = sourceBytes.slice(2);
+  }
+
+  // 1.5 Decode source buffer -> UNICODE (JS string)
   const decodedStringArray = Encoding.convert(sourceBytes, {
     to: 'UNICODE',
     from: sourceEncoding,
@@ -33,26 +40,40 @@ export function convertEncoding(
   const lineCount = (normalizedString.match(/\r\n|\r|\n/g) || []).length + 1;
 
   // 3. Convert string -> output encoding byte array
-  let outputBytesArray = Encoding.convert(Encoding.stringToCode(normalizedString), {
+  const outputBytesArray = Encoding.convert(Encoding.stringToCode(normalizedString), {
     to: options.outputEncoding,
     from: 'UNICODE',
     type: 'array'
   });
 
-  // 4. Add BOM if necessary
+  // 4. Add BOM if necessary and create final Uint8Array
+  let finalBytes: Uint8Array;
+  
   if (options.addBom) {
+    let bom: Uint8Array;
     if (options.outputEncoding === 'UTF8') {
-      outputBytesArray = [0xEF, 0xBB, 0xBF, ...outputBytesArray];
+      bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
     } else if (options.outputEncoding === 'UTF16LE') {
-      outputBytesArray = [0xFF, 0xFE, ...outputBytesArray];
+      bom = new Uint8Array([0xFF, 0xFE]);
     } else if (options.outputEncoding === 'UTF16BE') {
-      outputBytesArray = [0xFE, 0xFF, ...outputBytesArray];
+      bom = new Uint8Array([0xFE, 0xFF]);
+    } else {
+      bom = new Uint8Array(0);
     }
+    
+    if (bom.length > 0) {
+      finalBytes = new Uint8Array(bom.length + outputBytesArray.length);
+      finalBytes.set(bom);
+      finalBytes.set(outputBytesArray, bom.length);
+    } else {
+      finalBytes = new Uint8Array(outputBytesArray);
+    }
+  } else {
+    finalBytes = new Uint8Array(outputBytesArray);
   }
 
   // 5. Create Blob
-  const byteUint8Array = new Uint8Array(outputBytesArray);
-  const blob = new Blob([byteUint8Array], {
+  const blob = new Blob([finalBytes as any], {
     type: options.outputEncoding === 'UTF8' ? 'text/csv; charset=utf-8' : 'text/csv'
   });
 

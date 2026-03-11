@@ -210,7 +210,7 @@ function FileDropZone({ onFileLoaded, disabled }: FileDropZoneProps) {
       </div>
 
       {error && (
-        <div className={cn("mt-3 flex items-center text-sm text-destructive", isShaking && "animate-shake")}>
+        <div role="alert" className={cn("mt-3 flex items-center text-sm text-destructive", isShaking && "animate-shake")}>
           <AlertCircle className="w-4 h-4 mr-2" />
           {error}
         </div>
@@ -524,7 +524,7 @@ function DownloadButton({ buffer, originalFilename, sourceEncoding, options, dis
       setStatus('success');
       
       setTimeout(() => {
-        if (status === 'success') setStatus('idle');
+        setStatus(prev => prev === 'success' ? 'idle' : prev);
       }, 3000);
       
     } catch (e: any) {
@@ -650,7 +650,7 @@ export default function CsvFixer() {
 
     analyzeBuffer(event.buffer, event.detection.encoding);
 
-    if (settings.instantMode && event.detection.encoding) {
+    if (settings.instantMode && event.detection.encoding && event.detection.confidence !== 'low') {
       setTimeout(() => {
         executeInstantDownload(event.buffer, event.detection.encoding, event.file.name);
       }, 100);
@@ -703,13 +703,13 @@ export default function CsvFixer() {
     <div className="w-full max-w-4xl mx-auto space-y-8">
       {!file ? (
         <div className="space-y-6">
-          <FileDropZone onFileLoaded={handleFileLoaded} disabled={status === 'detecting'} />
           <div className="max-w-md mx-auto">
             <InstantModeToggle 
               enabled={settings.instantMode} 
               onToggle={(enabled) => handleSettingsChange({ ...settings, instantMode: enabled })}
             />
           </div>
+          <FileDropZone onFileLoaded={handleFileLoaded} disabled={status === 'detecting'} />
         </div>
       ) : (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">

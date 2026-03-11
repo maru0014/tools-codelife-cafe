@@ -72,4 +72,46 @@ test.describe('CSV文字化け修復ツール', () => {
     // Verify NOT showing low confidence alert
     await expect(page.getByText('エンコーディングの自動検出の信頼度が低いです')).not.toBeVisible();
   });
+
+  test('UTF-8ファイル（BOMあり）が正しく検出・変換されること', async ({ page }) => {
+    await page.locator('input[type="file"]').setInputFiles(path.join(process.cwd(), 'tests', 'e2e', 'fixtures', 'utf8_bom.csv'));
+
+    await expect(page.getByText('現在のエンコーディング')).toBeVisible();
+    await expect(page.getByText('UTF-8').first()).toBeVisible();
+    
+    await expect(page.getByLabel('BOM (バイトオーダーマーク) を付与する')).toBeChecked();
+
+    const downloadPromise = page.waitForEvent('download');
+    await page.getByRole('button', { name: '変換してダウンロード' }).click();
+    const download = await downloadPromise;
+
+    expect(download.suggestedFilename()).toBe('utf8_bom_converted.csv');
+  });
+
+  test('手動でエンコーディングを変更するとプレビューが更新されること', async ({ page }) => {
+    await page.locator('input[type="file"]').setInputFiles(path.join(process.cwd(), 'tests', 'e2e', 'fixtures', 'utf8_no_bom.csv'));
+    await expect(page.getByText('UTF-8').first()).toBeVisible();
+    await expect(page.getByRole('cell', { name: '山田太郎' })).toBeVisible();
+    
+    await page.locator('button[role="combobox"]').first().click();
+    await page.getByRole('option', { name: 'Shift_JIS' }).click();
+
+    await expect(page.getByRole('cell', { name: '山田太郎' })).not.toBeVisible();
+  });
+
+  test('即時モードONで低信頼度の場合は自動ダウンロードが発火せずフォールバックされること', async ({ page }) => {
+    await page.getByRole('switch', { name: '即時変換モード' }).click();
+
+    let downloadCount = 0;
+    page.on('download', () => downloadCount++);
+
+    await page.locator('input[type="file"]').setInputFiles(path.join(process.cwd(), 'tests', 'e2e', 'fixtures', 'small.csv'));
+
+    await expect(page.getByText('エンコーディングの自動検出の信頼度が低いです')).toBeVisible();
+
+    await page.waitForTimeout(1000);
+    expect(downloadCount).toBe(0);
+
+    await expect(page.getByRole('button', { name: '変換してダウンロード' })).toBeVisible();
+  });
 });
