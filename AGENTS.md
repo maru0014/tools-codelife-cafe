@@ -83,6 +83,8 @@ npx playwright test --project=chromium --headed --reporter=list  # 詳細表示
 - **テストファイル:** `tests/e2e/` に配置
 - **共通フィクスチャ:** `tests/e2e/fixtures/base.ts` — 広告ブロック、`createToolPage` ヘルパー
 - **ページヘルパー:** `tests/e2e/helpers/tool-page.ts` — `ToolPage` クラス（goto, expectSafetyBadge等）
+- **Astro ViewTransitionsとダウンロード:** React内で動的に `<a>` タグを生成してダウンロードを発火させる場合、Astroルーターが誤認してテストがクラッシュするのを防ぐため `a.dataset.astroReload = 'true'` を付与すること
+- **ハイドレーションとDOMのタイミング:** `input[type="file"]` などがロード直後にPlaywrightから見つからないFlakyを防ぐため、`useEffect`（`mounted`ステート等）でハイドレーション後に確実に見せる実装にし、テスト側も待機を確実にすること
 
 ## デプロイ
 
