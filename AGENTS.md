@@ -44,17 +44,6 @@ src/
 3. **ロジックとUIを分離する** — `src/lib/tools/` に純粋関数、`src/components/tools/` にReactコンポーネント
 4. **新ツールは3ファイルで完結** — ロジック(`lib`) + コンポーネント(`component`) + ページ(`page`)
 
-## 新しいツールの追加方法
-
-1. `src/lib/tools/[tool-name].ts` — ビジネスロジックを純粋関数として実装
-2. `src/components/tools/[ToolName].tsx` — React UIコンポーネントを作成
-3. `src/pages/[tool-name].astro` — `ToolLayout.astro` でラップするAstroページを作成（`src/pages/` 直下に配置）
-4. `src/pages/index.astro` に `ToolCard` を追加（Bento Grid）
-5. `src/components/layout/Navigation.astro` にリンクを追加
-6. `src/components/common/SearchModal.tsx` の `TOOLS` 配列にエントリを追加
-7. `tests/e2e/[tool-name].spec.ts` — E2Eテストを作成
-8. `README.md` のツール一覧を更新
-
 ## デザインシステム
 
 - **カラー:** CSS変数で定義（`--primary`, `--accent`, `--safety` など）。`global.css` の `:root` と `.dark` を参照
@@ -62,31 +51,12 @@ src/
 - **ダークモード:** `.dark` クラスで切替。`localStorage` に保存
 - **コンポーネント追加:** `npx shadcn@latest add [component]` を使用
 
-## ビルド・開発
-
-```bash
-npm run dev          # 開発サーバー（http://localhost:4321）
-npm run build        # 静的ビルド（dist/）
-npm run preview      # ビルド結果プレビュー（--host 付き、LAN上の他デバイスからアクセス可能）
-npm run preview:ci   # ビルド結果プレビュー（--host なし、テスト用）
-```
-
-## E2Eテスト（Playwright）
-
-```bash
-npx playwright test --project=chromium --headed   # ローカル実行（headed推奨）
-npx playwright test --project=chromium --headed --reporter=list  # 詳細表示
-```
-
-- **ローカル注意:** Windows環境ではヘッドレスモードでファイアウォールにブロックされる場合あり。`--headed` を使うこと
-- **CI:** PR作成時に `.github/workflows/e2e.yml` で自動実行。chromium + mobile-chrome の2プロジェクト
-- **テストファイル:** `tests/e2e/` に配置
-- **共通フィクスチャ:** `tests/e2e/fixtures/base.ts` — 広告ブロック、`createToolPage` ヘルパー
-- **ページヘルパー:** `tests/e2e/helpers/tool-page.ts` — `ToolPage` クラス（goto, expectSafetyBadge等）
-- **Astro ViewTransitionsとダウンロード:** React内で動的に `<a>` タグを生成してダウンロードを発火させる場合、Astroルーターが誤認してテストがクラッシュするのを防ぐため `a.dataset.astroReload = 'true'` を付与すること
-- **ハイドレーションとDOMのタイミング:** `input[type="file"]` などがロード直後にPlaywrightから見つからないFlakyを防ぐため、`useEffect`（`mounted`ステート等）でハイドレーション後に確実に見せる実装にし、テスト側も待機を確実にすること
-
 ## デプロイ
 
 GitHub Actions（`.github/workflows/deploy.yml`）で `main` ブランチへのpush時に自動デプロイ。
 Cloudflare Pages にデプロイされる。Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`。
+
+## エージェントのタスク完了条件 (DoD)
+- **Implementation Plan (実装計画)** が作成され、ユーザーの承認済みであること（新ツール作成・大幅改修時）
+- 変更ファイルが必要なスコープ内に収まっていること
+- **Walkthrough（実行やプレビューのスクリーンショット/録画）**、またはローカルE2Eテスト結果が提出されていること
