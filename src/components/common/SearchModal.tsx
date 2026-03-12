@@ -25,6 +25,7 @@ const TOOLS: Tool[] = [
 	{ id: 'csv-editor', name: 'CSVビューア/エディタ', description: 'CSV/TSVをテーブル形式で閲覧・編集・加工', href: '/csv-editor', icon: '📊', category: 'データ処理' },
 	{ id: 'unicode-converter', name: 'ユニコード変換', description: 'テキストとユニコードエスケープシーケンスを相互変換', href: '/unicode-converter', icon: '🔣', category: 'テキスト変換' },
 	{ id: 'csv-fixer', name: 'CSV文字化け修復', description: 'CSVのShift_JIS文字化けをブラウザで即座に修復。自動検出・BOM付与対応。', href: '/csv-fixer', icon: '📝', category: 'データ処理' },
+	{ id: 'phone-formatter', name: '電話番号フォーマッタ', description: '日本の電話番号をE.164・国際表記・国内表記に即変換。CSV一括変換対応。', href: '/phone-formatter', icon: '📞', category: 'データ処理' },
 ];
 
 export default function SearchModal() {
