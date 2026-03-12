@@ -6,7 +6,7 @@
 
 🔗 **[https://tools.codelife.cafe](https://tools.codelife.cafe)**
 
-## 📦 収録ツール（14種）
+## 📦 収録ツール（15種）
 
 ### テキスト処理
 
@@ -24,6 +24,7 @@
 | [JSON整形](/json-formatter) | JSONの整形・圧縮・バリデーション |
 | [CSVビューア/エディタ](/csv-editor) | CSVをテーブル形式で閲覧・編集・エクスポート |
 | [CSV文字化け修復](/csv-fixer) | CSVの文字コード自動判定・変換（Shift_JIS/UTF-8/EUC-JP等） |
+| [電話番号フォーマッタ](/phone-formatter) | 日本語の電話番号をE.164・国際表記・国内表記に即変換。CSV一括変換対応。 |
 | [ダミーデータ生成](/dummy-data) | 日本語の氏名・住所・電話番号等の一括生成（JSON/CSV/TSV） |
 
 ### ユーティリティ
