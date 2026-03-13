@@ -40,7 +40,7 @@ export default function Base64Converter() {
 				const out = decodeBase64(textInput);
 				return { output: out, error: null, size: getBase64ByteSize(textInput) };
 			}
-		} catch (err) {
+		} catch (err: any) {
 			return { output: '', error: err.message, size: 0 };
 		}
 	}, [textInput, direction]);
