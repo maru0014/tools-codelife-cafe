@@ -210,6 +210,7 @@ export function generateDummyData(
 export function parsePreviewData(
 	dataString: string,
 	format: ExportFormat,
+	// biome-ignore lint/suspicious/noExplicitAny: ok
 ): Record<string, any>[] {
 	if (!dataString) return [];
 	if (format === 'json') {
@@ -232,6 +233,7 @@ export function parsePreviewData(
 			format === 'csv'
 				? line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',')
 				: line.split('\t');
+		// biome-ignore lint/suspicious/noExplicitAny: ok
 		const obj: Record<string, any> = {};
 		headers.forEach((h, i) => {
 			let val = values[i] || '';

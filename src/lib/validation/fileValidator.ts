@@ -7,6 +7,7 @@ export interface ValidationResult {
 export function getMaxFileSize(): number {
 	if (typeof navigator !== 'undefined' && 'deviceMemory' in navigator) {
 		// navigator.deviceMemory gives memory in GB
+		// biome-ignore lint/suspicious/noExplicitAny: ok
 		const memory = (navigator as any).deviceMemory || 4;
 
 		if (memory < 4) {

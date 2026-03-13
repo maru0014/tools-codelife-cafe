@@ -101,6 +101,7 @@ export default function SingleInput({ onResult }: SingleInputProps) {
 				{/* 国選択ドロップダウン（v1.0: 日本固定） */}
 				{/* TODO: 将来的に多国対応を追加する */}
 				<button
+					type="button"
 					disabled
 					className="flex items-center gap-1.5 rounded-lg border border-border bg-muted px-3 py-2 text-sm text-muted-foreground cursor-not-allowed shrink-0"
 					title="現在は日本（+81）のみ対応"
@@ -132,6 +133,7 @@ export default function SingleInput({ onResult }: SingleInputProps) {
 					)}
 					{value && (
 						<button
+							type="button"
 							onClick={handleClear}
 							className="flex-shrink-0 ml-2 rounded-full p-1 text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
 							aria-label="入力をクリア"
@@ -143,10 +145,9 @@ export default function SingleInput({ onResult }: SingleInputProps) {
 			</div>
 
 			{/* バリデーションステータス */}
-			<div
+			<output
 				id="phone-validation-status"
-				className="min-h-[20px]"
-				role="status"
+				className="block min-h-[20px]"
 				aria-live="polite"
 			>
 				{status !== 'idle' && (
@@ -159,7 +160,7 @@ export default function SingleInput({ onResult }: SingleInputProps) {
 						)}
 					</div>
 				)}
-			</div>
+			</output>
 		</div>
 	);
 }

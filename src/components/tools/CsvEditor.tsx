@@ -407,6 +407,7 @@ export default function CsvEditor() {
 											{Array.from({ length: csvData.colCount }).map(
 												(_, cIdx) => (
 													<th
+														// biome-ignore lint/suspicious/noArrayIndexKey: ok
 														key={`h-${cIdx}`}
 														className="border bg-muted/50 p-1 min-w-[120px] sticky top-0 z-10 group"
 													>
@@ -416,6 +417,7 @@ export default function CsvEditor() {
 															</span>
 															{csvData.colCount > 1 && (
 																<button
+																	type="button"
 																	onClick={() => removeColumn(cIdx)}
 																	className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-red-100 hover:text-red-600 rounded text-muted-foreground transition-opacity"
 																	title="列を削除"
@@ -443,6 +445,7 @@ export default function CsvEditor() {
 																{absoluteIndex + 1}
 															</span>
 															<button
+																type="button"
 																onClick={() => removeRow(absoluteIndex)}
 																className="opacity-0 group-hover:opacity-100 p-1 hover:bg-red-100 hover:text-red-600 rounded text-muted-foreground transition-opacity absolute"
 																title="行を削除"
@@ -453,6 +456,7 @@ export default function CsvEditor() {
 													</td>
 													{row.map((cell, cIdx) => (
 														<td
+															// biome-ignore lint/suspicious/noArrayIndexKey: ok
 															key={`c-${absoluteIndex}-${cIdx}`}
 															className="border p-0 min-w-[120px]"
 														>

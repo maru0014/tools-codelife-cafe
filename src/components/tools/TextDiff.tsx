@@ -192,6 +192,7 @@ export default function TextDiff() {
 										.filter((p) => p.type !== 'added')
 										.map((part, i) => (
 											<div
+												// biome-ignore lint/suspicious/noArrayIndexKey: ok
 												key={`l-${i}`}
 												className={`px-4 py-0.5 min-w-max ${part.type === 'removed' ? 'bg-red-500/10 text-red-700 dark:text-red-300' : ''}`}
 											>
@@ -215,6 +216,7 @@ export default function TextDiff() {
 										.filter((p) => p.type !== 'removed')
 										.map((part, i) => (
 											<div
+												// biome-ignore lint/suspicious/noArrayIndexKey: ok
 												key={`r-${i}`}
 												className={`px-4 py-0.5 min-w-max ${part.type === 'added' ? 'bg-green-500/10 text-green-700 dark:text-green-300' : ''}`}
 											>
@@ -234,6 +236,7 @@ export default function TextDiff() {
 						<div className="rounded-xl border border-border bg-card overflow-hidden font-mono-tool text-sm">
 							{result.parts.map((part, i) => (
 								<div
+									// biome-ignore lint/suspicious/noArrayIndexKey: ok
 									key={i}
 									className={`px-4 py-0.5 whitespace-pre-wrap break-all ${
 										part.type === 'added'

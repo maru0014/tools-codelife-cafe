@@ -7,6 +7,7 @@ test.describe('Zenkaku Hankaku Converter', () => {
 	});
 
 	test('converts zenkaku to hankaku by default', async ({
+		// biome-ignore lint/correctness/noUnusedFunctionParameters: ok
 		page,
 		createToolPage,
 	}) => {

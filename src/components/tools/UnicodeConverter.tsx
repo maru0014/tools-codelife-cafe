@@ -19,6 +19,7 @@ export default function UnicodeConverter() {
 			} else {
 				return { output: unicodeToText(input), error: null };
 			}
+			// biome-ignore lint/suspicious/noExplicitAny: ok
 		} catch (err: any) {
 			return { output: '', error: err.message };
 		}

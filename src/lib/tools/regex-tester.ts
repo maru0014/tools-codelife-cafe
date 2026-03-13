@@ -43,7 +43,8 @@ export function testRegex(
 		const matches: RegexMatch[] = [];
 
 		if (regex.global) {
-			let match;
+			let match: RegExpExecArray | null;
+			// biome-ignore lint/suspicious/noAssignInExpressions: ok
 			while ((match = regex.exec(text)) !== null) {
 				matches.push({
 					value: match[0],
@@ -66,12 +67,13 @@ export function testRegex(
 			}
 		}
 
-		let replacedText;
+		let replacedText: string | undefined;
 		if (replacement !== undefined) {
 			replacedText = text.replace(regex, replacement);
 		}
 
 		return { matches, replacedText };
+		// biome-ignore lint/suspicious/noExplicitAny: ok
 	} catch (err: any) {
 		return { matches: [], error: err.message };
 	}

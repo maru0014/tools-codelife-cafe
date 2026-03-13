@@ -209,6 +209,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 			{/* テキスト / CSV タブ */}
 			<div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
 				<button
+					type="button"
 					onClick={() => setInputMode('text')}
 					className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors ${
 						inputMode === 'text'
@@ -220,6 +221,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 					テキスト入力
 				</button>
 				<button
+					type="button"
 					onClick={() => setInputMode('csv')}
 					className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors ${
 						inputMode === 'csv'
@@ -256,13 +258,12 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 			{inputMode === 'csv' && (
 				<div className="space-y-3">
 					{mounted && (
-						<div
+						<button
+							type="button"
 							onDragOver={handleDragOver}
 							onDragLeave={handleDragLeave}
 							onDrop={handleDrop}
 							onClick={() => fileInputRef.current?.click()}
-							role="button"
-							tabIndex={0}
 							aria-label="CSVファイルをドラッグ＆ドロップするか、クリックして選択"
 							onKeyDown={(e) => {
 								if (e.key === 'Enter' || e.key === ' ')
@@ -283,7 +284,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 									または クリックして選択（CSV/TSV/TXT、最大5MB）
 								</p>
 							</div>
-						</div>
+						</button>
 					)}
 
 					<input
@@ -313,6 +314,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 								className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20"
 							>
 								{csvHeaders.map((header, index) => (
+									// biome-ignore lint/suspicious/noArrayIndexKey: ok
 									<option key={index} value={index}>
 										{index + 1}列目: {header || `（列${index + 1}）`}
 									</option>
@@ -327,6 +329,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 											<tr className="bg-muted/50">
 												{csvHeaders.map((h, i) => (
 													<th
+														// biome-ignore lint/suspicious/noArrayIndexKey: ok
 														key={i}
 														className={`px-3 py-2 text-left font-medium ${
 															i === selectedColumn
@@ -341,9 +344,11 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 										</thead>
 										<tbody>
 											{previewRows.map((row, ri) => (
+												// biome-ignore lint/suspicious/noArrayIndexKey: ok
 												<tr key={ri} className="border-t border-border">
 													{csvHeaders.map((_, ci) => (
 														<td
+															// biome-ignore lint/suspicious/noArrayIndexKey: ok
 															key={ci}
 															className={`px-3 py-2 ${
 																ci === selectedColumn

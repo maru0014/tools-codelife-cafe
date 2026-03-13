@@ -270,6 +270,8 @@ export default function RegexTester() {
 					</div>
 				</div>
 				{!showReplace && (
+					// biome-ignore lint/a11y/useKeyWithClickEvents: ok
+					// biome-ignore lint/a11y/noStaticElementInteractions: ok
 					<div
 						className="absolute inset-0 z-10 cursor-pointer rounded-xl flex items-center justify-center hover:bg-muted/5 transition-colors group"
 						onClick={() => setShowReplace(true)}
@@ -305,6 +307,7 @@ export default function RegexTester() {
 						<AccordionContent className="pt-2">
 							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto px-1 pb-2 scrollbar-thin">
 								{result.matches.slice(0, 500).map((match, i) => (
+									// biome-ignore lint/suspicious/noArrayIndexKey: ok
 									<Card key={i} className="rounded-xl overflow-hidden text-sm">
 										<div className="bg-muted px-3 py-1.5 border-b flex justify-between items-center text-xs">
 											<span className="font-semibold text-muted-foreground">
@@ -323,6 +326,7 @@ export default function RegexTester() {
 												<div className="mt-3 space-y-1.5 border-t pt-2 border-border/50">
 													{match.groups.map((group, gi) => (
 														<div
+															// biome-ignore lint/suspicious/noArrayIndexKey: ok
 															key={gi}
 															className="flex gap-2 text-xs items-start"
 														>

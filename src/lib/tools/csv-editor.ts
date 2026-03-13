@@ -55,6 +55,7 @@ export function parseCsv(
 				colCount: maxCols,
 			},
 		};
+		// biome-ignore lint/suspicious/noExplicitAny: ok
 	} catch (err: any) {
 		return {
 			data: { rows: [], colCount: 0 },

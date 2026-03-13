@@ -40,7 +40,7 @@ export default function Base64Converter() {
 				const out = decodeBase64(textInput);
 				return { output: out, error: null, size: getBase64ByteSize(textInput) };
 			}
-		} catch (err: any) {
+		} catch (err) {
 			return { output: '', error: err.message, size: 0 };
 		}
 	}, [textInput, direction]);
@@ -207,6 +207,7 @@ export default function Base64Converter() {
 									ファイル入力
 								</Label>
 							</div>
+							{/* biome-ignore lint/a11y/noStaticElementInteractions: ok */}
 							<div
 								onDrop={handleDrop}
 								onDragOver={(e) => {

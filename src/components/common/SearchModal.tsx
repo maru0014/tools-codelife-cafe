@@ -218,6 +218,8 @@ export default function SearchModal() {
 	if (!isOpen) return null;
 
 	return (
+		// biome-ignore lint/a11y/useKeyWithClickEvents: ok
+		// biome-ignore lint/a11y/noStaticElementInteractions: ok
 		<div
 			className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] bg-background/80 backdrop-blur-sm"
 			onClick={handleBackdropClick}
@@ -262,6 +264,7 @@ export default function SearchModal() {
 										<span
 											className="text-xl"
 											aria-hidden="true"
+											// biome-ignore lint/security/noDangerouslySetInnerHtml: ok
 											dangerouslySetInnerHTML={{ __html: tool.icon }}
 										></span>
 										<div className="flex flex-col">

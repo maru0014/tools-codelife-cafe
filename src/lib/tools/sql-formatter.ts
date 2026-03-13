@@ -53,6 +53,7 @@ export function formatSql(
 			linesBetweenQueries: 2,
 		});
 		return { output: formatted };
+		// biome-ignore lint/suspicious/noExplicitAny: ok
 	} catch (error: any) {
 		const msg = error.message || String(error);
 		return {

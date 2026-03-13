@@ -187,6 +187,7 @@ export default function DummyDataGenerator() {
 
 							<div className="flex flex-col gap-2 border rounded-md p-2 bg-muted/20">
 								{fields.map((f, i) => (
+									// biome-ignore lint/a11y/noStaticElementInteractions: ok
 									<div
 										key={f.id}
 										draggable

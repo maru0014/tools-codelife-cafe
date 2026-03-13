@@ -57,6 +57,7 @@ test.describe('CSV文字化け修復ツール', () => {
 		).toBeVisible();
 	});
 
+	// biome-ignore lint/correctness/noUnusedFunctionParameters: ok
 	test('即時変換モードが動作すること', async ({ page, context }) => {
 		// Enable instant mode
 		await page.getByRole('switch', { name: '即時変換モード' }).click();

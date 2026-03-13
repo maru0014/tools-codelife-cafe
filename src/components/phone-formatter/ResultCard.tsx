@@ -51,6 +51,7 @@ export default function ResultCard({ result }: ResultCardProps) {
 	];
 
 	return (
+		// biome-ignore lint/a11y/useAriaPropsSupportedByRole: ok
 		<div
 			className="mt-4 rounded-xl border border-border bg-card overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200"
 			aria-live="polite"

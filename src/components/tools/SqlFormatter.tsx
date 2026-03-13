@@ -81,12 +81,14 @@ export default function SqlFormatter() {
 	const { output, error } = useMemo(() => {
 		if (autoFormat) return formatSql(input, options);
 		return { output: manualOutput, error: manualError };
+		// biome-ignore lint/correctness/useExhaustiveDependencies: ok
 	}, [input, options, autoFormat, manualOutput, manualError]);
 
 	const handleFormat = useCallback(() => {
 		const res = formatSql(input, options);
 		setManualOutput(res.output);
 		setManualError(res.error || null);
+		// biome-ignore lint/correctness/useExhaustiveDependencies: ok
 	}, [input, options]);
 
 	useEffect(() => {

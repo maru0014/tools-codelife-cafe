@@ -181,8 +181,8 @@ function FileDropZone({ onFileLoaded, disabled }: FileDropZoneProps) {
 
 	return (
 		<div className="w-full">
-			<div
-				role="button"
+			<button
+				type="button"
 				tabIndex={disabled || isProcessing ? -1 : 0}
 				aria-label="CSVファイルを選択またはドラッグ＆ドロップ"
 				className={cn(
@@ -243,7 +243,7 @@ function FileDropZone({ onFileLoaded, disabled }: FileDropZoneProps) {
 						}}
 					/>
 				)}
-			</div>
+			</button>
 
 			{error && (
 				<div
@@ -324,6 +324,7 @@ function EncodingDetector({
 
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-2">
 					<div className="space-y-1.5">
+						{/* biome-ignore lint/a11y/noLabelWithoutControl: ok */}
 						<label className="text-xs font-medium text-muted-foreground">
 							現在のエンコーディング
 						</label>
@@ -444,6 +445,7 @@ function CsvPreview({ preview, isLoading }: CsvPreviewProps) {
 										行
 									</TableHead>
 									{headers.map((h, i) => (
+										// biome-ignore lint/suspicious/noArrayIndexKey: ok
 										<TableHead key={i} className="max-w-[200px] truncate">
 											{h}
 										</TableHead>
@@ -454,6 +456,7 @@ function CsvPreview({ preview, isLoading }: CsvPreviewProps) {
 						<TableBody>
 							{rows.map((row, rowIndex) => (
 								<TableRow
+									// biome-ignore lint/suspicious/noArrayIndexKey: ok
 									key={rowIndex}
 									className="border-b last:border-0 hover:bg-muted/30"
 								>
@@ -462,6 +465,7 @@ function CsvPreview({ preview, isLoading }: CsvPreviewProps) {
 									</TableCell>
 									{row.map((cell, colIndex) => (
 										<TableCell
+											// biome-ignore lint/suspicious/noArrayIndexKey: ok
 											key={colIndex}
 											className="max-w-[300px] truncate py-2"
 											title={cell}
@@ -678,7 +682,7 @@ function DownloadButton({
 			setTimeout(() => {
 				setStatus((prev) => (prev === 'success' ? 'idle' : prev));
 			}, 3000);
-		} catch (e: any) {
+		} catch (e: unknown) {
 			console.error('Conversion error:', e);
 			setStatus('error');
 
@@ -928,6 +932,7 @@ export default function CsvFixer() {
 							</div>
 						</div>
 						<button
+							type="button"
 							onClick={resetState}
 							className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4"
 						>

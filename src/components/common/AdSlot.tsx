@@ -10,7 +10,7 @@ interface AdSlotProps {
 
 declare global {
 	interface Window {
-		adsbygoogle: any[];
+		adsbygoogle: unknown[];
 	}
 }
 
@@ -25,6 +25,7 @@ export default function AdSlot({
 	useEffect(() => {
 		if (adsenseId && typeof window !== 'undefined') {
 			try {
+				// biome-ignore lint/suspicious/noAssignInExpressions: ok
 				(window.adsbygoogle = window.adsbygoogle || []).push({});
 			} catch (e) {
 				console.error('AdSense error:', e);

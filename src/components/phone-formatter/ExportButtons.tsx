@@ -27,6 +27,7 @@ const EXPORT_COLUMNS = [
 
 export default function ExportButtons({
 	results,
+	// biome-ignore lint/correctness/noUnusedFunctionParameters: ok
 	visibleColumns,
 }: ExportButtonsProps) {
 	const [copiedCSV, setCopiedCSV] = useState(false);

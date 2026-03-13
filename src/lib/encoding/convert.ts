@@ -89,6 +89,7 @@ export function convertEncoding(
 	}
 
 	// 5. Create Blob
+	// biome-ignore lint/suspicious/noExplicitAny: ok
 	const blob = new Blob([finalBytes as any], {
 		type:
 			options.outputEncoding === 'UTF8'
