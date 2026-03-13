@@ -1,56 +1,68 @@
-import { test, expect } from './fixtures/base';
+import { expect, test } from './fixtures/base';
 
 test.describe('Layout & Navigation', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-  });
+	test.beforeEach(async ({ page }) => {
+		await page.goto('/');
+	});
 
-  test('Header logo navigates to top', async ({ page }) => {
-    // Navigate to a tool page first
-    await page.goto('/char-count');
+	test('Header logo navigates to top', async ({ page }) => {
+		// Navigate to a tool page first
+		await page.goto('/char-count');
 
-    // Click logo
-    await page.getByRole('link', { name: /CODE:LIFE/i }).first().click();
+		// Click logo
+		await page
+			.getByRole('link', { name: /CODE:LIFE/i })
+			.first()
+			.click();
 
-    // Verify we are back on top page
-    await expect(page).toHaveURL(/\/$/);
-  });
+		// Verify we are back on top page
+		await expect(page).toHaveURL(/\/$/);
+	});
 
-  test('Dark mode toggle works', async ({ page }) => {
-    // The dark mode toggle is a button with aria-label 'ダークモードに切替'
-    const toggleButton = page.getByRole('button', { name: /モードに切替/i });
-    await expect(toggleButton).toBeVisible();
+	test('Dark mode toggle works', async ({ page }) => {
+		// Wait for React hydration before interacting with the toggle
+		await page.waitForLoadState('networkidle');
 
-    // Click to switch to dark mode
-    await toggleButton.click();
+		// The dark mode toggle is a button with aria-label 'ダークモードに切替'
+		const toggleButton = page.getByRole('button', { name: /モードに切替/i });
+		await expect(toggleButton).toBeVisible();
 
-    // After clicking, the html element should have 'dark' class
-    await expect(page.locator('html')).toHaveClass(/dark/);
+		// Click to switch to dark mode
+		await toggleButton.click();
 
-    // The button's aria-label should now contain 'ライト'
-    const lightToggle = page.getByRole('button', { name: /ライトモードに切替/i });
-    await expect(lightToggle).toBeVisible();
-  });
+		// After clicking, the html element should have 'dark' class
+		await expect(page.locator('html')).toHaveClass(/dark/);
 
-  test('Cmd+K Search focuses search input', async ({ page }) => {
-    // Wait for React SearchModal component to hydrate by checking for an interactive element
-    await page.waitForTimeout(1000);
+		// The button's aria-label should now contain 'ライト'
+		const lightToggle = page.getByRole('button', {
+			name: /ライトモードに切替/i,
+		});
+		await expect(lightToggle).toBeVisible();
+	});
 
-    // Press Ctrl+K
-    await page.keyboard.press('Control+k');
+	test('Cmd+K Search focuses search input', async ({ page }) => {
+		// Wait for React SearchModal component to hydrate by checking for an interactive element
+		await page.waitForTimeout(1000);
 
-    // Verify search modal/input is visible and focused
-    const searchInput = page.getByPlaceholder(/ツールを検索/i);
-    await expect(searchInput).toBeVisible({ timeout: 5000 });
-    await expect(searchInput).toBeFocused();
-  });
+		// Press Ctrl+K
+		await page.keyboard.press('Control+k');
 
-  test('Footer links are present', async ({ page }) => {
-    const footer = page.locator('footer');
-    await expect(footer).toBeVisible();
+		// Verify search modal/input is visible and focused
+		const searchInput = page.getByPlaceholder(/ツールを検索/i);
+		await expect(searchInput).toBeVisible({ timeout: 5000 });
+		await expect(searchInput).toBeFocused();
+	});
 
-    // Check for standard footer links
-    await expect(footer.getByRole('link', { name: /プライバシーポリシー/i })).toBeVisible();
-    await expect(footer.getByRole('link', { name: /このサイトについて/i })).toBeVisible();
-  });
+	test('Footer links are present', async ({ page }) => {
+		const footer = page.locator('footer');
+		await expect(footer).toBeVisible();
+
+		// Check for standard footer links
+		await expect(
+			footer.getByRole('link', { name: /プライバシーポリシー/i }),
+		).toBeVisible();
+		await expect(
+			footer.getByRole('link', { name: /このサイトについて/i }),
+		).toBeVisible();
+	});
 });
