@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "test": "playwright test",
     "preview": "astro preview --host",
     "preview:ci": "astro preview",
+    "lint": "biome check src/ tests/",
+    "lint:fix": "biome check --write src/ tests/",
     "astro": "astro"
   },
   "dependencies": {
@@ -46,6 +49,7 @@
     "typescript": "^5.9.3"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.4.6",
     "@playwright/test": "^1.58.2",
     "@types/encoding-japanese": "^2.2.1",
     "@types/papaparse": "^5.5.2"
