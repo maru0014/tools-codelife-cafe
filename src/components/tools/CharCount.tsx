@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
-import { countChars, getTwitterProgress } from '@/lib/tools/char-count';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Info, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
-import { Trash2, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { countChars, getTwitterProgress } from '@/lib/tools/char-count';
 
 function formatNumber(n: number): string {
 	return n.toLocaleString('ja-JP');
@@ -15,15 +15,38 @@ export default function CharCount() {
 	const [text, setText] = useState('');
 
 	const result = useMemo(() => countChars(text), [text]);
-	const twitter = useMemo(() => getTwitterProgress(result.charsWithSpaces), [result.charsWithSpaces]);
+	const twitter = useMemo(
+		() => getTwitterProgress(result.charsWithSpaces),
+		[result.charsWithSpaces],
+	);
 
 	const stats = [
-		{ label: '文字数（空白含む）', value: formatNumber(result.charsWithSpaces), unit: '文字' },
-		{ label: '文字数（空白除く）', value: formatNumber(result.charsWithoutSpaces), unit: '文字' },
-		{ label: 'バイト数（UTF-8）', value: formatNumber(result.bytesUtf8), unit: 'bytes' },
-		{ label: 'バイト数（Shift-JIS）', value: formatNumber(result.bytesShiftJis), unit: 'bytes' },
+		{
+			label: '文字数（空白含む）',
+			value: formatNumber(result.charsWithSpaces),
+			unit: '文字',
+		},
+		{
+			label: '文字数（空白除く）',
+			value: formatNumber(result.charsWithoutSpaces),
+			unit: '文字',
+		},
+		{
+			label: 'バイト数（UTF-8）',
+			value: formatNumber(result.bytesUtf8),
+			unit: 'bytes',
+		},
+		{
+			label: 'バイト数（Shift-JIS）',
+			value: formatNumber(result.bytesShiftJis),
+			unit: 'bytes',
+		},
 		{ label: '行数', value: formatNumber(result.lines), unit: '行' },
-		{ label: '原稿用紙（400字）', value: formatNumber(result.manuscriptPages), unit: '枚' },
+		{
+			label: '原稿用紙（400字）',
+			value: formatNumber(result.manuscriptPages),
+			unit: '枚',
+		},
 	];
 
 	return (
@@ -79,14 +102,23 @@ export default function CharCount() {
 								</div>
 							</span>
 						</div>
-						<p className={`text-sm font-mono tabular-nums whitespace-nowrap ${twitter.isOver ? 'text-destructive font-bold' : 'text-muted-foreground'}`}>
-							{twitter.remaining >= 0 ? `残り ${formatNumber(twitter.remaining)} 文字` : `${formatNumber(Math.abs(twitter.remaining))} 文字オーバー`}
+						<p
+							className={`text-sm font-mono tabular-nums whitespace-nowrap ${twitter.isOver ? 'text-destructive font-bold' : 'text-muted-foreground'}`}
+						>
+							{twitter.remaining >= 0
+								? `残り ${formatNumber(twitter.remaining)} 文字`
+								: `${formatNumber(Math.abs(twitter.remaining))} 文字オーバー`}
 						</p>
 					</div>
 					<div className="h-2 rounded-full bg-muted overflow-hidden">
 						<div
-							className={`h-full rounded-full transition-all duration-300 ${twitter.isOver ? 'bg-destructive' : twitter.percentage > 80 ? 'bg-yellow-500' : 'bg-primary'
-								}`}
+							className={`h-full rounded-full transition-all duration-300 ${
+								twitter.isOver
+									? 'bg-destructive'
+									: twitter.percentage > 80
+										? 'bg-yellow-500'
+										: 'bg-primary'
+							}`}
 							style={{ width: `${Math.min(twitter.percentage, 100)}%` }}
 						/>
 					</div>

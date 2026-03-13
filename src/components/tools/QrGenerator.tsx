@@ -1,18 +1,9 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-	generateQRDataUrl,
-	generateQRSvg,
-	downloadDataUrl,
-	downloadSvg,
-	defaultOptions,
-	type QROptions,
-	type ErrorCorrectionLevel,
-	type QRSize,
-} from '@/lib/tools/qr-generator';
-import { Input } from '@/components/ui/input';
+import { AlertCircle, Download, ImageIcon } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
 	Select,
 	SelectContent,
@@ -20,7 +11,16 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Download, ImageIcon, AlertCircle } from 'lucide-react';
+import {
+	defaultOptions,
+	downloadDataUrl,
+	downloadSvg,
+	type ErrorCorrectionLevel,
+	generateQRDataUrl,
+	generateQRSvg,
+	type QROptions,
+	type QRSize,
+} from '@/lib/tools/qr-generator';
 
 function hexToRgb(hex: string) {
 	const h = hex.replace('#', '');
@@ -31,7 +31,7 @@ function hexToRgb(hex: string) {
 function getLuminance(r: number, g: number, b: number) {
 	const a = [r, g, b].map((v) => {
 		v /= 255;
-		return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+		return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
 	});
 	return a[0] * 0.2126 + a[1] * 0.7152 + a[2] * 0.0722;
 }
@@ -45,7 +45,7 @@ function getContrastRatio(hex1: string, hex2: string) {
 		const brightest = Math.max(lum1, lum2);
 		const darkest = Math.min(lum1, lum2);
 		return (brightest + 0.05) / (darkest + 0.05);
-	} catch (e) {
+	} catch (_e) {
 		return 21;
 	}
 }
@@ -100,7 +100,9 @@ export default function QrGenerator() {
 			<div className="lg:col-span-7 space-y-6">
 				{/* Input */}
 				<div>
-					<Label className="text-sm font-medium mb-2 block">URLまたはテキスト</Label>
+					<Label className="text-sm font-medium mb-2 block">
+						URLまたはテキスト
+					</Label>
 					<Input
 						value={text}
 						onChange={(e) => setText(e.target.value)}
@@ -115,7 +117,9 @@ export default function QrGenerator() {
 						<Label className="text-sm mb-2 block">サイズ</Label>
 						<Select
 							value={String(options.size)}
-							onValueChange={(v) => setOptions((prev) => ({ ...prev, size: Number(v) as QRSize }))}
+							onValueChange={(v) =>
+								setOptions((prev) => ({ ...prev, size: Number(v) as QRSize }))
+							}
 						>
 							<SelectTrigger className="rounded-xl">
 								<SelectValue />
@@ -131,7 +135,12 @@ export default function QrGenerator() {
 						<Label className="text-sm mb-2 block">エラー訂正レベル</Label>
 						<Select
 							value={options.errorCorrection}
-							onValueChange={(v) => setOptions((prev) => ({ ...prev, errorCorrection: v as ErrorCorrectionLevel }))}
+							onValueChange={(v) =>
+								setOptions((prev) => ({
+									...prev,
+									errorCorrection: v as ErrorCorrectionLevel,
+								}))
+							}
 						>
 							<SelectTrigger className="rounded-xl">
 								<SelectValue />
@@ -150,12 +159,22 @@ export default function QrGenerator() {
 							<input
 								type="color"
 								value={options.foregroundColor}
-								onChange={(e) => setOptions((prev) => ({ ...prev, foregroundColor: e.target.value }))}
+								onChange={(e) =>
+									setOptions((prev) => ({
+										...prev,
+										foregroundColor: e.target.value,
+									}))
+								}
 								className="h-10 w-10 min-w-10 rounded border border-border cursor-pointer p-0.5"
 							/>
 							<Input
 								value={options.foregroundColor}
-								onChange={(e) => setOptions((prev) => ({ ...prev, foregroundColor: e.target.value }))}
+								onChange={(e) =>
+									setOptions((prev) => ({
+										...prev,
+										foregroundColor: e.target.value,
+									}))
+								}
 								className="rounded-xl"
 							/>
 						</div>
@@ -166,12 +185,22 @@ export default function QrGenerator() {
 							<input
 								type="color"
 								value={options.backgroundColor}
-								onChange={(e) => setOptions((prev) => ({ ...prev, backgroundColor: e.target.value }))}
+								onChange={(e) =>
+									setOptions((prev) => ({
+										...prev,
+										backgroundColor: e.target.value,
+									}))
+								}
 								className="h-10 w-10 min-w-10 rounded border border-border cursor-pointer p-0.5"
 							/>
 							<Input
 								value={options.backgroundColor}
-								onChange={(e) => setOptions((prev) => ({ ...prev, backgroundColor: e.target.value }))}
+								onChange={(e) =>
+									setOptions((prev) => ({
+										...prev,
+										backgroundColor: e.target.value,
+									}))
+								}
 								className="rounded-xl"
 							/>
 						</div>
@@ -180,11 +209,20 @@ export default function QrGenerator() {
 
 				{/* Download Buttons */}
 				<div className="flex flex-wrap gap-3">
-					<Button onClick={handleDownloadPng} disabled={!qrDataUrl} className="rounded-xl">
+					<Button
+						onClick={handleDownloadPng}
+						disabled={!qrDataUrl}
+						className="rounded-xl"
+					>
 						<Download className="h-4 w-4 mr-1" />
 						PNG ダウンロード
 					</Button>
-					<Button onClick={handleDownloadSvg} disabled={!qrSvg} variant="outline" className="rounded-xl">
+					<Button
+						onClick={handleDownloadSvg}
+						disabled={!qrSvg}
+						variant="outline"
+						className="rounded-xl"
+					>
 						<Download className="h-4 w-4 mr-1" />
 						SVG ダウンロード
 					</Button>
@@ -207,14 +245,20 @@ export default function QrGenerator() {
 									<div className="mt-6 flex flex-col items-center gap-1.5 text-sm text-yellow-600 dark:text-yellow-500 bg-yellow-50 dark:bg-yellow-950/30 p-3 rounded-lg border border-yellow-200 dark:border-yellow-900 w-full text-center max-w-sm">
 										<AlertCircle className="h-5 w-5" />
 										<p className="font-semibold">コントラストが低すぎます</p>
-										<p className="text-xs opacity-90">QRコードが正しく読み取れない可能性があります。コントラスト比を高めてください。</p>
+										<p className="text-xs opacity-90">
+											QRコードが正しく読み取れない可能性があります。コントラスト比を高めてください。
+										</p>
 									</div>
 								)}
 							</div>
 						) : (
 							<div className="flex flex-col items-center justify-center text-muted-foreground">
 								<ImageIcon className="h-16 w-16 mb-4 opacity-30" />
-								<p className="text-sm text-center">テキストを入力すると<br className="sm:hidden" />QRコードが表示されます</p>
+								<p className="text-sm text-center">
+									テキストを入力すると
+									<br className="sm:hidden" />
+									QRコードが表示されます
+								</p>
 							</div>
 						)}
 					</CardContent>

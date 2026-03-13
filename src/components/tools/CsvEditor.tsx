@@ -1,14 +1,31 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
-import { parseCsv, exportCsv, getColumnLabel, type CsvData } from '@/lib/tools/csv-editor';
-import { Textarea } from '@/components/ui/textarea';
+import {
+	Braces,
+	Copy,
+	Download,
+	FileSpreadsheet,
+	Plus,
+	Trash2,
+	Upload,
+} from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Input } from '@/components/ui/input';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Download, Upload, Trash2, Plus, Copy, FileSpreadsheet, Braces } from 'lucide-react';
-
+import { Label } from '@/components/ui/label';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	type CsvData,
+	exportCsv,
+	getColumnLabel,
+	parseCsv,
+} from '@/lib/tools/csv-editor';
 
 const ROWS_PER_PAGE = 50;
 
@@ -97,7 +114,7 @@ export default function CsvEditor() {
 		let resultStr = '';
 		if (hasHeader && csvData.rows.length > 1) {
 			const headers = csvData.rows[0];
-			const jsonArray = csvData.rows.slice(1).map(row => {
+			const jsonArray = csvData.rows.slice(1).map((row) => {
 				const obj: Record<string, string> = {};
 				headers.forEach((h, i) => {
 					obj[h || `Column${i + 1}`] = row[i];
@@ -109,7 +126,9 @@ export default function CsvEditor() {
 			resultStr = JSON.stringify(csvData.rows, null, 2);
 		}
 
-		const blob = new Blob([resultStr], { type: 'application/json;charset=utf-8' });
+		const blob = new Blob([resultStr], {
+			type: 'application/json;charset=utf-8',
+		});
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');
 		a.href = url;
@@ -162,7 +181,7 @@ export default function CsvEditor() {
 	const addColumn = () => {
 		if (!csvData) return;
 		const newColCount = csvData.colCount + 1;
-		const newRows = csvData.rows.map(r => [...r, '']);
+		const newRows = csvData.rows.map((r) => [...r, '']);
 		setCsvData({ rows: newRows, colCount: newColCount });
 	};
 
@@ -170,7 +189,7 @@ export default function CsvEditor() {
 		if (!csvData) return;
 		if (csvData.colCount <= 1) return; // Cannot remove last column
 		const newColCount = csvData.colCount - 1;
-		const newRows = csvData.rows.map(r => {
+		const newRows = csvData.rows.map((r) => {
 			const nr = [...r];
 			nr.splice(cIdx, 1);
 			return nr;
@@ -196,7 +215,9 @@ export default function CsvEditor() {
 			<div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-muted/30 p-4 rounded-xl border">
 				<div className="flex items-center gap-4 flex-wrap">
 					<div>
-						<Label className="text-xs mb-1 block text-muted-foreground">区切り文字</Label>
+						<Label className="text-xs mb-1 block text-muted-foreground">
+							区切り文字
+						</Label>
 						<Select value={delimiter} onValueChange={setDelimiter}>
 							<SelectTrigger className="w-[140px] h-8 rounded-lg bg-background">
 								<SelectValue />
@@ -211,8 +232,17 @@ export default function CsvEditor() {
 					</div>
 
 					<div className="pt-5 hidden sm:flex items-center gap-2">
-						<Checkbox id="has-header" checked={hasHeader} onCheckedChange={(v) => setHasHeader(!!v)} />
-						<Label htmlFor="has-header" className="text-sm cursor-pointer whitespace-nowrap">1行目をヘッダーとする</Label>
+						<Checkbox
+							id="has-header"
+							checked={hasHeader}
+							onCheckedChange={(v) => setHasHeader(!!v)}
+						/>
+						<Label
+							htmlFor="has-header"
+							className="text-sm cursor-pointer whitespace-nowrap"
+						>
+							1行目をヘッダーとする
+						</Label>
 					</div>
 
 					<div className="pt-5">
@@ -223,7 +253,12 @@ export default function CsvEditor() {
 							ref={fileInputRef}
 							onChange={handleFileUpload}
 						/>
-						<Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()} className="h-8">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => fileInputRef.current?.click()}
+							className="h-8"
+						>
 							<Upload className="h-4 w-4 sm:mr-2" />
 							<span className="hidden sm:inline">読込</span>
 						</Button>
@@ -233,21 +268,42 @@ export default function CsvEditor() {
 				<div className="flex gap-2 w-full sm:w-auto">
 					{csvData && (
 						<>
-							<Button variant="outline" size="sm" onClick={handleCopy} className="h-8 flex-1 sm:flex-none">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleCopy}
+								className="h-8 flex-1 sm:flex-none"
+							>
 								<Copy className="h-4 w-4 sm:mr-2" />
 								<span className="hidden sm:inline">コピー</span>
 							</Button>
-							<Button variant="outline" size="sm" onClick={handleDownloadJson} className="h-8 flex-1 sm:flex-none">
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleDownloadJson}
+								className="h-8 flex-1 sm:flex-none"
+							>
 								<Braces className="h-4 w-4 sm:mr-2" />
 								<span className="hidden sm:inline">JSON</span>
 							</Button>
-							<Button variant="default" size="sm" onClick={handleDownload} className="h-8 flex-1 sm:flex-none">
+							<Button
+								variant="default"
+								size="sm"
+								onClick={handleDownload}
+								className="h-8 flex-1 sm:flex-none"
+							>
 								<Download className="h-4 w-4 sm:mr-2" />
 								<span className="hidden sm:inline">CSV</span>
 							</Button>
 						</>
 					)}
-					<Button variant="ghost" size="sm" onClick={clearData} disabled={!inputText && !csvData} className="h-8 text-muted-foreground">
+					<Button
+						variant="ghost"
+						size="sm"
+						onClick={clearData}
+						disabled={!inputText && !csvData}
+						className="h-8 text-muted-foreground"
+					>
 						<Trash2 className="h-4 w-4" />
 					</Button>
 				</div>
@@ -256,7 +312,9 @@ export default function CsvEditor() {
 			<Tabs value={activeTab} onValueChange={setActiveTab}>
 				<TabsList className="grid w-full grid-cols-2 max-w-[400px]">
 					<TabsTrigger value="input">テキスト入力</TabsTrigger>
-					<TabsTrigger value="edit" disabled={!csvData}>テーブル編集</TabsTrigger>
+					<TabsTrigger value="edit" disabled={!csvData}>
+						テーブル編集
+					</TabsTrigger>
 				</TabsList>
 
 				<TabsContent value="input" className="mt-4 space-y-4">
@@ -276,21 +334,36 @@ export default function CsvEditor() {
 					{error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 				</TabsContent>
 
-				<TabsContent value="edit" className="mt-4 border rounded-xl bg-card overflow-hidden flex flex-col min-h-[500px]">
+				<TabsContent
+					value="edit"
+					className="mt-4 border rounded-xl bg-card overflow-hidden flex flex-col min-h-[500px]"
+				>
 					{!csvData ? (
 						<div className="flex-1 flex flex-col items-center justify-center text-muted-foreground p-8">
 							<FileSpreadsheet className="h-12 w-12 mb-4 opacity-20" />
-							<p>データがありません。テキスト入力またはファイル読み込みを行ってください。</p>
+							<p>
+								データがありません。テキスト入力またはファイル読み込みを行ってください。
+							</p>
 						</div>
 					) : (
 						<div className="flex flex-col h-full w-full overflow-hidden">
 							{/* Pagination Top Bar */}
 							<div className="border-b bg-muted/20 p-2 flex items-center justify-between">
 								<div className="flex items-center gap-2">
-									<Button variant="outline" size="sm" onClick={addRow} className="h-8 text-xs">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={addRow}
+										className="h-8 text-xs"
+									>
 										<Plus className="h-3 w-3 mr-1" /> 行を追加
 									</Button>
-									<Button variant="outline" size="sm" onClick={addColumn} className="h-8 text-xs">
+									<Button
+										variant="outline"
+										size="sm"
+										onClick={addColumn}
+										className="h-8 text-xs"
+									>
 										<Plus className="h-3 w-3 mr-1" /> 列を追加
 									</Button>
 								</div>
@@ -304,7 +377,7 @@ export default function CsvEditor() {
 											variant="ghost"
 											size="sm"
 											disabled={currentPage === 1}
-											onClick={() => setCurrentPage(p => p - 1)}
+											onClick={() => setCurrentPage((p) => p - 1)}
 											className="h-8 px-2"
 										>
 											前へ
@@ -316,7 +389,7 @@ export default function CsvEditor() {
 											variant="ghost"
 											size="sm"
 											disabled={currentPage === totalPages}
-											onClick={() => setCurrentPage(p => p + 1)}
+											onClick={() => setCurrentPage((p) => p + 1)}
 											className="h-8 px-2"
 										>
 											次へ
@@ -331,29 +404,39 @@ export default function CsvEditor() {
 									<thead>
 										<tr>
 											<th className="border bg-muted/50 w-10 sticky top-0 left-0 z-20"></th>
-											{Array.from({ length: csvData.colCount }).map((_, cIdx) => (
-												<th key={`h-${cIdx}`} className="border bg-muted/50 p-1 min-w-[120px] sticky top-0 z-10 group">
-													<div className="flex items-center justify-between px-2">
-														<span className="font-semibold text-muted-foreground">{getColumnLabel(cIdx)}</span>
-														{csvData.colCount > 1 && (
-															<button
-																onClick={() => removeColumn(cIdx)}
-																className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-red-100 hover:text-red-600 rounded text-muted-foreground transition-opacity"
-																title="列を削除"
-															>
-																<Trash2 className="h-3 w-3" />
-															</button>
-														)}
-													</div>
-												</th>
-											))}
+											{Array.from({ length: csvData.colCount }).map(
+												(_, cIdx) => (
+													<th
+														key={`h-${cIdx}`}
+														className="border bg-muted/50 p-1 min-w-[120px] sticky top-0 z-10 group"
+													>
+														<div className="flex items-center justify-between px-2">
+															<span className="font-semibold text-muted-foreground">
+																{getColumnLabel(cIdx)}
+															</span>
+															{csvData.colCount > 1 && (
+																<button
+																	onClick={() => removeColumn(cIdx)}
+																	className="opacity-0 group-hover:opacity-100 p-0.5 hover:bg-red-100 hover:text-red-600 rounded text-muted-foreground transition-opacity"
+																	title="列を削除"
+																>
+																	<Trash2 className="h-3 w-3" />
+																</button>
+															)}
+														</div>
+													</th>
+												),
+											)}
 										</tr>
 									</thead>
 									<tbody>
 										{currentRows.map((row, relativeIndex) => {
 											const absoluteIndex = startIndex + relativeIndex;
 											return (
-												<tr key={`r-${absoluteIndex}`} className="group hover:bg-muted/10">
+												<tr
+													key={`r-${absoluteIndex}`}
+													className="group hover:bg-muted/10"
+												>
 													<td className="border bg-muted/30 text-center sticky left-0 z-10 w-10 p-0">
 														<div className="flex items-center justify-center relative w-full h-full min-h-[36px]">
 															<span className="text-xs text-muted-foreground group-hover:opacity-0 transition-opacity absolute">
@@ -369,11 +452,20 @@ export default function CsvEditor() {
 														</div>
 													</td>
 													{row.map((cell, cIdx) => (
-														<td key={`c-${absoluteIndex}-${cIdx}`} className="border p-0 min-w-[120px]">
+														<td
+															key={`c-${absoluteIndex}-${cIdx}`}
+															className="border p-0 min-w-[120px]"
+														>
 															<input
 																type="text"
 																value={cell}
-																onChange={(e) => updateCell(absoluteIndex, cIdx, e.target.value)}
+																onChange={(e) =>
+																	updateCell(
+																		absoluteIndex,
+																		cIdx,
+																		e.target.value,
+																	)
+																}
 																className="w-full h-full min-h-[36px] px-2 py-1 bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary focus:bg-background transition-colors"
 															/>
 														</td>

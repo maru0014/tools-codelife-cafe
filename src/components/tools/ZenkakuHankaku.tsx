@@ -1,12 +1,16 @@
-import { useState, useCallback } from 'react';
-import { convert, type Direction, type ConversionOptions } from '@/lib/tools/zenkaku-hankaku';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Trash2 } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import CopyButton from '@/components/common/CopyButton';
-import { ArrowLeftRight, Trash2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	type ConversionOptions,
+	convert,
+	type Direction,
+} from '@/lib/tools/zenkaku-hankaku';
 
 export default function ZenkakuHankaku() {
 	const [input, setInput] = useState('');
@@ -30,27 +34,35 @@ export default function ZenkakuHankaku() {
 			<div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
 				{/* Direction toggle */}
 				<div className="flex items-center gap-3">
-					<Label className={`text-sm font-medium whitespace-nowrap transition-colors ${direction === 'toHankaku' ? 'text-primary' : 'text-muted-foreground'}`}>
+					<Label
+						className={`text-sm font-medium whitespace-nowrap transition-colors ${direction === 'toHankaku' ? 'text-primary' : 'text-muted-foreground'}`}
+					>
 						全角 → 半角
 					</Label>
 					<Switch
 						checked={direction === 'toZenkaku'}
-						onCheckedChange={(checked) => setDirection(checked ? 'toZenkaku' : 'toHankaku')}
+						onCheckedChange={(checked) =>
+							setDirection(checked ? 'toZenkaku' : 'toHankaku')
+						}
 						className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-primary"
 					/>
-					<Label className={`text-sm font-medium whitespace-nowrap transition-colors ${direction === 'toZenkaku' ? 'text-primary' : 'text-muted-foreground'}`}>
+					<Label
+						className={`text-sm font-medium whitespace-nowrap transition-colors ${direction === 'toZenkaku' ? 'text-primary' : 'text-muted-foreground'}`}
+					>
 						半角 → 全角
 					</Label>
 				</div>
 
 				{/* Category checkboxes */}
 				<div className="flex flex-wrap gap-4">
-					{([
-						['katakana', 'カナ'],
-						['alpha', '英字'],
-						['numbers', '数字'],
-						['symbols', '記号'],
-					] as [keyof ConversionOptions, string][]).map(([key, label]) => (
+					{(
+						[
+							['katakana', 'カナ'],
+							['alpha', '英字'],
+							['numbers', '数字'],
+							['symbols', '記号'],
+						] as [keyof ConversionOptions, string][]
+					).map(([key, label]) => (
 						<div key={key} className="flex items-center gap-1.5">
 							<Checkbox
 								id={`opt-${key}`}

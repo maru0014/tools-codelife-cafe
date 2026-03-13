@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react';
+import type React from 'react';
+import { useEffect } from 'react';
 
 interface AdSlotProps {
 	slotId: string;
@@ -13,7 +14,12 @@ declare global {
 	}
 }
 
-export default function AdSlot({ slotId, format = 'auto', className = '', style }: AdSlotProps) {
+export default function AdSlot({
+	slotId,
+	format = 'auto',
+	className = '',
+	style,
+}: AdSlotProps) {
 	const adsenseId = import.meta.env.PUBLIC_ADSENSE_ID;
 
 	useEffect(() => {
@@ -24,7 +30,7 @@ export default function AdSlot({ slotId, format = 'auto', className = '', style 
 				console.error('AdSense error:', e);
 			}
 		}
-	}, [adsenseId]);
+	}, []);
 
 	if (!adsenseId) {
 		// 開発環境かつAdSense ID未設定の場合はプレースホルダーを表示（確認用）
@@ -32,7 +38,10 @@ export default function AdSlot({ slotId, format = 'auto', className = '', style 
 			return (
 				<div
 					className={`flex w-full overflow-hidden items-center justify-center bg-muted/30 border border-dashed border-border rounded-lg text-sm text-muted-foreground ${className}`}
-					style={{ minHeight: format === 'horizontal' ? '90px' : '250px', ...style }}
+					style={{
+						minHeight: format === 'horizontal' ? '90px' : '250px',
+						...style,
+					}}
 				>
 					AdSense Placeholder ({format})
 				</div>

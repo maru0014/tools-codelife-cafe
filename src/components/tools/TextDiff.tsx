@@ -1,12 +1,16 @@
-import { useState, useMemo, useCallback, type DragEvent } from 'react';
-import { computeDiff, readFileAsText, type DiffMode } from '@/lib/tools/text-diff';
-import { Textarea } from '@/components/ui/textarea';
-import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FileText, GitCompareArrows, Trash2 } from 'lucide-react';
+import { type DragEvent, useCallback, useMemo, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
-import { GitCompareArrows, FileText, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	computeDiff,
+	type DiffMode,
+	readFileAsText,
+} from '@/lib/tools/text-diff';
 
 export default function TextDiff() {
 	const [textA, setTextA] = useState('');
@@ -37,15 +41,22 @@ export default function TextDiff() {
 				}
 			}
 		},
-		[]
+		[],
 	);
 
 	const diffText = useMemo(() => {
 		if (!result) return '';
-		return result.parts.map((p) => {
-			const prefix = p.type === 'added' ? '+ ' : p.type === 'removed' ? '- ' : '  ';
-			return p.value.split('\n').filter(Boolean).map((line) => `${prefix}${line}`).join('\n');
-		}).join('\n');
+		return result.parts
+			.map((p) => {
+				const prefix =
+					p.type === 'added' ? '+ ' : p.type === 'removed' ? '- ' : '  ';
+				return p.value
+					.split('\n')
+					.filter(Boolean)
+					.map((line) => `${prefix}${line}`)
+					.join('\n');
+			})
+			.join('\n');
 	}, [result]);
 
 	return (
@@ -63,7 +74,11 @@ export default function TextDiff() {
 							<TabsTrigger value="chars">文字単位</TabsTrigger>
 						</TabsList>
 					</Tabs>
-					<Tabs value={viewMode} onValueChange={(v) => setViewMode(v as 'unified' | 'split')} className="hidden sm:block">
+					<Tabs
+						value={viewMode}
+						onValueChange={(v) => setViewMode(v as 'unified' | 'split')}
+						className="hidden sm:block"
+					>
 						<TabsList>
 							<TabsTrigger value="unified">Unified</TabsTrigger>
 							<TabsTrigger value="split">Split</TabsTrigger>
@@ -77,19 +92,30 @@ export default function TextDiff() {
 				<div>
 					<div className="flex items-center justify-between mb-2">
 						<Label className="text-sm font-medium">テキストA（変更前）</Label>
-						<Button variant="outline" size="sm" onClick={() => setTextA('')} disabled={!textA} className="h-6 px-2 text-xs">
-							<Trash2 className="h-3 w-3 mr-1" />クリア
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setTextA('')}
+							disabled={!textA}
+							className="h-6 px-2 text-xs"
+						>
+							<Trash2 className="h-3 w-3 mr-1" />
+							クリア
 						</Button>
 					</div>
 					<Textarea
 						value={textA}
 						onChange={(e) => setTextA(e.target.value)}
 						onDrop={(e) => handleDrop(e, 'A')}
-						onDragOver={(e) => { e.preventDefault(); setDragOverA(true); }}
+						onDragOver={(e) => {
+							e.preventDefault();
+							setDragOverA(true);
+						}}
 						onDragLeave={() => setDragOverA(false)}
 						placeholder="変更前のテキストをここに入力..."
-						className={`min-h-[200px] font-mono-tool rounded-xl focus:ring-2 focus:ring-primary ${dragOverA ? 'border-primary border-dashed bg-primary/5' : ''
-							}`}
+						className={`min-h-[200px] font-mono-tool rounded-xl focus:ring-2 focus:ring-primary ${
+							dragOverA ? 'border-primary border-dashed bg-primary/5' : ''
+						}`}
 					/>
 					<p className="text-xs text-muted-foreground mt-1 flex items-center gap-1">
 						<FileText className="h-3 w-3" />
@@ -99,19 +125,30 @@ export default function TextDiff() {
 				<div>
 					<div className="flex items-center justify-between mb-2">
 						<Label className="text-sm font-medium">テキストB（変更後）</Label>
-						<Button variant="outline" size="sm" onClick={() => setTextB('')} disabled={!textB} className="h-6 px-2 text-xs">
-							<Trash2 className="h-3 w-3 mr-1" />クリア
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => setTextB('')}
+							disabled={!textB}
+							className="h-6 px-2 text-xs"
+						>
+							<Trash2 className="h-3 w-3 mr-1" />
+							クリア
 						</Button>
 					</div>
 					<Textarea
 						value={textB}
 						onChange={(e) => setTextB(e.target.value)}
 						onDrop={(e) => handleDrop(e, 'B')}
-						onDragOver={(e) => { e.preventDefault(); setDragOverB(true); }}
+						onDragOver={(e) => {
+							e.preventDefault();
+							setDragOverB(true);
+						}}
 						onDragLeave={() => setDragOverB(false)}
 						placeholder="変更後のテキストをここに入力..."
-						className={`min-h-[200px] font-mono-tool rounded-xl focus:ring-2 focus:ring-primary ${dragOverB ? 'border-primary border-dashed bg-primary/5' : ''
-							}`}
+						className={`min-h-[200px] font-mono-tool rounded-xl focus:ring-2 focus:ring-primary ${
+							dragOverB ? 'border-primary border-dashed bg-primary/5' : ''
+						}`}
 					/>
 				</div>
 			</div>
@@ -147,27 +184,49 @@ export default function TextDiff() {
 					{viewMode === 'split' ? (
 						<div className="grid grid-cols-2 gap-4">
 							<div className="rounded-xl border border-border bg-card overflow-x-auto whitespace-pre font-mono-tool text-sm min-h-[100px]">
-								<div className="bg-muted px-4 py-1.5 border-b border-border text-xs font-bold text-muted-foreground sticky top-0">テキストA（変更前）</div>
+								<div className="bg-muted px-4 py-1.5 border-b border-border text-xs font-bold text-muted-foreground sticky top-0">
+									テキストA（変更前）
+								</div>
 								<div className="w-full min-w-max">
-									{result.parts.filter(p => p.type !== 'added').map((part, i) => (
-										<div key={`l-${i}`} className={`px-4 py-0.5 min-w-max ${part.type === 'removed' ? 'bg-red-500/10 text-red-700 dark:text-red-300' : ''}`}>
-											{part.type === 'removed' && <span className="select-none opacity-50">- </span>}
-											{part.type === 'unchanged' && <span className="select-none opacity-30">  </span>}
-											{part.value}
-										</div>
-									))}
+									{result.parts
+										.filter((p) => p.type !== 'added')
+										.map((part, i) => (
+											<div
+												key={`l-${i}`}
+												className={`px-4 py-0.5 min-w-max ${part.type === 'removed' ? 'bg-red-500/10 text-red-700 dark:text-red-300' : ''}`}
+											>
+												{part.type === 'removed' && (
+													<span className="select-none opacity-50">- </span>
+												)}
+												{part.type === 'unchanged' && (
+													<span className="select-none opacity-30"> </span>
+												)}
+												{part.value}
+											</div>
+										))}
 								</div>
 							</div>
 							<div className="rounded-xl border border-border bg-card overflow-x-auto whitespace-pre font-mono-tool text-sm min-h-[100px]">
-								<div className="bg-muted px-4 py-1.5 border-b border-border text-xs font-bold text-muted-foreground sticky top-0">テキストB（変更後）</div>
+								<div className="bg-muted px-4 py-1.5 border-b border-border text-xs font-bold text-muted-foreground sticky top-0">
+									テキストB（変更後）
+								</div>
 								<div className="w-full min-w-max">
-									{result.parts.filter(p => p.type !== 'removed').map((part, i) => (
-										<div key={`r-${i}`} className={`px-4 py-0.5 min-w-max ${part.type === 'added' ? 'bg-green-500/10 text-green-700 dark:text-green-300' : ''}`}>
-											{part.type === 'added' && <span className="select-none opacity-50">+ </span>}
-											{part.type === 'unchanged' && <span className="select-none opacity-30">  </span>}
-											{part.value}
-										</div>
-									))}
+									{result.parts
+										.filter((p) => p.type !== 'removed')
+										.map((part, i) => (
+											<div
+												key={`r-${i}`}
+												className={`px-4 py-0.5 min-w-max ${part.type === 'added' ? 'bg-green-500/10 text-green-700 dark:text-green-300' : ''}`}
+											>
+												{part.type === 'added' && (
+													<span className="select-none opacity-50">+ </span>
+												)}
+												{part.type === 'unchanged' && (
+													<span className="select-none opacity-30"> </span>
+												)}
+												{part.value}
+											</div>
+										))}
 								</div>
 							</div>
 						</div>
@@ -176,16 +235,23 @@ export default function TextDiff() {
 							{result.parts.map((part, i) => (
 								<div
 									key={i}
-									className={`px-4 py-0.5 whitespace-pre-wrap break-all ${part.type === 'added'
-										? 'bg-green-500/10 text-green-700 dark:text-green-300'
-										: part.type === 'removed'
-											? 'bg-red-500/10 text-red-700 dark:text-red-300'
-											: ''
-										}`}
+									className={`px-4 py-0.5 whitespace-pre-wrap break-all ${
+										part.type === 'added'
+											? 'bg-green-500/10 text-green-700 dark:text-green-300'
+											: part.type === 'removed'
+												? 'bg-red-500/10 text-red-700 dark:text-red-300'
+												: ''
+									}`}
 								>
-									{part.type === 'added' && <span className="select-none opacity-50">+ </span>}
-									{part.type === 'removed' && <span className="select-none opacity-50">- </span>}
-									{part.type === 'unchanged' && <span className="select-none opacity-30">  </span>}
+									{part.type === 'added' && (
+										<span className="select-none opacity-50">+ </span>
+									)}
+									{part.type === 'removed' && (
+										<span className="select-none opacity-50">- </span>
+									)}
+									{part.type === 'unchanged' && (
+										<span className="select-none opacity-30"> </span>
+									)}
 									{part.value}
 								</div>
 							))}
