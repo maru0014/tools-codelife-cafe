@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import QrGenerator from '../components/tools/QrGenerator.tsx';
+import QrGeneratorTool from '../components/tools/QrGenerator.tsx';
 
 
 ---
@@ -10,7 +10,7 @@ import QrGenerator from '../components/tools/QrGenerator.tsx';
   description="URLやテキストからQRコードを即座に生成。サイズ・色のカスタマイズ、PNG/SVGダウンロード対応。"
   path="/qr-generator"
 >
-  <QrGenerator client:load />
+  <QrGeneratorTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">

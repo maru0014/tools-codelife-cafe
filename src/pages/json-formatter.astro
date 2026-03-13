@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import JsonFormatter from '../components/tools/JsonFormatter.tsx';
+import JsonFormatterTool from '../components/tools/JsonFormatter.tsx';
 
 
 ---
@@ -10,7 +10,7 @@ import JsonFormatter from '../components/tools/JsonFormatter.tsx';
   description="JSONの整形・圧縮・構文チェック。インデント幅を選択可能。"
   path="/json-formatter"
 >
-  <JsonFormatter client:load />
+  <JsonFormatterTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">

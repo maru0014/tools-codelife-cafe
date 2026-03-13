@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import ZenkakuHankaku from '../components/tools/ZenkakuHankaku.tsx';
+import ZenkakuHankakuTool from '../components/tools/ZenkakuHankaku.tsx';
 
 
 ---
@@ -10,7 +10,7 @@ import ZenkakuHankaku from '../components/tools/ZenkakuHankaku.tsx';
   description="カタカナ・英数字・記号の全角半角を双方向変換。カテゴリ別に変換対象を制御可能。"
   path="/zenkaku-hankaku"
 >
-  <ZenkakuHankaku client:load />
+  <ZenkakuHankakuTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">
