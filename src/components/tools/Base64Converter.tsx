@@ -1,20 +1,19 @@
-import { useState, useMemo, useCallback, type DragEvent } from 'react';
-import {
-	encodeBase64,
-	decodeBase64,
-	fileToBase64,
-	getByteSize,
-	getBase64ByteSize,
-} from '@/lib/tools/base64';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { ArrowLeftRight, Download, Trash2, UploadCloud } from 'lucide-react';
+import { type DragEvent, useCallback, useMemo, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import CopyButton from '@/components/common/CopyButton';
-import { ArrowLeftRight, Trash2, Download, UploadCloud } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	decodeBase64,
+	encodeBase64,
+	fileToBase64,
+	getBase64ByteSize,
+	getByteSize,
+} from '@/lib/tools/base64';
 
 export default function Base64Converter() {
 	const [tab, setTab] = useState('text');
@@ -47,28 +46,33 @@ export default function Base64Converter() {
 	}, [textInput, direction]);
 
 	// Handlers for File Drop
-	const handleDrop = useCallback(async (e: DragEvent<HTMLDivElement>) => {
-		e.preventDefault();
-		setDragOver(false);
-		const file = e.dataTransfer.files[0];
-		if (file) {
-			setLoading(true);
-			try {
-				setFileName(file.name);
-				const b64 = await fileToBase64(file, withDataUri);
-				setFileOutput(b64);
-			} catch (err) {
-				alert('ファイルの読み込みに失敗しました。');
-			} finally {
-				setLoading(false);
+	const handleDrop = useCallback(
+		async (e: DragEvent<HTMLDivElement>) => {
+			e.preventDefault();
+			setDragOver(false);
+			const file = e.dataTransfer.files[0];
+			if (file) {
+				setLoading(true);
+				try {
+					setFileName(file.name);
+					const b64 = await fileToBase64(file, withDataUri);
+					setFileOutput(b64);
+				} catch (_err) {
+					alert('ファイルの読み込みに失敗しました。');
+				} finally {
+					setLoading(false);
+				}
 			}
-		}
-	}, [withDataUri]);
+		},
+		[withDataUri],
+	);
 
 	// Download decoded text
 	const downloadDecodedText = useCallback(() => {
 		if (direction === 'decode' && !textResult.error && textResult.output) {
-			const blob = new Blob([textResult.output], { type: 'text/plain;charset=utf-8' });
+			const blob = new Blob([textResult.output], {
+				type: 'text/plain;charset=utf-8',
+			});
 			const url = URL.createObjectURL(blob);
 			const a = document.createElement('a');
 			a.href = url;
@@ -104,11 +108,15 @@ export default function Base64Converter() {
 				<TabsContent value="text" className="space-y-6 mt-0">
 					<div className="flex items-center gap-3 mb-4">
 						<Label className="text-sm font-medium whitespace-nowrap">
-							{direction === 'encode' ? 'テキスト → Base64' : 'Base64 → テキスト'}
+							{direction === 'encode'
+								? 'テキスト → Base64'
+								: 'Base64 → テキスト'}
 						</Label>
 						<Switch
 							checked={direction === 'decode'}
-							onCheckedChange={(checked) => setDirection(checked ? 'decode' : 'encode')}
+							onCheckedChange={(checked) =>
+								setDirection(checked ? 'decode' : 'encode')
+							}
 						/>
 						<ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
 					</div>
@@ -117,7 +125,8 @@ export default function Base64Converter() {
 						<div>
 							<div className="flex justify-between items-center mb-2 min-h-9">
 								<Label className="text-sm font-medium block">
-									入力 ({direction === 'encode' ? 'プレーンテキスト' : 'Base64'})
+									入力 ({direction === 'encode' ? 'プレーンテキスト' : 'Base64'}
+									)
 								</Label>
 								{textResult.size > 0 && (
 									<span className="text-xs text-muted-foreground">
@@ -130,8 +139,8 @@ export default function Base64Converter() {
 								onChange={(e) => setTextInput(e.target.value)}
 								placeholder={
 									direction === 'encode'
-										? "こんにちは世界"
-										: "44GT44KT44Gr44Gh44Gv5LiW55WM"
+										? 'こんにちは世界'
+										: '44GT44KT44Gr44Gh44Gv5LiW55WM'
 								}
 								className="min-h-[240px] font-mono-tool rounded-xl focus:ring-2 focus:ring-primary"
 							/>
@@ -141,12 +150,18 @@ export default function Base64Converter() {
 							<div className="flex items-center justify-between mb-2 min-h-9">
 								<Label className="text-sm font-medium">変換結果</Label>
 								<div className="flex gap-2">
-									{direction === 'decode' && textResult.output && !textResult.error && (
-										<Button variant="outline" size="sm" onClick={downloadDecodedText}>
-											<Download className="h-4 w-4 mr-1" />
-											DL
-										</Button>
-									)}
+									{direction === 'decode' &&
+										textResult.output &&
+										!textResult.error && (
+											<Button
+												variant="outline"
+												size="sm"
+												onClick={downloadDecodedText}
+											>
+												<Download className="h-4 w-4 mr-1" />
+												DL
+											</Button>
+										)}
 									<CopyButton text={textResult.output} />
 									<Button
 										variant="outline"
@@ -162,8 +177,11 @@ export default function Base64Converter() {
 							<Textarea
 								value={textResult.error ? textResult.error : textResult.output}
 								readOnly
-								className={`min-h-[240px] font-mono-tool rounded-xl bg-muted/50 ${textResult.error ? 'text-red-500 font-bold border-red-200 bg-red-50 dark:bg-red-950/20' : ''
-									} ${textResult.output ? 'shimmer' : ''}`}
+								className={`min-h-[240px] font-mono-tool rounded-xl bg-muted/50 ${
+									textResult.error
+										? 'text-red-500 font-bold border-red-200 bg-red-50 dark:bg-red-950/20'
+										: ''
+								} ${textResult.output ? 'shimmer' : ''}`}
 							/>
 						</div>
 					</div>
@@ -185,34 +203,50 @@ export default function Base64Converter() {
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						<div>
 							<div className="flex items-center mb-2 min-h-9">
-								<Label className="text-sm font-medium block">ファイル入力</Label>
+								<Label className="text-sm font-medium block">
+									ファイル入力
+								</Label>
 							</div>
 							<div
 								onDrop={handleDrop}
-								onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+								onDragOver={(e) => {
+									e.preventDefault();
+									setDragOver(true);
+								}}
 								onDragLeave={() => setDragOver(false)}
-								className={`flex flex-col items-center justify-center min-h-[240px] rounded-xl border-2 border-dashed transition-colors ${dragOver ? 'border-primary bg-primary/5' : 'border-border bg-card hover:bg-muted/50'
-									}`}
+								className={`flex flex-col items-center justify-center min-h-[240px] rounded-xl border-2 border-dashed transition-colors ${
+									dragOver
+										? 'border-primary bg-primary/5'
+										: 'border-border bg-card hover:bg-muted/50'
+								}`}
 							>
 								{loading ? (
-									<div className="text-muted-foreground animate-pulse p-6">読み込み中...</div>
+									<div className="text-muted-foreground animate-pulse p-6">
+										読み込み中...
+									</div>
 								) : fileName ? (
 									<div className="flex flex-col items-center p-4">
-										{fileOutput && fileOutput.startsWith('data:image/') && (
+										{fileOutput?.startsWith('data:image/') && (
 											<img
 												src={fileOutput}
 												alt={fileName}
 												className="max-h-32 max-w-full rounded-md object-contain mb-3 shadow-sm border border-border"
 											/>
 										)}
-										<div className="font-medium text-primary mb-1 text-center break-all line-clamp-2 px-2">{fileName}</div>
-										<div className="text-xs text-muted-foreground mt-2 text-center">別のファイルをドロップして上書き</div>
+										<div className="font-medium text-primary mb-1 text-center break-all line-clamp-2 px-2">
+											{fileName}
+										</div>
+										<div className="text-xs text-muted-foreground mt-2 text-center">
+											別のファイルをドロップして上書き
+										</div>
 									</div>
 								) : (
 									<div className="text-center p-6 text-muted-foreground">
 										<UploadCloud className="h-10 w-10 mx-auto mb-3 opacity-50" />
 										<p className="text-sm mb-1">ファイルをここにドロップ</p>
-										<p className="text-xs opacity-70">またはクリックして選択（※ブラウザで完結）</p>
+										<p className="text-xs opacity-70">
+											またはクリックして選択（※ブラウザで完結）
+										</p>
 									</div>
 								)}
 								<input
@@ -226,7 +260,7 @@ export default function Base64Converter() {
 												setFileName(file.name);
 												const b64 = await fileToBase64(file, withDataUri);
 												setFileOutput(b64);
-											} catch (err) {
+											} catch (_err) {
 												alert('エラーが発生しました。');
 											} finally {
 												setLoading(false);
@@ -246,7 +280,10 @@ export default function Base64Converter() {
 									<Button
 										variant="outline"
 										size="sm"
-										onClick={() => { setFileOutput(''); setFileName(''); }}
+										onClick={() => {
+											setFileOutput('');
+											setFileName('');
+										}}
 										disabled={!fileOutput}
 									>
 										<Trash2 className="h-4 w-4 mr-1" />

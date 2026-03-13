@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import TextDiff from '../components/tools/TextDiff.tsx';
+import TextDiffTool from '../components/tools/TextDiff.tsx';
 
 
 ---
@@ -10,7 +10,7 @@ import TextDiff from '../components/tools/TextDiff.tsx';
   description="2つのテキストの違いをハイライト表示。行単位・文字単位の切替対応。"
   path="/text-diff"
 >
-  <TextDiff client:load />
+  <TextDiffTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">

@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect, useCallback, type UIEvent } from 'react';
-import { formatSql, type SqlDialect, type IndentStyle, type SqlFormatOptions } from '@/lib/tools/sql-formatter';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
+import { Code2, Download, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import { type UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
 	Select,
 	SelectContent,
@@ -11,14 +10,57 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import CopyButton from '@/components/common/CopyButton';
-import { Trash2, Download, Code2, Maximize2, Minimize2 } from 'lucide-react';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	formatSql,
+	type IndentStyle,
+	type SqlDialect,
+	type SqlFormatOptions,
+} from '@/lib/tools/sql-formatter';
 
 const SQL_KEYWORDS = [
-	'SELECT', 'FROM', 'WHERE', 'AND', 'OR', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'ON',
-	'ORDER BY', 'GROUP BY', 'HAVING', 'LIMIT', 'OFFSET', 'INSERT', 'INTO', 'VALUES',
-	'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE', 'DROP', 'ALTER', 'ADD', 'COLUMN',
-	'AS', 'DISTINCT', 'COUNT', 'MAX', 'MIN', 'AVG', 'SUM', 'IS', 'NULL', 'NOT', 'IN', 'BETWEEN', 'LIKE'
+	'SELECT',
+	'FROM',
+	'WHERE',
+	'AND',
+	'OR',
+	'JOIN',
+	'LEFT',
+	'RIGHT',
+	'INNER',
+	'OUTER',
+	'ON',
+	'ORDER BY',
+	'GROUP BY',
+	'HAVING',
+	'LIMIT',
+	'OFFSET',
+	'INSERT',
+	'INTO',
+	'VALUES',
+	'UPDATE',
+	'SET',
+	'DELETE',
+	'CREATE',
+	'TABLE',
+	'DROP',
+	'ALTER',
+	'ADD',
+	'COLUMN',
+	'AS',
+	'DISTINCT',
+	'COUNT',
+	'MAX',
+	'MIN',
+	'AVG',
+	'SUM',
+	'IS',
+	'NULL',
+	'NOT',
+	'IN',
+	'BETWEEN',
+	'LIKE',
 ];
 
 export default function SqlFormatter() {
@@ -76,7 +118,10 @@ export default function SqlFormatter() {
 		const parts = [];
 		let lastIndex = 0;
 		const keywordPattern = SQL_KEYWORDS.join('|');
-		const regex = new RegExp(`('.*?')|\\b(\\d+)\\b|\\b(${keywordPattern})\\b`, 'ig');
+		const regex = new RegExp(
+			`('.*?')|\\b(\\d+)\\b|\\b(${keywordPattern})\\b`,
+			'ig',
+		);
 
 		const matches = Array.from(output.matchAll(regex));
 
@@ -88,11 +133,26 @@ export default function SqlFormatter() {
 			}
 
 			if (m[1]) {
-				parts.push(<span key={i} className="text-green-600 dark:text-green-400">{m[1]}</span>);
+				parts.push(
+					<span key={i} className="text-green-600 dark:text-green-400">
+						{m[1]}
+					</span>,
+				);
 			} else if (m[2]) {
-				parts.push(<span key={i} className="text-blue-600 dark:text-blue-400">{m[2]}</span>);
+				parts.push(
+					<span key={i} className="text-blue-600 dark:text-blue-400">
+						{m[2]}
+					</span>,
+				);
 			} else if (m[3]) {
-				parts.push(<span key={i} className="text-purple-600 dark:text-purple-400 font-bold">{m[3]}</span>);
+				parts.push(
+					<span
+						key={i}
+						className="text-purple-600 dark:text-purple-400 font-bold"
+					>
+						{m[3]}
+					</span>,
+				);
 			}
 			lastIndex = index !== undefined ? index + m[0].length : lastIndex;
 		}
@@ -105,8 +165,14 @@ export default function SqlFormatter() {
 	}, [output]);
 
 	// Line numbers setup
-	const lineCount = useMemo(() => (input.match(/\n/g) || []).length + 1, [input]);
-	const lines = Array.from({ length: Math.max(lineCount, 10) }, (_, i) => i + 1);
+	const lineCount = useMemo(
+		() => (input.match(/\n/g) || []).length + 1,
+		[input],
+	);
+	const lines = Array.from(
+		{ length: Math.max(lineCount, 10) },
+		(_, i) => i + 1,
+	);
 
 	const handleScroll = (e: UIEvent<HTMLTextAreaElement>) => {
 		const gutter = document.getElementById('line-numbers');
@@ -134,8 +200,13 @@ export default function SqlFormatter() {
 			{/* Options Toolbar */}
 			<div className="flex flex-wrap items-center gap-4 bg-muted/30 p-4 rounded-xl border">
 				<div>
-					<Label className="text-xs mb-1 block text-muted-foreground">SQL方言</Label>
-					<Select value={dialect} onValueChange={(v) => setDialect(v as SqlDialect)}>
+					<Label className="text-xs mb-1 block text-muted-foreground">
+						SQL方言
+					</Label>
+					<Select
+						value={dialect}
+						onValueChange={(v) => setDialect(v as SqlDialect)}
+					>
 						<SelectTrigger className="w-[140px] h-8 rounded-lg bg-background">
 							<SelectValue />
 						</SelectTrigger>
@@ -151,8 +222,13 @@ export default function SqlFormatter() {
 
 				{!compress && (
 					<div>
-						<Label className="text-xs mb-1 block text-muted-foreground">インデント</Label>
-						<Select value={indent} onValueChange={(v) => setIndent(v as IndentStyle)}>
+						<Label className="text-xs mb-1 block text-muted-foreground">
+							インデント
+						</Label>
+						<Select
+							value={indent}
+							onValueChange={(v) => setIndent(v as IndentStyle)}
+						>
 							<SelectTrigger className="w-[120px] h-8 rounded-lg bg-background">
 								<SelectValue />
 							</SelectTrigger>
@@ -167,18 +243,45 @@ export default function SqlFormatter() {
 
 				<div className="flex items-center gap-4 ml-auto mt-4 sm:mt-0">
 					<div className="flex items-center gap-2">
-						<Switch id="auto-format" checked={autoFormat} onCheckedChange={setAutoFormat} />
-						<Label htmlFor="auto-format" className="text-sm cursor-pointer whitespace-nowrap">自動整形</Label>
+						<Switch
+							id="auto-format"
+							checked={autoFormat}
+							onCheckedChange={setAutoFormat}
+						/>
+						<Label
+							htmlFor="auto-format"
+							className="text-sm cursor-pointer whitespace-nowrap"
+						>
+							自動整形
+						</Label>
 					</div>
 
 					<div className="flex items-center gap-2">
-						<Switch id="opt-uppercase" checked={uppercase} onCheckedChange={setUppercase} />
-						<Label htmlFor="opt-uppercase" className="text-sm cursor-pointer whitespace-nowrap">大文字化</Label>
+						<Switch
+							id="opt-uppercase"
+							checked={uppercase}
+							onCheckedChange={setUppercase}
+						/>
+						<Label
+							htmlFor="opt-uppercase"
+							className="text-sm cursor-pointer whitespace-nowrap"
+						>
+							大文字化
+						</Label>
 					</div>
 
 					<div className="flex items-center gap-2">
-						<Switch id="opt-compress" checked={compress} onCheckedChange={setCompress} />
-						<Label htmlFor="opt-compress" className="text-sm cursor-pointer whitespace-nowrap">圧縮 (1行化)</Label>
+						<Switch
+							id="opt-compress"
+							checked={compress}
+							onCheckedChange={setCompress}
+						/>
+						<Label
+							htmlFor="opt-compress"
+							className="text-sm cursor-pointer whitespace-nowrap"
+						>
+							圧縮 (1行化)
+						</Label>
 					</div>
 
 					<div className="w-px h-6 bg-border mx-2 hidden sm:block"></div>
@@ -188,10 +291,14 @@ export default function SqlFormatter() {
 						size="sm"
 						onClick={toggleExpand}
 						className="hidden sm:flex"
-						title={isExpanded ? "標準サイズに戻す" : "画面幅を広げる"}
+						title={isExpanded ? '標準サイズに戻す' : '画面幅を広げる'}
 					>
-						{isExpanded ? <Minimize2 className="h-4 w-4 mr-2" /> : <Maximize2 className="h-4 w-4 mr-2" />}
-						{isExpanded ? "標準幅" : "フルサイズ"}
+						{isExpanded ? (
+							<Minimize2 className="h-4 w-4 mr-2" />
+						) : (
+							<Maximize2 className="h-4 w-4 mr-2" />
+						)}
+						{isExpanded ? '標準幅' : 'フルサイズ'}
 					</Button>
 				</div>
 			</div>
@@ -204,8 +311,12 @@ export default function SqlFormatter() {
 					onClick={toggleExpand}
 					className="w-full"
 				>
-					{isExpanded ? <Minimize2 className="h-4 w-4 mr-2" /> : <Maximize2 className="h-4 w-4 mr-2" />}
-					{isExpanded ? "標準サイズに戻す" : "画面幅を広げる (フルサイズ)"}
+					{isExpanded ? (
+						<Minimize2 className="h-4 w-4 mr-2" />
+					) : (
+						<Maximize2 className="h-4 w-4 mr-2" />
+					)}
+					{isExpanded ? '標準サイズに戻す' : '画面幅を広げる (フルサイズ)'}
 				</Button>
 			</div>
 
@@ -239,7 +350,11 @@ export default function SqlFormatter() {
 							id="line-numbers"
 							className="w-12 border-r bg-muted/40 text-right pr-2 py-3 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none"
 						>
-							{lines.map(num => <div key={num} className="leading-5 h-5">{num}</div>)}
+							{lines.map((num) => (
+								<div key={num} className="leading-5 h-5">
+									{num}
+								</div>
+							))}
 						</div>
 						{/* Textarea */}
 						<Textarea
@@ -257,11 +372,20 @@ export default function SqlFormatter() {
 				<div>
 					<div className="flex items-center justify-between mb-2">
 						<Label className="text-sm font-medium">
-							{error ? <span className="text-red-500">エラー</span> : '整形後SQL'}
+							{error ? (
+								<span className="text-red-500">エラー</span>
+							) : (
+								'整形後SQL'
+							)}
 						</Label>
 						<div className="flex items-center gap-2">
 							{output && !error && (
-								<Button variant="outline" size="sm" onClick={handleDownload} className="h-8">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={handleDownload}
+									className="h-8"
+								>
 									<Download className="h-4 w-4 mr-1" />
 									.sql保存
 								</Button>
@@ -269,8 +393,11 @@ export default function SqlFormatter() {
 							<CopyButton text={output} />
 						</div>
 					</div>
-					<div className={`rounded-xl border shadow-sm h-[400px] overflow-auto bg-card relative ${error ? 'border-red-500 border-2' : ''
-						} ${output ? 'shimmer' : ''}`}>
+					<div
+						className={`rounded-xl border shadow-sm h-[400px] overflow-auto bg-card relative ${
+							error ? 'border-red-500 border-2' : ''
+						} ${output ? 'shimmer' : ''}`}
+					>
 						{error ? (
 							<div className="p-4 text-red-500 font-medium font-mono-tool text-sm whitespace-pre-wrap flex items-start gap-2 max-w-full">
 								<Code2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
@@ -284,7 +411,11 @@ export default function SqlFormatter() {
 							<div className="flex h-full items-center justify-center text-muted-foreground p-6 text-center">
 								<div>
 									<Code2 className="h-10 w-10 mx-auto mb-3 opacity-20" />
-									<p className="text-sm">左側（または上）にSQLを入力すると<br />整形されたコードが表示されます</p>
+									<p className="text-sm">
+										左側（または上）にSQLを入力すると
+										<br />
+										整形されたコードが表示されます
+									</p>
 								</div>
 							</div>
 						)}

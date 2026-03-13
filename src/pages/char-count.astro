@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import CharCount from '../components/tools/CharCount.tsx';
+import CharCountTool from '../components/tools/CharCount.tsx';
 
 
 ---
@@ -10,7 +10,7 @@ import CharCount from '../components/tools/CharCount.tsx';
   description="文字数・バイト数（UTF-8/Shift-JIS）・行数をリアルタイムカウント。原稿用紙換算にも対応。"
   path="/char-count"
 >
-  <CharCount client:load />
+  <CharCountTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">

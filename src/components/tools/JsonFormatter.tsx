@@ -1,6 +1,6 @@
-import { useState, useCallback } from 'react';
-import { formatJson, minifyJson, type IndentType } from '@/lib/tools/json-formatter';
-import { Textarea } from '@/components/ui/textarea';
+import { AlertCircle, Download, Minimize2, Wand2 } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -10,27 +10,37 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import CopyButton from '@/components/common/CopyButton';
-import { Wand2, Minimize2, Download, AlertCircle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	formatJson,
+	type IndentType,
+	minifyJson,
+} from '@/lib/tools/json-formatter';
 
 function highlightJson(json: string) {
 	if (!json) return '';
-	const jsonStr = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-	return jsonStr.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
-		let cls = 'text-green-600 dark:text-green-400'; // number
-		if (/^"/.test(match)) {
-			if (/:$/.test(match)) {
-				cls = 'text-blue-600 dark:text-blue-400'; // key
-			} else {
-				cls = 'text-orange-600 dark:text-orange-400'; // string
+	const jsonStr = json
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;');
+	return jsonStr.replace(
+		/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)/g,
+		(match) => {
+			let cls = 'text-green-600 dark:text-green-400'; // number
+			if (/^"/.test(match)) {
+				if (/:$/.test(match)) {
+					cls = 'text-blue-600 dark:text-blue-400'; // key
+				} else {
+					cls = 'text-orange-600 dark:text-orange-400'; // string
+				}
+			} else if (/true|false/.test(match)) {
+				cls = 'text-purple-600 dark:text-purple-400'; // boolean
+			} else if (/null/.test(match)) {
+				cls = 'text-gray-500 dark:text-gray-400'; // null
 			}
-		} else if (/true|false/.test(match)) {
-			cls = 'text-purple-600 dark:text-purple-400'; // boolean
-		} else if (/null/.test(match)) {
-			cls = 'text-gray-500 dark:text-gray-400'; // null
-		}
-		return '<span class="' + cls + '">' + match + '</span>';
-	});
+			return `<span class="${cls}">${match}</span>`;
+		},
+	);
 }
 
 export default function JsonFormatter() {
@@ -40,10 +50,11 @@ export default function JsonFormatter() {
 	const [error, setError] = useState<string | null>(null);
 	const [errorPosition, setErrorPosition] = useState<number | null>(null);
 
-	const errorLine = useState<number | null>(null);
-	const currentErrorLine = errorPosition !== null && input
-		? input.substring(0, errorPosition).split('\n').length
-		: null;
+	const _errorLine = useState<number | null>(null);
+	const currentErrorLine =
+		errorPosition !== null && input
+			? input.substring(0, errorPosition).split('\n').length
+			: null;
 
 	const handleFormat = useCallback(() => {
 		const result = formatJson(input, indent);
@@ -83,28 +94,31 @@ export default function JsonFormatter() {
 		URL.revokeObjectURL(url);
 	}, [output]);
 
-	const handleInputChange = useCallback((value: string) => {
-		setInput(value);
-		setError(null);
-		setErrorPosition(null);
-		// Auto-format on input change
-		if (value.trim()) {
-			const result = formatJson(value, indent);
-			if (result.success) {
-				setOutput(result.output);
-				setError(null);
-				setErrorPosition(null);
+	const handleInputChange = useCallback(
+		(value: string) => {
+			setInput(value);
+			setError(null);
+			setErrorPosition(null);
+			// Auto-format on input change
+			if (value.trim()) {
+				const result = formatJson(value, indent);
+				if (result.success) {
+					setOutput(result.output);
+					setError(null);
+					setErrorPosition(null);
+				} else {
+					// Don't clear output immediately if they're just typing,
+					// but let's show the error state or position if it fails
+					setError(result.error ?? 'エラーが発生しました');
+					setErrorPosition(result.errorPosition ?? null);
+					setOutput('');
+				}
 			} else {
-				// Don't clear output immediately if they're just typing,
-				// but let's show the error state or position if it fails
-				setError(result.error ?? 'エラーが発生しました');
-				setErrorPosition(result.errorPosition ?? null);
 				setOutput('');
 			}
-		} else {
-			setOutput('');
-		}
-	}, [indent]);
+		},
+		[indent],
+	);
 
 	return (
 		<div className="space-y-6">
@@ -112,7 +126,12 @@ export default function JsonFormatter() {
 			{error && (
 				<div className="flex items-start gap-2 rounded-xl border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
 					<AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-					<p>{error} {currentErrorLine && <span className="font-bold">（{currentErrorLine}行目付近）</span>}</p>
+					<p>
+						{error}{' '}
+						{currentErrorLine && (
+							<span className="font-bold">（{currentErrorLine}行目付近）</span>
+						)}
+					</p>
 				</div>
 			)}
 
@@ -120,7 +139,10 @@ export default function JsonFormatter() {
 			<div className="flex flex-wrap items-center gap-3">
 				<div className="flex items-center gap-2">
 					<Label className="text-sm whitespace-nowrap">インデント:</Label>
-					<Select value={indent} onValueChange={(v) => setIndent(v as IndentType)}>
+					<Select
+						value={indent}
+						onValueChange={(v) => setIndent(v as IndentType)}
+					>
 						<SelectTrigger className="w-[140px]">
 							<SelectValue />
 						</SelectTrigger>
@@ -183,7 +205,11 @@ export default function JsonFormatter() {
 						value=""
 						readOnly
 						disabled={!!error}
-						placeholder={error ? "入力JSONにエラーがあります" : "整形結果がここに表示されます..."}
+						placeholder={
+							error
+								? '入力JSONにエラーがあります'
+								: '整形結果がここに表示されます...'
+						}
 						className={`min-h-[200px] font-mono-tool rounded-xl bg-muted/50`}
 						spellCheck={false}
 					/>

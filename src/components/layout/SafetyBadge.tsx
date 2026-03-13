@@ -1,5 +1,5 @@
+import { Info, ShieldCheck } from 'lucide-react';
 import { useState } from 'react';
-import { ShieldCheck, Info } from 'lucide-react';
 import {
 	Popover,
 	PopoverContent,
@@ -17,7 +17,9 @@ export default function SafetyBadge() {
 					aria-label="セキュリティ情報を表示"
 				>
 					<ShieldCheck className="h-4 w-4" />
-					<span className="hidden sm:inline">このツールはサーバーと通信しません</span>
+					<span className="hidden sm:inline">
+						このツールはサーバーと通信しません
+					</span>
 					<span className="sm:hidden">ローカル処理</span>
 					<Info className="h-3 w-3 opacity-50" />
 				</button>

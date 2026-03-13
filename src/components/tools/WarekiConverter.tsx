@@ -1,13 +1,9 @@
-import { useState, useMemo } from 'react';
-import {
-	seirekiToWareki,
-	warekiToSeireki,
-	type Gengo,
-} from '@/lib/tools/wareki-converter';
+import { ArrowLeftRight, Calendar } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Card, CardContent } from '@/components/ui/card';
 import {
 	Select,
 	SelectContent,
@@ -15,8 +11,12 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { ArrowLeftRight, Calendar } from 'lucide-react';
-import CopyButton from '@/components/common/CopyButton';
+import { Switch } from '@/components/ui/switch';
+import {
+	type Gengo,
+	seirekiToWareki,
+	warekiToSeireki,
+} from '@/lib/tools/wareki-converter';
 
 type Direction = 'toWareki' | 'toSeireki';
 
@@ -26,14 +26,18 @@ export default function WarekiConverter() {
 	const [direction, setDirection] = useState<Direction>('toWareki');
 
 	// State for Seireki to Wareki
-	const [seirekiYear, setSeirekiYear] = useState<number>(currentDate.getFullYear());
+	const [seirekiYear, setSeirekiYear] = useState<number>(
+		currentDate.getFullYear(),
+	);
 	const [month, setMonth] = useState<number>(currentDate.getMonth() + 1);
 	const [day, setDay] = useState<number>(currentDate.getDate());
 
 	// State for Wareki to Seireki
 	const [gengo, setGengo] = useState<Gengo>('令和');
 	// Just a simple default assumption for current year
-	const [warekiYear, setWarekiYear] = useState<number>(currentDate.getFullYear() - 2018);
+	const [warekiYear, setWarekiYear] = useState<number>(
+		currentDate.getFullYear() - 2018,
+	);
 
 	const result = useMemo(() => {
 		if (direction === 'toWareki') {
@@ -57,7 +61,9 @@ export default function WarekiConverter() {
 				</Label>
 				<Switch
 					checked={direction === 'toSeireki'}
-					onCheckedChange={(checked) => setDirection(checked ? 'toSeireki' : 'toWareki')}
+					onCheckedChange={(checked) =>
+						setDirection(checked ? 'toSeireki' : 'toWareki')
+					}
 				/>
 				<ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
 			</div>
@@ -94,7 +100,9 @@ export default function WarekiConverter() {
 							</Select>
 						</div>
 						<div className="sm:col-span-3">
-							<Label className="text-sm font-medium mb-2 block">年 (元年 = 1)</Label>
+							<Label className="text-sm font-medium mb-2 block">
+								年 (元年 = 1)
+							</Label>
 							<Input
 								type="number"
 								value={warekiYear}
@@ -107,28 +115,39 @@ export default function WarekiConverter() {
 					</>
 				)}
 
-				<div className={`sm:col-span-4 ${direction === 'toSeireki' ? 'sm:col-span-3' : ''}`}>
+				<div
+					className={`sm:col-span-4 ${direction === 'toSeireki' ? 'sm:col-span-3' : ''}`}
+				>
 					<Label className="text-sm font-medium mb-2 block">月</Label>
-					<Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+					<Select
+						value={String(month)}
+						onValueChange={(v) => setMonth(Number(v))}
+					>
 						<SelectTrigger className="rounded-xl">
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							{Array.from({ length: 12 }, (_, i) => i + 1).map(m => (
-								<SelectItem key={m} value={String(m)}>{m}月</SelectItem>
+							{Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+								<SelectItem key={m} value={String(m)}>
+									{m}月
+								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>
 				</div>
-				<div className={`sm:col-span-4 ${direction === 'toSeireki' ? 'sm:col-span-3' : ''}`}>
+				<div
+					className={`sm:col-span-4 ${direction === 'toSeireki' ? 'sm:col-span-3' : ''}`}
+				>
 					<Label className="text-sm font-medium mb-2 block">日</Label>
 					<Select value={String(day)} onValueChange={(v) => setDay(Number(v))}>
 						<SelectTrigger className="rounded-xl">
 							<SelectValue />
 						</SelectTrigger>
 						<SelectContent>
-							{Array.from({ length: 31 }, (_, i) => i + 1).map(d => (
-								<SelectItem key={d} value={String(d)}>{d}日</SelectItem>
+							{Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+								<SelectItem key={d} value={String(d)}>
+									{d}日
+								</SelectItem>
 							))}
 						</SelectContent>
 					</Select>

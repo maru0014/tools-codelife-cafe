@@ -1,11 +1,11 @@
-import { useState, useMemo } from 'react';
-import { textToUnicode, unicodeToText } from '@/lib/tools/unicode-converter';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import CopyButton from '@/components/common/CopyButton';
 import { ArrowLeftRight, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { textToUnicode, unicodeToText } from '@/lib/tools/unicode-converter';
 
 export default function UnicodeConverter() {
 	const [input, setInput] = useState('');
@@ -28,11 +28,15 @@ export default function UnicodeConverter() {
 		<div className="space-y-6">
 			<div className="flex items-center gap-3 mb-4">
 				<Label className="text-sm font-medium whitespace-nowrap">
-					{direction === 'encode' ? 'テキスト → ユニコード' : 'ユニコード → テキスト'}
+					{direction === 'encode'
+						? 'テキスト → ユニコード'
+						: 'ユニコード → テキスト'}
 				</Label>
 				<Switch
 					checked={direction === 'decode'}
-					onCheckedChange={(checked) => setDirection(checked ? 'decode' : 'encode')}
+					onCheckedChange={(checked) =>
+						setDirection(checked ? 'decode' : 'encode')
+					}
 				/>
 				<ArrowLeftRight className="h-4 w-4 text-muted-foreground" />
 			</div>
@@ -42,7 +46,11 @@ export default function UnicodeConverter() {
 				<div>
 					<div className="flex justify-between items-center mb-2 min-h-9">
 						<Label className="text-sm font-medium block">
-							入力 ({direction === 'encode' ? 'プレーンテキスト' : 'ユニコード(\\uXXXX)'})
+							入力 (
+							{direction === 'encode'
+								? 'プレーンテキスト'
+								: 'ユニコード(\\uXXXX)'}
+							)
 						</Label>
 					</div>
 					<Textarea
@@ -50,8 +58,8 @@ export default function UnicodeConverter() {
 						onChange={(e) => setInput(e.target.value)}
 						placeholder={
 							direction === 'encode'
-								? "こんにちは世界\nHello World"
-								: "\\u3053\\u3093\\u306b\\u3061\\u306f\\u4e16\\u754c\n\\u0048\\u0065\\u006c\\u006c\\u006f\\u0020\\u0057\\u006f\\u0072\\u006c\\u0064"
+								? 'こんにちは世界\nHello World'
+								: '\\u3053\\u3093\\u306b\\u3061\\u306f\\u4e16\\u754c\n\\u0048\\u0065\\u006c\\u006c\\u006f\\u0020\\u0057\\u006f\\u0072\\u006c\\u0064'
 						}
 						className="min-h-[300px] font-mono-tool rounded-xl focus:ring-2 focus:ring-primary"
 					/>
@@ -78,8 +86,11 @@ export default function UnicodeConverter() {
 						value={result.error ? result.error : result.output}
 						readOnly
 						placeholder="変換結果がここに表示されます..."
-						className={`min-h-[300px] font-mono-tool rounded-xl bg-muted/50 ${result.error ? 'text-red-500 font-bold border-red-200 bg-red-50 dark:bg-red-950/20' : ''
-							} ${result.output ? 'shimmer' : ''}`}
+						className={`min-h-[300px] font-mono-tool rounded-xl bg-muted/50 ${
+							result.error
+								? 'text-red-500 font-bold border-red-200 bg-red-50 dark:bg-red-950/20'
+								: ''
+						} ${result.output ? 'shimmer' : ''}`}
 					/>
 				</div>
 			</div>

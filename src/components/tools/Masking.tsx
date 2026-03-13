@@ -1,13 +1,10 @@
-import { useState, useMemo } from 'react';
-import { maskText, type MaskTarget, type MaskChar, type MaskStrength } from '@/lib/tools/masking';
-import { Textarea } from '@/components/ui/textarea';
-import { Switch } from '@/components/ui/switch';
+import { Download, Trash2 } from 'lucide-react';
+import { useMemo, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import CopyButton from '@/components/common/CopyButton';
-import { Trash2, Download } from 'lucide-react';
 import {
 	Select,
 	SelectContent,
@@ -15,8 +12,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import {
+	type MaskChar,
+	type MaskStrength,
+	type MaskTarget,
+	maskText,
+} from '@/lib/tools/masking';
 
-const TARGET_TYPES: { id: MaskTarget, label: string }[] = [
+const TARGET_TYPES: { id: MaskTarget; label: string }[] = [
 	{ id: 'email', label: 'メールアドレス' },
 	{ id: 'phone', label: '電話番号' },
 	{ id: 'zipcode', label: '郵便番号' },
@@ -27,27 +31,39 @@ const TARGET_TYPES: { id: MaskTarget, label: string }[] = [
 
 export default function Masking() {
 	const [text, setText] = useState('');
-	const [targets, setTargets] = useState<Set<MaskTarget>>(new Set(['email', 'phone', 'zipcode', 'card', 'mynumber']));
+	const [targets, setTargets] = useState<Set<MaskTarget>>(
+		new Set(['email', 'phone', 'zipcode', 'card', 'mynumber']),
+	);
 	const [maskChar, setMaskChar] = useState<MaskChar>('*');
 	const [strength, setStrength] = useState<MaskStrength>('partial');
 
 	const { maskedText, counts, ranges } = useMemo(() => {
-		if (!text) return { maskedText: '', counts: { email: 0, phone: 0, zipcode: 0, card: 0, mynumber: 0, name: 0 }, ranges: [] };
+		if (!text)
+			return {
+				maskedText: '',
+				counts: {
+					email: 0,
+					phone: 0,
+					zipcode: 0,
+					card: 0,
+					mynumber: 0,
+					name: 0,
+				},
+				ranges: [],
+			};
 		return maskText(text, { targets, maskChar, strength });
 	}, [text, targets, maskChar, strength]);
 
 	const totalMasked = Object.values(counts).reduce((a, b) => a + b, 0);
 
 	const toggleTarget = (id: MaskTarget) => {
-		setTargets(prev => {
+		setTargets((prev) => {
 			const next = new Set(prev);
 			if (next.has(id)) next.delete(id);
 			else next.add(id);
 			return next;
 		});
 	};
-
-
 
 	const handleDownload = () => {
 		if (!maskedText) return;
@@ -81,12 +97,18 @@ export default function Masking() {
 		for (let i = 0; i < sorted.length; i++) {
 			const range = sorted[i];
 			if (range.start > lastIndex) {
-				nodes.push(<span key={`t-${i}`}>{text.slice(lastIndex, range.start)}</span>);
+				nodes.push(
+					<span key={`t-${i}`}>{text.slice(lastIndex, range.start)}</span>,
+				);
 			}
 			nodes.push(
-				<mark key={`m-${i}`} className="bg-primary/30 text-transparent rounded-[2px]" title={range.type}>
+				<mark
+					key={`m-${i}`}
+					className="bg-primary/30 text-transparent rounded-[2px]"
+					title={range.type}
+				>
 					{text.slice(range.start, range.end)}
-				</mark>
+				</mark>,
 			);
 			lastIndex = Math.max(lastIndex, range.end);
 		}
@@ -104,8 +126,13 @@ export default function Masking() {
 			<div className="bg-muted/30 p-4 rounded-xl border space-y-4">
 				<div className="flex flex-wrap items-center gap-6">
 					<div>
-						<Label className="text-xs mb-1 block text-muted-foreground">マスク文字</Label>
-						<Select value={maskChar} onValueChange={(v) => setMaskChar(v as MaskChar)}>
+						<Label className="text-xs mb-1 block text-muted-foreground">
+							マスク文字
+						</Label>
+						<Select
+							value={maskChar}
+							onValueChange={(v) => setMaskChar(v as MaskChar)}
+						>
 							<SelectTrigger className="w-[100px] h-8 rounded-lg bg-background">
 								<SelectValue />
 							</SelectTrigger>
@@ -117,8 +144,13 @@ export default function Masking() {
 					</div>
 
 					<div>
-						<Label className="text-xs mb-1 block text-muted-foreground">強度</Label>
-						<Select value={strength} onValueChange={(v) => setStrength(v as MaskStrength)}>
+						<Label className="text-xs mb-1 block text-muted-foreground">
+							強度
+						</Label>
+						<Select
+							value={strength}
+							onValueChange={(v) => setStrength(v as MaskStrength)}
+						>
 							<SelectTrigger className="w-[140px] h-8 rounded-lg bg-background">
 								<SelectValue />
 							</SelectTrigger>
@@ -131,17 +163,28 @@ export default function Masking() {
 				</div>
 
 				<div>
-					<Label className="text-xs mb-2 block text-muted-foreground">自動検出対象</Label>
+					<Label className="text-xs mb-2 block text-muted-foreground">
+						自動検出対象
+					</Label>
 					<div className="flex flex-wrap gap-3">
-						{TARGET_TYPES.map(t => (
+						{TARGET_TYPES.map((t) => (
 							<div key={t.id} className="flex items-center gap-1.5">
 								<Checkbox
 									id={`target-${t.id}`}
 									checked={targets.has(t.id)}
 									onCheckedChange={() => toggleTarget(t.id)}
 								/>
-								<Label htmlFor={`target-${t.id}`} className="text-sm cursor-pointer whitespace-nowrap">
-									{t.label} <Badge variant="secondary" className="ml-1 px-1 h-4 text-[10px]">{counts[t.id]}</Badge>
+								<Label
+									htmlFor={`target-${t.id}`}
+									className="text-sm cursor-pointer whitespace-nowrap"
+								>
+									{t.label}{' '}
+									<Badge
+										variant="secondary"
+										className="ml-1 px-1 h-4 text-[10px]"
+									>
+										{counts[t.id]}
+									</Badge>
 								</Label>
 							</div>
 						))}
@@ -188,11 +231,20 @@ export default function Masking() {
 					<div className="flex items-center justify-between mb-2">
 						<Label className="text-sm font-medium flex items-center gap-2">
 							マスキング後
-							{totalMasked > 0 && <span className="text-xs text-green-600 font-normal">({totalMasked}箇所マスク済)</span>}
+							{totalMasked > 0 && (
+								<span className="text-xs text-green-600 font-normal">
+									({totalMasked}箇所マスク済)
+								</span>
+							)}
 						</Label>
 						<div className="flex items-center gap-2">
 							{maskedText && (
-								<Button variant="outline" size="sm" onClick={handleDownload} className="h-8">
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={handleDownload}
+									className="h-8"
+								>
 									<Download className="h-4 w-4 mr-1" /> 保存
 								</Button>
 							)}
@@ -202,8 +254,9 @@ export default function Masking() {
 					<Textarea
 						value={maskedText}
 						readOnly
-						className={`min-h-[300px] font-mono-tool text-sm leading-5 rounded-xl bg-card border shadow-sm ${maskedText ? 'shimmer' : ''
-							}`}
+						className={`min-h-[300px] font-mono-tool text-sm leading-5 rounded-xl bg-card border shadow-sm ${
+							maskedText ? 'shimmer' : ''
+						}`}
 						spellCheck={false}
 					/>
 				</div>

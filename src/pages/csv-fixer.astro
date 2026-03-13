@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import CsvFixer from '../components/tools/CsvFixer';
+import CsvFixerTool from '../components/tools/CsvFixer';
 ---
 
 <ToolLayout
@@ -9,7 +9,7 @@ import CsvFixer from '../components/tools/CsvFixer';
   path="/csv-fixer"
 >
   <div class="mt-8">
-    <CsvFixer client:load />
+    <CsvFixerTool client:load />
   </div>
 
   <div slot="usage" class="mt-12">

@@ -44,6 +44,18 @@ src/
 3. **ロジックとUIを分離する** — `src/lib/tools/` に純粋関数、`src/components/tools/` にReactコンポーネント
 4. **新ツールは3ファイルで完結** — ロジック(`lib`) + コンポーネント(`component`) + ページ(`page`)
 
+## 命名規約・コーディング規約
+
+- **ファイル名（ページ・ロジック）:** kebab-case（例：`json-formatter.ts`, `json-formatter.astro`）
+- **ファイル名（Reactコンポーネント）:** PascalCase（例：`JsonFormatter.tsx`）
+- **コンポーネント名:** PascalCase（例：`export function JsonFormatter()`）
+- **関数・変数:** camelCase（例：`formatJson`, `inputText`）
+- **定数:** UPPER_SNAKE_CASE（例：`MAX_INPUT_LENGTH`）
+- **型・インターフェース:** PascalCase（例：`type FormatOptions`）
+- **インポートパス:** `@/` エイリアスを使用（例：`import { cn } from '@/lib/utils'`）
+- **Linter:** Biome（`npx biome check`）。CI でも実行される
+- **インデント:** タブ（Biome デフォルト）
+
 ## デザインシステム
 
 - **カラー:** CSS変数で定義（`--primary`, `--accent`, `--safety` など）。`global.css` の `:root` と `.dark` を参照

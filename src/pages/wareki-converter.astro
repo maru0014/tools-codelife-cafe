@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import WarekiConverter from '../components/tools/WarekiConverter.tsx';
+import WarekiConverterTool from '../components/tools/WarekiConverter.tsx';
 ---
 
 <ToolLayout
@@ -8,7 +8,7 @@ import WarekiConverter from '../components/tools/WarekiConverter.tsx';
   description="明治〜令和の和暦と西暦を相互変換。干支・年齢も同時表示。ブラウザ内処理でデータ送信なし。"
   path="/wareki-converter"
 >
-  <WarekiConverter client:load />
+  <WarekiConverterTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">

@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import UnicodeConverter from '../components/tools/UnicodeConverter.tsx';
+import UnicodeConverterTool from '../components/tools/UnicodeConverter.tsx';
 ---
 
 <ToolLayout
@@ -8,7 +8,7 @@ import UnicodeConverter from '../components/tools/UnicodeConverter.tsx';
   description="テキストとユニコードエスケープシーケンス（\\uXXXX）を相互変換。完全クライアントサイド処理で安全に利用できます。"
   path="/unicode-converter"
 >
-  <UnicodeConverter client:load />
+  <UnicodeConverterTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">

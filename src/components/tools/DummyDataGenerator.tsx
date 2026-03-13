@@ -1,13 +1,17 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
-import { generateDummyData, parsePreviewData, type FieldType, type ExportFormat } from '@/lib/tools/dummy-data';
+import {
+	Download,
+	GripVertical,
+	ListPlus,
+	Loader2,
+	RefreshCw,
+} from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import CopyButton from '@/components/common/CopyButton';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Card, CardContent } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import CopyButton from '@/components/common/CopyButton';
-import { GripVertical, Download, RefreshCw, ListPlus, Loader2 } from 'lucide-react';
 import {
 	Select,
 	SelectContent,
@@ -15,11 +19,17 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+	type ExportFormat,
+	type FieldType,
+	generateDummyData,
+} from '@/lib/tools/dummy-data';
 
 const PRESETS: Record<string, FieldType[]> = {
-	'顧客リスト': ['name', 'kana', 'email', 'phone', 'zipcode', 'address'],
-	'社員名簿': ['name', 'kana', 'department', 'email', 'phone'],
-	'注文データ': ['date', 'name', 'number', 'address'],
+	顧客リスト: ['name', 'kana', 'email', 'phone', 'zipcode', 'address'],
+	社員名簿: ['name', 'kana', 'department', 'email', 'phone'],
+	注文データ: ['date', 'name', 'number', 'address'],
 };
 
 interface FieldItem {
@@ -42,15 +52,17 @@ const ALL_FIELDS: FieldItem[] = [
 
 export default function DummyDataGenerator() {
 	const [fields, setFields] = useState<FieldItem[]>(ALL_FIELDS);
-	const [selectedFields, setSelectedFields] = useState<Set<FieldType>>(new Set(['name', 'kana', 'email', 'phone']));
+	const [selectedFields, setSelectedFields] = useState<Set<FieldType>>(
+		new Set(['name', 'kana', 'email', 'phone']),
+	);
 	const [count, setCount] = useState<number>(10);
 	const [format, setFormat] = useState<ExportFormat>('json');
 
 	// To trigger re-generation without changing inputs
-	const [refreshKey, setRefreshKey] = useState(0);
+	const [_refreshKey, setRefreshKey] = useState(0);
 
 	const activeFields = useMemo(() => {
-		return fields.filter(f => selectedFields.has(f.id)).map(f => f.id);
+		return fields.filter((f) => selectedFields.has(f.id)).map((f) => f.id);
 	}, [fields, selectedFields]);
 
 	const [outputData, setOutputData] = useState('');
@@ -62,12 +74,14 @@ export default function DummyDataGenerator() {
 			if (activeFields.length === 0 || count < 1) {
 				setOutputData('');
 			} else {
-				setOutputData(generateDummyData(activeFields, Math.min(count, 1000), format));
+				setOutputData(
+					generateDummyData(activeFields, Math.min(count, 1000), format),
+				);
 			}
 			setIsGenerating(false);
 		}, 50);
 		return () => clearTimeout(timer);
-	}, [activeFields, count, format, refreshKey]);
+	}, [activeFields, count, format]);
 
 	const previewData = useMemo(() => {
 		if (!outputData) return [];
@@ -82,7 +96,7 @@ export default function DummyDataGenerator() {
 		const lines = outputData.split('\n');
 		const head = lines[0];
 		const rows = lines.slice(1, 21);
-		return [{ __previewText: head + '\n' + rows.join('\n') }];
+		return [{ __previewText: `${head}\n${rows.join('\n')}` }];
 	}, [outputData, format]);
 
 	// Drag and Drop ordering
@@ -93,9 +107,9 @@ export default function DummyDataGenerator() {
 	const handleDrop = (e: React.DragEvent, dropIndex: number) => {
 		e.preventDefault();
 		const dragIndex = parseInt(e.dataTransfer.getData('fieldIndex'), 10);
-		if (dragIndex === dropIndex || isNaN(dragIndex)) return;
+		if (dragIndex === dropIndex || Number.isNaN(dragIndex)) return;
 
-		setFields(prev => {
+		setFields((prev) => {
 			const next = [...prev];
 			const [draggedItem] = next.splice(dragIndex, 1);
 			next.splice(dropIndex, 0, draggedItem);
@@ -104,7 +118,7 @@ export default function DummyDataGenerator() {
 	};
 
 	const toggleField = (id: FieldType) => {
-		setSelectedFields(prev => {
+		setSelectedFields((prev) => {
 			const next = new Set(prev);
 			if (next.has(id)) next.delete(id);
 			else next.add(id);
@@ -158,8 +172,10 @@ export default function DummyDataGenerator() {
 										<SelectValue placeholder="プリセット" />
 									</SelectTrigger>
 									<SelectContent>
-										{Object.keys(PRESETS).map(key => (
-											<SelectItem key={key} value={key}>{key}</SelectItem>
+										{Object.keys(PRESETS).map((key) => (
+											<SelectItem key={key} value={key}>
+												{key}
+											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
@@ -186,7 +202,11 @@ export default function DummyDataGenerator() {
 											onCheckedChange={() => toggleField(f.id)}
 											className="flex-shrink-0"
 										/>
-										<Label htmlFor={`field-${f.id}`} className="text-sm cursor-pointer flex-1 whitespace-nowrap overflow-hidden text-ellipsis" title={f.label}>
+										<Label
+											htmlFor={`field-${f.id}`}
+											className="text-sm cursor-pointer flex-1 whitespace-nowrap overflow-hidden text-ellipsis"
+											title={f.label}
+										>
 											{f.label}
 										</Label>
 									</div>
@@ -198,7 +218,9 @@ export default function DummyDataGenerator() {
 					<Card className="rounded-xl border-2">
 						<CardContent className="p-4 space-y-4">
 							<div>
-								<Label className="font-semibold text-sm mb-2 block">生成件数 (1〜1000)</Label>
+								<Label className="font-semibold text-sm mb-2 block">
+									生成件数 (1〜1000)
+								</Label>
 								<Input
 									type="number"
 									min={1}
@@ -210,8 +232,13 @@ export default function DummyDataGenerator() {
 							</div>
 
 							<div>
-								<Label className="font-semibold text-sm mb-2 block">出力形式</Label>
-								<Tabs value={format} onValueChange={(v) => setFormat(v as ExportFormat)}>
+								<Label className="font-semibold text-sm mb-2 block">
+									出力形式
+								</Label>
+								<Tabs
+									value={format}
+									onValueChange={(v) => setFormat(v as ExportFormat)}
+								>
 									<TabsList className="grid w-full grid-cols-3">
 										<TabsTrigger value="json">JSON</TabsTrigger>
 										<TabsTrigger value="csv">CSV</TabsTrigger>
@@ -221,7 +248,7 @@ export default function DummyDataGenerator() {
 							</div>
 
 							<Button
-								onClick={() => setRefreshKey(k => k + 1)}
+								onClick={() => setRefreshKey((k) => k + 1)}
 								className="w-full rounded-xl"
 								variant="secondary"
 							>
@@ -235,9 +262,16 @@ export default function DummyDataGenerator() {
 				{/* Right column: Preview & Output */}
 				<div className="lg:col-span-8 flex flex-col h-full">
 					<div className="flex items-center justify-between mb-4">
-						<Label className="text-base font-semibold">データプレビュー (最大20件)</Label>
+						<Label className="text-base font-semibold">
+							データプレビュー (最大20件)
+						</Label>
 						<div className="flex gap-2">
-							<Button variant="outline" size="sm" onClick={handleDownload} disabled={!outputData}>
+							<Button
+								variant="outline"
+								size="sm"
+								onClick={handleDownload}
+								disabled={!outputData}
+							>
 								<Download className="h-4 w-4 mr-1" /> 保存
 							</Button>
 							<CopyButton text={outputData} />
@@ -248,7 +282,9 @@ export default function DummyDataGenerator() {
 						{isGenerating && (
 							<div className="absolute inset-0 z-10 bg-background/50 backdrop-blur-[1px] flex flex-col items-center justify-center">
 								<Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-								<span className="text-primary text-sm font-medium">生成中...</span>
+								<span className="text-primary text-sm font-medium">
+									生成中...
+								</span>
 							</div>
 						)}
 						{activeFields.length === 0 ? (

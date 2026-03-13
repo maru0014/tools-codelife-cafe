@@ -14,7 +14,7 @@ export default defineConfig({
   },
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    { name: 'mobile-chrome', use: { ...devices['Pixel 5'] } },
+    { name: 'mobile-chrome', use: { ...devices['Pixel 7'] } },
   ],
   webServer: {
     command: 'npm run preview:ci',
