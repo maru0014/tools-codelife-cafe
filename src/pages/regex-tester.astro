@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import RegexTester from '../components/tools/RegexTester.tsx';
+import RegexTesterTool from '../components/tools/RegexTester.tsx';
 ---
 
 <ToolLayout
@@ -8,7 +8,7 @@ import RegexTester from '../components/tools/RegexTester.tsx';
   description="正規表現のリアルタイムテスト・マッチ確認・置換。よく使うパターン集付き。"
   path="/regex-tester"
 >
-  <RegexTester client:load />
+  <RegexTesterTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">
