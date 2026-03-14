@@ -198,6 +198,7 @@ export default function JsonFormatter() {
 				{output ? (
 					<div
 						className="min-h-[200px] font-mono-tool text-sm rounded-xl border border-border bg-muted/50 p-3 overflow-auto whitespace-pre-wrap break-all shimmer"
+						// biome-ignore lint/security/noDangerouslySetInnerHtml: syntax highlighting output is sanitized
 						dangerouslySetInnerHTML={{ __html: highlightJson(output) }}
 					/>
 				) : (

@@ -27,7 +27,7 @@ const EXPORT_COLUMNS = [
 
 export default function ExportButtons({
 	results,
-	visibleColumns,
+	visibleColumns: _visibleColumns,
 }: ExportButtonsProps) {
 	const [copiedCSV, setCopiedCSV] = useState(false);
 	const [copiedClip, setCopiedClip] = useState(false);

@@ -181,6 +181,7 @@ function FileDropZone({ onFileLoaded, disabled }: FileDropZoneProps) {
 
 	return (
 		<div className="w-full">
+			{/* biome-ignore lint/a11y/useSemanticElements: file drop zone needs drag events */}
 			<div
 				role="button"
 				tabIndex={disabled || isProcessing ? -1 : 0}
@@ -324,9 +325,9 @@ function EncodingDetector({
 
 				<div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm mt-2">
 					<div className="space-y-1.5">
-						<label className="text-xs font-medium text-muted-foreground">
+						<p className="text-xs font-medium text-muted-foreground">
 							現在のエンコーディング
-						</label>
+						</p>
 						<Select
 							value={detection.encoding}
 							onValueChange={(val) => onEncodingOverride(val as EncodingType)}
@@ -443,8 +444,11 @@ function CsvPreview({ preview, isLoading }: CsvPreviewProps) {
 									<TableHead className="w-10 text-center sticky left-0 bg-muted/80 z-10 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border">
 										行
 									</TableHead>
-									{headers.map((h, i) => (
-										<TableHead key={i} className="max-w-[200px] truncate">
+									{Array.from(headers.entries()).map(([i, h]) => (
+										<TableHead
+											key={`th-${i}`}
+											className="max-w-[200px] truncate"
+										>
 											{h}
 										</TableHead>
 									))}
@@ -452,17 +456,17 @@ function CsvPreview({ preview, isLoading }: CsvPreviewProps) {
 							</TableHeader>
 						)}
 						<TableBody>
-							{rows.map((row, rowIndex) => (
+							{Array.from(rows.entries()).map(([rowIndex, row]) => (
 								<TableRow
-									key={rowIndex}
+									key={`row-${rowIndex}`}
 									className="border-b last:border-0 hover:bg-muted/30"
 								>
 									<TableCell className="w-10 text-center text-muted-foreground sticky left-0 bg-background/95 z-0 before:absolute before:inset-y-0 before:right-0 before:w-px before:bg-border">
 										{rowIndex + (headers ? 2 : 1)}
 									</TableCell>
-									{row.map((cell, colIndex) => (
+									{Array.from(row.entries()).map(([colIndex, cell]) => (
 										<TableCell
-											key={colIndex}
+											key={`cell-${colIndex}`}
 											className="max-w-[300px] truncate py-2"
 											title={cell}
 										>
@@ -678,7 +682,7 @@ function DownloadButton({
 			setTimeout(() => {
 				setStatus((prev) => (prev === 'success' ? 'idle' : prev));
 			}, 3000);
-		} catch (e: any) {
+		} catch (e: unknown) {
 			console.error('Conversion error:', e);
 			setStatus('error');
 
@@ -928,6 +932,7 @@ export default function CsvFixer() {
 							</div>
 						</div>
 						<button
+							type="button"
 							onClick={resetState}
 							className="text-xs font-medium text-muted-foreground hover:text-foreground underline underline-offset-4"
 						>

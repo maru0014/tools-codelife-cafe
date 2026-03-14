@@ -7,7 +7,8 @@ export interface ValidationResult {
 export function getMaxFileSize(): number {
 	if (typeof navigator !== 'undefined' && 'deviceMemory' in navigator) {
 		// navigator.deviceMemory gives memory in GB
-		const memory = (navigator as any).deviceMemory || 4;
+		const memory =
+			(navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
 
 		if (memory < 4) {
 			// Mobile (< 4GB): clamp to deviceMemory * 5 MB, min 10MB, max 20MB

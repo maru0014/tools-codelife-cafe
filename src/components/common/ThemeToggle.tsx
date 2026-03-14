@@ -37,6 +37,7 @@ export default function ThemeToggle() {
 
 	return (
 		<button
+			type="button"
 			onClick={toggle}
 			className="relative inline-flex h-9 w-9 items-center justify-center rounded-lg border border-border bg-background hover:bg-muted transition-colors"
 			aria-label={isDark ? 'ライトモードに切替' : 'ダークモードに切替'}

@@ -190,9 +190,9 @@ export default function TextDiff() {
 								<div className="w-full min-w-max">
 									{result.parts
 										.filter((p) => p.type !== 'added')
-										.map((part, i) => (
+										.map((part) => (
 											<div
-												key={`l-${i}`}
+												key={`l-${part.type}-${part.value.slice(0, 30)}`}
 												className={`px-4 py-0.5 min-w-max ${part.type === 'removed' ? 'bg-red-500/10 text-red-700 dark:text-red-300' : ''}`}
 											>
 												{part.type === 'removed' && (
@@ -213,9 +213,9 @@ export default function TextDiff() {
 								<div className="w-full min-w-max">
 									{result.parts
 										.filter((p) => p.type !== 'removed')
-										.map((part, i) => (
+										.map((part) => (
 											<div
-												key={`r-${i}`}
+												key={`r-${part.type}-${part.value.slice(0, 30)}`}
 												className={`px-4 py-0.5 min-w-max ${part.type === 'added' ? 'bg-green-500/10 text-green-700 dark:text-green-300' : ''}`}
 											>
 												{part.type === 'added' && (
@@ -232,9 +232,9 @@ export default function TextDiff() {
 						</div>
 					) : (
 						<div className="rounded-xl border border-border bg-card overflow-hidden font-mono-tool text-sm">
-							{result.parts.map((part, i) => (
+							{result.parts.map((part) => (
 								<div
-									key={i}
+									key={`u-${part.type}-${part.value.slice(0, 30)}`}
 									className={`px-4 py-0.5 whitespace-pre-wrap break-all ${
 										part.type === 'added'
 											? 'bg-green-500/10 text-green-700 dark:text-green-300'

@@ -17,7 +17,7 @@ export function decodeBase64(base64: string): string {
 			throw new Error('不正なBase64文字列です。');
 		}
 		const binString = atob(base64);
-		const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0)!);
+		const bytes = Uint8Array.from(binString, (m) => m.codePointAt(0) ?? 0);
 		return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
 	} catch (_error) {
 		throw new Error(

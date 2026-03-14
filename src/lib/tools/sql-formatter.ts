@@ -53,8 +53,8 @@ export function formatSql(
 			linesBetweenQueries: 2,
 		});
 		return { output: formatted };
-	} catch (error: any) {
-		const msg = error.message || String(error);
+	} catch (error: unknown) {
+		const msg = error instanceof Error ? error.message : String(error);
 		return {
 			output: sql,
 			error: `SQLの構文エラー:\n${msg}`,

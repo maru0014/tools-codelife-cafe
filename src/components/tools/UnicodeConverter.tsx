@@ -19,8 +19,11 @@ export default function UnicodeConverter() {
 			} else {
 				return { output: unicodeToText(input), error: null };
 			}
-		} catch (err: any) {
-			return { output: '', error: err.message };
+		} catch (err: unknown) {
+			return {
+				output: '',
+				error: err instanceof Error ? err.message : String(err),
+			};
 		}
 	}, [input, direction]);
 

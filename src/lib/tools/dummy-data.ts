@@ -210,7 +210,7 @@ export function generateDummyData(
 export function parsePreviewData(
 	dataString: string,
 	format: ExportFormat,
-): Record<string, any>[] {
+): Record<string, unknown>[] {
 	if (!dataString) return [];
 	if (format === 'json') {
 		try {
@@ -232,7 +232,7 @@ export function parsePreviewData(
 			format === 'csv'
 				? line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || line.split(',')
 				: line.split('\t');
-		const obj: Record<string, any> = {};
+		const obj: Record<string, unknown> = {};
 		headers.forEach((h, i) => {
 			let val = values[i] || '';
 			if (val.startsWith('"') && val.endsWith('"')) {

@@ -89,7 +89,7 @@ export function convertEncoding(
 	}
 
 	// 5. Create Blob
-	const blob = new Blob([finalBytes as any], {
+	const blob = new Blob([finalBytes.buffer as ArrayBuffer], {
 		type:
 			options.outputEncoding === 'UTF8'
 				? 'text/csv; charset=utf-8'
