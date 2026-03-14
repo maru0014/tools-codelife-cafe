@@ -43,8 +43,8 @@ export function testRegex(
 		const matches: RegexMatch[] = [];
 
 		if (regex.global) {
-			let match;
-			while ((match = regex.exec(text)) !== null) {
+			let match: RegExpExecArray | null = regex.exec(text);
+			while (match !== null) {
 				matches.push({
 					value: match[0],
 					index: match.index,
@@ -54,6 +54,7 @@ export function testRegex(
 				if (match.index === regex.lastIndex) {
 					regex.lastIndex++;
 				}
+				match = regex.exec(text);
 			}
 		} else {
 			const match = regex.exec(text);
@@ -66,13 +67,16 @@ export function testRegex(
 			}
 		}
 
-		let replacedText;
+		let replacedText: string | undefined;
 		if (replacement !== undefined) {
 			replacedText = text.replace(regex, replacement);
 		}
 
 		return { matches, replacedText };
-	} catch (err: any) {
-		return { matches: [], error: err.message };
+	} catch (err: unknown) {
+		return {
+			matches: [],
+			error: err instanceof Error ? err.message : String(err),
+		};
 	}
 }

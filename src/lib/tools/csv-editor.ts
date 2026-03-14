@@ -55,10 +55,13 @@ export function parseCsv(
 				colCount: maxCols,
 			},
 		};
-	} catch (err: any) {
+	} catch (err: unknown) {
 		return {
 			data: { rows: [], colCount: 0 },
-			error: err.message || 'CSVの解析に失敗しました。',
+			error:
+				err instanceof Error
+					? err.message
+					: String(err) || 'CSVの解析に失敗しました。',
 		};
 	}
 }

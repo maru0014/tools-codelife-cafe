@@ -40,8 +40,12 @@ export default function Base64Converter() {
 				const out = decodeBase64(textInput);
 				return { output: out, error: null, size: getBase64ByteSize(textInput) };
 			}
-		} catch (err: any) {
-			return { output: '', error: err.message, size: 0 };
+		} catch (err: unknown) {
+			return {
+				output: '',
+				error: err instanceof Error ? err.message : String(err),
+				size: 0,
+			};
 		}
 	}, [textInput, direction]);
 
@@ -207,6 +211,7 @@ export default function Base64Converter() {
 									ファイル入力
 								</Label>
 							</div>
+							{/* biome-ignore lint/a11y/noStaticElementInteractions: file drop zone */}
 							<div
 								onDrop={handleDrop}
 								onDragOver={(e) => {

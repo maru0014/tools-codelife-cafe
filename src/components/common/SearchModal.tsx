@@ -218,9 +218,14 @@ export default function SearchModal() {
 	if (!isOpen) return null;
 
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: modal backdrop closes on click
 		<div
 			className="fixed inset-0 z-50 flex items-start justify-center pt-[20vh] bg-background/80 backdrop-blur-sm"
+			role="presentation"
 			onClick={handleBackdropClick}
+			onKeyDown={(e) => {
+				if (e.key === 'Escape') setIsOpen(false);
+			}}
 		>
 			<div className="relative w-full max-w-xl mx-4 overflow-hidden bg-card border border-border rounded-xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
 				<div className="flex items-center px-4 py-3 border-b border-border">
@@ -259,11 +264,9 @@ export default function SearchModal() {
 									onClick={() => setIsOpen(false)}
 								>
 									<div className="flex items-center gap-3">
-										<span
-											className="text-xl"
-											aria-hidden="true"
-											dangerouslySetInnerHTML={{ __html: tool.icon }}
-										></span>
+										<span className="text-xl" aria-hidden="true">
+											{tool.icon}
+										</span>
 										<div className="flex flex-col">
 											<span
 												className={`font-medium ${index === activeIndex ? 'text-primary' : 'text-foreground'}`}

@@ -44,6 +44,7 @@ export default function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
 				className="absolute top-1 h-[calc(100%-8px)] bg-background rounded-md shadow-sm transition-all duration-200 ease-in-out"
 			/>
 			<button
+				type="button"
 				ref={singleRef}
 				role="tab"
 				aria-selected={mode === 'single'}
@@ -57,6 +58,7 @@ export default function ModeToggle({ mode, onModeChange }: ModeToggleProps) {
 				単一入力
 			</button>
 			<button
+				type="button"
 				ref={bulkRef}
 				role="tab"
 				aria-selected={mode === 'bulk'}

@@ -75,7 +75,7 @@ export default function ResultTable({
 	return (
 		<div className="space-y-4">
 			{/* サマリーバー */}
-			<div
+			<section
 				className="flex flex-wrap items-center gap-4 rounded-lg border border-border bg-card px-4 py-3"
 				aria-label="変換結果サマリー"
 			>
@@ -92,12 +92,11 @@ export default function ResultTable({
 				<span className="text-sm text-muted-foreground">
 					合計: {summary.total.toLocaleString()}件
 				</span>
-			</div>
+			</section>
 
 			{/* カラム表示切替 */}
-			<div
+			<fieldset
 				className="flex flex-wrap items-center gap-2"
-				role="group"
 				aria-label="表示カラムの選択"
 			>
 				<span className="text-xs text-muted-foreground">表示カラム:</span>
@@ -125,7 +124,7 @@ export default function ResultTable({
 						</label>
 					);
 				})}
-			</div>
+			</fieldset>
 
 			{/* テーブル */}
 			<div className="overflow-x-auto rounded-xl border border-border">
@@ -197,9 +196,8 @@ export default function ResultTable({
 
 			{/* ページネーション */}
 			{totalPages > 1 && (
-				<div
+				<nav
 					className="flex items-center justify-between"
-					role="navigation"
 					aria-label="ページネーション"
 				>
 					<span className="text-xs text-muted-foreground">
@@ -230,7 +228,7 @@ export default function ResultTable({
 							<ChevronRight className="h-4 w-4" />
 						</Button>
 					</div>
-				</div>
+				</nav>
 			)}
 		</div>
 	);

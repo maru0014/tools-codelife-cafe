@@ -57,7 +57,7 @@ test.describe('CSV文字化け修復ツール', () => {
 		).toBeVisible();
 	});
 
-	test('即時変換モードが動作すること', async ({ page, context }) => {
+	test('即時変換モードが動作すること', async ({ page, context: _context }) => {
 		// Enable instant mode
 		await page.getByRole('switch', { name: '即時変換モード' }).click();
 

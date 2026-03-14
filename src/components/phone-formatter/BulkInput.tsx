@@ -209,6 +209,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 			{/* テキスト / CSV タブ */}
 			<div className="flex gap-1 bg-muted rounded-lg p-1 w-fit">
 				<button
+					type="button"
 					onClick={() => setInputMode('text')}
 					className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors ${
 						inputMode === 'text'
@@ -220,6 +221,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 					テキスト入力
 				</button>
 				<button
+					type="button"
 					onClick={() => setInputMode('csv')}
 					className={`flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors ${
 						inputMode === 'csv'
@@ -256,18 +258,13 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 			{inputMode === 'csv' && (
 				<div className="space-y-3">
 					{mounted && (
-						<div
+						<button
+							type="button"
 							onDragOver={handleDragOver}
 							onDragLeave={handleDragLeave}
 							onDrop={handleDrop}
 							onClick={() => fileInputRef.current?.click()}
-							role="button"
-							tabIndex={0}
 							aria-label="CSVファイルをドラッグ＆ドロップするか、クリックして選択"
-							onKeyDown={(e) => {
-								if (e.key === 'Enter' || e.key === ' ')
-									fileInputRef.current?.click();
-							}}
 							className={`flex flex-col items-center justify-center gap-3 rounded-xl border-2 border-dashed p-8 cursor-pointer transition-colors ${
 								isDragging
 									? 'border-primary bg-primary/5'
@@ -283,7 +280,7 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 									または クリックして選択（CSV/TSV/TXT、最大5MB）
 								</p>
 							</div>
-						</div>
+						</button>
 					)}
 
 					<input
@@ -312,8 +309,8 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 								onChange={(e) => setSelectedColumn(Number(e.target.value))}
 								className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring/20"
 							>
-								{csvHeaders.map((header, index) => (
-									<option key={index} value={index}>
+								{Array.from(csvHeaders.entries()).map(([index, header]) => (
+									<option key={`col-${index}`} value={index}>
 										{index + 1}列目: {header || `（列${index + 1}）`}
 									</option>
 								))}
@@ -325,9 +322,9 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 									<table className="w-full text-xs">
 										<thead>
 											<tr className="bg-muted/50">
-												{csvHeaders.map((h, i) => (
+												{Array.from(csvHeaders.entries()).map(([i, h]) => (
 													<th
-														key={i}
+														key={`th-${i}`}
 														className={`px-3 py-2 text-left font-medium ${
 															i === selectedColumn
 																? 'text-primary bg-primary/5'
@@ -340,11 +337,14 @@ export default function BulkInput({ onBulkResult }: BulkInputProps) {
 											</tr>
 										</thead>
 										<tbody>
-											{previewRows.map((row, ri) => (
-												<tr key={ri} className="border-t border-border">
-													{csvHeaders.map((_, ci) => (
+											{Array.from(previewRows.entries()).map(([ri, row]) => (
+												<tr
+													key={`row-${ri}`}
+													className="border-t border-border"
+												>
+													{Array.from(csvHeaders.entries()).map(([ci]) => (
 														<td
-															key={ci}
+															key={`cell-${ri}-${ci}`}
 															className={`px-3 py-2 ${
 																ci === selectedColumn
 																	? 'font-medium text-primary bg-primary/5'

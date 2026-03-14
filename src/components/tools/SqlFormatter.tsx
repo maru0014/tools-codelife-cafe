@@ -76,18 +76,27 @@ export default function SqlFormatter() {
 	const [manualOutput, setManualOutput] = useState('');
 	const [manualError, setManualError] = useState<string | null>(null);
 
-	const options: SqlFormatOptions = { dialect, indent, uppercase, compress };
-
 	const { output, error } = useMemo(() => {
-		if (autoFormat) return formatSql(input, options);
+		const opts: SqlFormatOptions = { dialect, indent, uppercase, compress };
+		if (autoFormat) return formatSql(input, opts);
 		return { output: manualOutput, error: manualError };
-	}, [input, options, autoFormat, manualOutput, manualError]);
+	}, [
+		input,
+		dialect,
+		indent,
+		uppercase,
+		compress,
+		autoFormat,
+		manualOutput,
+		manualError,
+	]);
 
 	const handleFormat = useCallback(() => {
-		const res = formatSql(input, options);
+		const opts: SqlFormatOptions = { dialect, indent, uppercase, compress };
+		const res = formatSql(input, opts);
 		setManualOutput(res.output);
 		setManualError(res.error || null);
-	}, [input, options]);
+	}, [input, dialect, indent, uppercase, compress]);
 
 	useEffect(() => {
 		if (autoFormat) {
