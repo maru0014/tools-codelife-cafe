@@ -1,7 +1,7 @@
 /**
  * URL Encode/Decode options
  */
-export type UrlEncodeMode = "component" | "full";
+export type UrlEncodeMode = 'component' | 'full';
 
 export interface UrlEncodeOptions {
 	mode: UrlEncodeMode;
@@ -16,17 +16,17 @@ export interface UrlEncodeOptions {
  */
 export function encodeUrl(
 	text: string,
-	options: UrlEncodeOptions = { mode: "component" },
+	options: UrlEncodeOptions = { mode: 'component' },
 ): string {
-	if (!text) return "";
+	if (!text) return '';
 
 	try {
-		if (options.mode === "full") {
+		if (options.mode === 'full') {
 			return encodeURI(text);
 		}
 		return encodeURIComponent(text);
 	} catch (error) {
-		console.error("URL encoding error:", error);
+		console.error('URL encoding error:', error);
 		return text;
 	}
 }
@@ -40,9 +40,9 @@ export function encodeUrl(
  */
 export function decodeUrl(
 	text: string,
-	options: UrlEncodeOptions = { mode: "component" },
+	options: UrlEncodeOptions = { mode: 'component' },
 ): string {
-	if (!text) return "";
+	if (!text) return '';
 
 	try {
 		// "+" is often used to represent space in query parameters
@@ -50,15 +50,15 @@ export function decodeUrl(
 		// However, standard encodeURIComponent encodes space as "%20", not "+".
 		// To be safely handling "+", we replace it with "%20" before decoding.
 		const normalizedText =
-			options.mode === "component" ? text.replace(/\+/g, "%20") : text;
+			options.mode === 'component' ? text.replace(/\+/g, '%20') : text;
 
-		if (options.mode === "full") {
+		if (options.mode === 'full') {
 			return decodeURI(normalizedText);
 		}
 		return decodeURIComponent(normalizedText);
 	} catch (error) {
 		// Return original text if malformed URI component
-		console.error("URL decoding error:", error);
+		console.error('URL decoding error:', error);
 		return text;
 	}
 }
