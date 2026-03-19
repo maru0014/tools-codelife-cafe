@@ -1,6 +1,6 @@
 ---
 import ToolLayout from '../components/common/ToolLayout.astro';
-import UrlEncoder from '../components/tools/UrlEncoder.tsx';
+import UrlEncoderTool from '../components/tools/UrlEncoder.tsx';
 ---
 
 <ToolLayout
@@ -8,7 +8,7 @@ import UrlEncoder from '../components/tools/UrlEncoder.tsx';
   description="日本語を含むURLやクエリパラメータをブラウザ内で安全にエンコード・デコードします。encodeURIComponent と encodeURI モード切替対応。"
   path="/url-encoder"
 >
-  <UrlEncoder client:load />
+  <UrlEncoderTool client:load />
 
   <div slot="usage" class="mt-8">
     <details class="group rounded-xl border border-border p-4">
