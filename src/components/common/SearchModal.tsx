@@ -69,6 +69,14 @@ const TOOLS: Tool[] = [
 		category: 'ユーティリティ',
 	},
 	{
+		id: 'url-encoder',
+		name: 'URLエンコード/デコード',
+		description: '日本語を含むURLやクエリを安全に双方向変換',
+		href: '/url-encoder',
+		icon: '🔗',
+		category: 'エンコード/デコード',
+	},
+	{
 		id: 'regex-tester',
 		name: '正規表現テスター',
 		description: '正規表現のリアルタイムテスト・マッチ確認・置換',

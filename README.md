@@ -6,7 +6,7 @@
 
 🔗 **[https://tools.codelife.cafe](https://tools.codelife.cafe)**
 
-## 📦 収録ツール（15種）
+## 📦 収録ツール（16種）
 
 ### テキスト処理
 
@@ -33,6 +33,7 @@
 |--------|------|
 | [QRコード生成](/qr-generator) | テキスト・URLからQRコードを生成しPNG/SVGダウンロード |
 | [Base64エンコード/デコード](/base64) | テキスト・ファイルのBase64変換、Data URI出力対応 |
+| [URLエンコード/デコード](/url-encoder) | 日本語を含むURLやクエリを安全に双方向変換。コンポーネント/フルURLモード対応 |
 | [和暦⇔西暦変換](/wareki-converter) | 和暦（令和・平成等）と西暦のリアルタイム相互変換 |
 
 ### 開発者向け
