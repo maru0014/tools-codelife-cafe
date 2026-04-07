@@ -4,14 +4,18 @@ import {
 	type CipherAlgorithm,
 	type CipherDirection,
 	caesarCipher,
+	getMaxShift,
 	morseDecode,
 	morseEncode,
 	reverseString,
 	rot13,
 } from '@/lib/cipher';
 import { AlgorithmInfo } from './AlgorithmInfo';
+import { BruteForcePanel } from './BruteForcePanel';
+import { DirectionToggle } from './DirectionToggle';
 import { InputPanel } from './InputPanel';
 import { OutputPanel } from './OutputPanel';
+import { ShiftSlider } from './ShiftSlider';
 
 export function CipherPage() {
 	const [activeTab, setActiveTab] = useState<CipherAlgorithm>('caesar');
@@ -87,11 +91,21 @@ export function CipherPage() {
 					</TabsList>
 				</div>
 
-				{/* We'll inject Caesar controls here later */}
 				{activeTab === 'caesar' && (
-					<div className="my-4 p-4 border rounded-md text-sm text-muted-foreground">
-						{/* Step 3 Placeholder */}
-						ここにシーザー暗号用の操作盤が入ります（ステップ3で実装）
+					<div className="my-4 p-4 border rounded-md">
+						<div className="flex flex-col md:flex-row md:items-center gap-6 justify-between">
+							<DirectionToggle
+								direction={caesarDirection}
+								onChange={setCaesarDirection}
+							/>
+							<div className="flex-1 max-w-sm">
+								<ShiftSlider
+									shift={caesarShift}
+									maxShift={getMaxShift(input)}
+									onChange={setCaesarShift}
+								/>
+							</div>
+						</div>
 					</div>
 				)}
 
@@ -127,10 +141,13 @@ export function CipherPage() {
 					<OutputPanel value={output} />
 				</div>
 
-				{/* Step 3 Brute Force Placeholder */}
 				{activeTab === 'caesar' && (
 					<div className="mt-4">
-						{/* Brute force panel placeholder logger */}
+						<BruteForcePanel
+							input={input}
+							currentShift={caesarShift}
+							onSelectShift={setCaesarShift}
+						/>
 					</div>
 				)}
 			</Tabs>
