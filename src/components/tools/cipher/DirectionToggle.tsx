@@ -7,9 +7,16 @@ interface DirectionToggleProps {
 	onChange: (value: CipherDirection) => void;
 }
 
-export default function DirectionToggle({ value, onChange }: DirectionToggleProps) {
+export default function DirectionToggle({
+	value,
+	onChange,
+}: DirectionToggleProps) {
 	return (
-		<div className="flex rounded-md border border-border overflow-hidden shrink-0" role="group" aria-label="変換方向">
+		<div
+			className="flex rounded-md border border-border overflow-hidden shrink-0"
+			role="group"
+			aria-label="変換方向"
+		>
 			<Button
 				variant="ghost"
 				size="sm"

@@ -1,14 +1,14 @@
 import { useMemo, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import type { CipherAlgorithm, CipherDirection } from '@/lib/cipher';
 import {
 	caesarCipher,
 	getMaxShift,
-	morseEncode,
 	morseDecode,
+	morseEncode,
 	reverseString,
 	rot13,
 } from '@/lib/cipher';
-import type { CipherAlgorithm, CipherDirection } from '@/lib/cipher';
 import AlgorithmInfo from './AlgorithmInfo';
 import BruteForcePanel from './BruteForcePanel';
 import DirectionToggle from './DirectionToggle';
@@ -20,8 +20,10 @@ export default function CipherPage() {
 	const [activeTab, setActiveTab] = useState<CipherAlgorithm>('caesar');
 	const [input, setInput] = useState('');
 	const [shift, setShift] = useState(3);
-	const [caesarDirection, setCaesarDirection] = useState<CipherDirection>('encode');
-	const [morseDirection, setMorseDirection] = useState<CipherDirection>('encode');
+	const [caesarDirection, setCaesarDirection] =
+		useState<CipherDirection>('encode');
+	const [morseDirection, setMorseDirection] =
+		useState<CipherDirection>('encode');
 
 	const maxShift = useMemo(() => getMaxShift(input), [input]);
 
@@ -29,7 +31,8 @@ export default function CipherPage() {
 		if (!input) return '';
 		switch (activeTab) {
 			case 'caesar':
-				return caesarCipher(input, { shift, direction: caesarDirection }).output;
+				return caesarCipher(input, { shift, direction: caesarDirection })
+					.output;
 			case 'rot13':
 				return rot13(input).output;
 			case 'reverse':
@@ -74,11 +77,7 @@ export default function CipherPage() {
 					</div>
 
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<InputPanel
-							value={input}
-							onChange={setInput}
-							algorithm="caesar"
-						/>
+						<InputPanel value={input} onChange={setInput} algorithm="caesar" />
 						<OutputPanel value={output} />
 					</div>
 

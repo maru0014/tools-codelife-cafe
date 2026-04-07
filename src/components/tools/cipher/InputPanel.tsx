@@ -16,7 +16,7 @@ const PLACEHOLDERS: Record<string, string> = {
 	reverse: '「テキストを反転します」を入力...',
 	'morse-encode': '「SOS」や「Hello」を入力...',
 	'morse-decode': '「... --- ...」を入力...',
-}
+};
 
 export default function InputPanel({
 	value,

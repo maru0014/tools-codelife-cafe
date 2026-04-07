@@ -8,7 +8,11 @@ interface ShiftSliderProps {
 	maxShift: number;
 }
 
-export default function ShiftSlider({ value, onChange, maxShift }: ShiftSliderProps) {
+export default function ShiftSlider({
+	value,
+	onChange,
+	maxShift,
+}: ShiftSliderProps) {
 	// Clamp if max decreases
 	useEffect(() => {
 		if (value > maxShift) {
