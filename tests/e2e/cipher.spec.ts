@@ -31,7 +31,9 @@ test.describe('Cipher Tool', () => {
 		test('Caesar tab shows shift slider', async ({ page, createToolPage }) => {
 			const toolPage = createToolPage('tools/cipher');
 			await toolPage.goto();
-			await expect(page.getByLabel('シフト数')).toBeVisible();
+			await expect(
+				page.getByRole('slider', { name: 'シフト数' }),
+			).toBeVisible();
 		});
 
 		test('ROT13 tab does not show shift slider', async ({
@@ -41,7 +43,9 @@ test.describe('Cipher Tool', () => {
 			const toolPage = createToolPage('tools/cipher');
 			await toolPage.goto();
 			await page.getByRole('tab', { name: 'ROT13' }).click();
-			await expect(page.getByLabel('シフト数')).not.toBeVisible();
+			await expect(
+				page.getByRole('slider', { name: 'シフト数' }),
+			).not.toBeVisible();
 		});
 	});
 
@@ -106,9 +110,7 @@ test.describe('Cipher Tool', () => {
 			const outputArea = page.getByRole('textbox').nth(1);
 			await inputArea.fill('def');
 			// Click decode button
-			await page
-				.getByRole('button', { name: /デコード（復号）/ })
-				.click();
+			await page.getByRole('button', { name: /デコード（復号）/ }).click();
 			await expect(outputArea).toHaveValue('abc');
 		});
 
@@ -120,8 +122,14 @@ test.describe('Cipher Tool', () => {
 			await toolPage.goto();
 			const inputArea = page.getByRole('textbox').first();
 			await inputArea.fill('def');
-			await page.getByText('ブルートフォース（全パターン表示）').click();
-			await expect(page.getByText('シフト 3:')).toBeVisible();
+			// Open the brute force <details> panel by clicking its <summary>
+			await page
+				.locator('summary')
+				.filter({ hasText: 'ブルートフォース' })
+				.click();
+			await expect(
+				page.locator('button').filter({ hasText: 'シフト 3:' }).first(),
+			).toBeVisible();
 		});
 
 		test('clicking brute force row updates slider', async ({
@@ -132,12 +140,18 @@ test.describe('Cipher Tool', () => {
 			await toolPage.goto();
 			const inputArea = page.getByRole('textbox').first();
 			await inputArea.fill('def');
-			await page.getByText('ブルートフォース（全パターン表示）').click();
-			// Click on shift 5 row
+			// Open the brute force <details> panel by clicking its <summary>
 			await page
-				.getByRole('button', { name: /シフト 5:/ })
-				.first()
+				.locator('summary')
+				.filter({ hasText: 'ブルートフォース' })
 				.click();
+			// Wait for rows to appear, then click shift 5
+			const shift5Row = page
+				.locator('button')
+				.filter({ hasText: 'シフト 5:' })
+				.first();
+			await expect(shift5Row).toBeVisible();
+			await shift5Row.click();
 			const shiftInput = page.getByLabel('シフト数入力');
 			await expect(shiftInput).toHaveValue('5');
 		});
@@ -259,7 +273,10 @@ test.describe('Cipher Tool', () => {
 			const inputArea = page.getByRole('textbox').first();
 			await inputArea.fill('abc');
 			await toolPage.clickCopy();
-			await expect(page.getByRole('button', { name: /コピー済み/ })).toBeVisible();
+			// aria-label changes to 'コピーしました' after click
+			await expect(
+				page.getByRole('button', { name: 'コピーしました' }),
+			).toBeVisible();
 		});
 
 		test('clear button resets input', async ({ page, createToolPage }) => {
@@ -290,7 +307,9 @@ test.describe('Cipher Tool', () => {
 			await toolPage.goto();
 			const summary = page.getByText('シーザー暗号について');
 			await summary.click();
-			await expect(page.getByText('各文字を指定した数だけずらして')).toBeVisible();
+			await expect(
+				page.getByText('各文字を指定した数だけずらして'),
+			).toBeVisible();
 		});
 
 		test('empty input yields empty output without errors', async ({

@@ -11,6 +11,7 @@ function Slider({
 	value,
 	min = 0,
 	max = 100,
+	'aria-label': ariaLabel,
 	...props
 }: React.ComponentProps<typeof SliderPrimitive.Root>) {
 	const _values = Array.isArray(value)
@@ -48,7 +49,9 @@ function Slider({
 			{Array.from({ length: _values.length }, (_, i) => (
 				<SliderPrimitive.Thumb
 					data-slot="slider-thumb"
+					// biome-ignore lint/suspicious/noArrayIndexKey: slider thumbs are positionally stable
 					key={i}
+					aria-label={ariaLabel}
 					className="border-primary/50 bg-background focus-visible:ring-ring block size-4 shrink-0 rounded-full border shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 disabled:pointer-events-none disabled:opacity-50"
 				/>
 			))}
