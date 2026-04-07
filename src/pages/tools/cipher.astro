@@ -1,0 +1,71 @@
+---
+import ToolLayout from '../../components/common/ToolLayout.astro';
+import CipherPage from '../../components/tools/cipher/CipherPage.tsx';
+---
+
+<ToolLayout
+  title="暗号化・難読化ツール"
+  description="シーザー暗号・ROT13・文字列反転・モールス信号をブラウザ内で変換。ひらがな・カタカナ対応のシーザー暗号、ブルートフォース解析付き。完全クライアントサイド処理でデータも安心。"
+  path="/tools/cipher"
+>
+  <CipherPage client:load />
+
+  <div slot="usage" class="mt-8 space-y-3">
+    <details class="group rounded-xl border border-border p-4">
+      <summary class="cursor-pointer text-sm font-semibold flex items-center gap-2">
+        📖 使い方・ユースケース
+        <span class="ml-auto text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
+      </summary>
+      <div class="mt-4 space-y-4 text-sm text-muted-foreground">
+        <div>
+          <h3 class="font-semibold text-foreground mb-1">🔐 シーザー暗号</h3>
+          <p>シフト数（1〜25）を指定して英字を暗号化します。日本語（ひらがな・カタカナ）にも対応しており、シフト数は1〜45まで設定できます。「ブルートフォース」機能で全パターンを一覧表示し、暗号文の解読にも使えます。</p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>CTF（Capture the Flag）の古典暗号問題</li>
+            <li>日本語テキストの簡易難読化</li>
+            <li>謎解きイベントでの問題作成</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold text-foreground mb-1">🔄 ROT13</h3>
+          <p>英字を13文字ずらす暗号方式です。2回適用すると元に戻る性質があるため、エンコードとデコードが同じ操作で行えます。</p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>掲示板・フォーラムでのネタバレ防止</li>
+            <li>クイズや謎解きの答えを隠す</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="font-semibold text-foreground mb-1">↩️ 文字列反転</h3>
+          <p>テキストを逆順に並び替えます。絵文字やサロゲートペア、結合文字（濁点など）も正しく処理します。</p>
+        </div>
+        <div>
+          <h3 class="font-semibold text-foreground mb-1">📡 モールス信号</h3>
+          <p>ITU国際モールス符号に準拠した変換ツールです。英字・数字・主要記号に対応しています。</p>
+          <ul class="list-disc pl-5 mt-2 space-y-1">
+            <li>モールス信号の学習・練習</li>
+            <li>CTFのモールス信号問題の解読</li>
+            <li>謎解きイベントでの活用</li>
+          </ul>
+        </div>
+
+        <div class="rounded-lg bg-muted/50 p-3">
+          <p class="font-semibold text-foreground mb-1">関連ツール</p>
+          <ul class="space-y-1">
+            <li>
+              <a href="/base64" class="text-primary hover:underline">
+                Base64エンコード/デコード
+              </a>
+              — テキスト・ファイルのBase64変換
+            </li>
+            <li>
+              <a href="/url-encoder" class="text-primary hover:underline">
+                URLエンコード/デコード
+              </a>
+              — 日本語URLの安全な変換
+            </li>
+          </ul>
+        </div>
+      </div>
+    </details>
+  </div>
+</ToolLayout>
