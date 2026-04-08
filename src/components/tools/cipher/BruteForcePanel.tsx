@@ -28,32 +28,34 @@ export default function BruteForcePanel({
 						テキストを入力すると全パターンが表示されます
 					</p>
 				) : (
-					<div
-						className="overflow-y-auto max-h-[400px] rounded-md border border-border"
-						role="list"
-					>
+					<ul className="overflow-y-auto max-h-[400px] rounded-md border border-border">
 						{results.map(({ shift, output }) => (
-							<button
+							<li
 								key={shift}
-								type="button"
-								role="listitem"
-								onClick={() => onShiftSelect(shift)}
-								className={`w-full text-left px-3 py-2 text-sm font-mono flex gap-2 transition-colors hover:bg-muted border-b border-border last:border-b-0 ${
-									shift === currentShift
-										? 'bg-primary/10 text-primary font-medium'
-										: ''
-								}`}
-								aria-label={`シフト ${shift}: ${output.slice(0, 100)}`}
+								className="border-b border-border last:border-b-0"
 							>
-								<span className="shrink-0 text-muted-foreground w-16">
-									シフト {shift}:
-								</span>
-								<span className="truncate">
-									{output.length > 100 ? `${output.slice(0, 100)}...` : output}
-								</span>
-							</button>
+								<button
+									type="button"
+									onClick={() => onShiftSelect(shift)}
+									className={`w-full text-left px-3 py-2 text-sm font-mono flex gap-2 transition-colors hover:bg-muted ${
+										shift === currentShift
+											? 'bg-primary/10 text-primary font-medium'
+											: ''
+									}`}
+									aria-label={`シフト ${shift}: ${output.slice(0, 100)}`}
+								>
+									<span className="shrink-0 text-muted-foreground w-16">
+										シフト {shift}:
+									</span>
+									<span className="truncate">
+										{output.length > 100
+											? `${output.slice(0, 100)}...`
+											: output}
+									</span>
+								</button>
+							</li>
 						))}
-					</div>
+					</ul>
 				)}
 			</div>
 		</details>

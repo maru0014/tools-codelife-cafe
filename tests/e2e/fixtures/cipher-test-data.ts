@@ -3,7 +3,12 @@ export const caesarTestCases = [
 	{ input: 'ABC', shift: 3, direction: 'encode' as const, expected: 'DEF' },
 	{ input: 'xyz', shift: 3, direction: 'encode' as const, expected: 'abc' },
 	{ input: 'def', shift: 3, direction: 'decode' as const, expected: 'abc' },
-	{ input: 'Hello! 123', shift: 1, direction: 'encode' as const, expected: 'Ifmmp! 123' },
+	{
+		input: 'Hello! 123',
+		shift: 1,
+		direction: 'encode' as const,
+		expected: 'Ifmmp! 123',
+	},
 ] as const;
 
 export const morseTestCases = [

@@ -12,9 +12,8 @@ export default function DirectionToggle({
 	onChange,
 }: DirectionToggleProps) {
 	return (
-		<div
-			className="flex rounded-md border border-border overflow-hidden shrink-0"
-			role="group"
+		<fieldset
+			className="flex rounded-md border border-border overflow-hidden shrink-0 m-0 p-0"
 			aria-label="変換方向"
 		>
 			<Button
@@ -46,6 +45,6 @@ export default function DirectionToggle({
 				<Unlock className="h-3.5 w-3.5" />
 				デコード（復号）
 			</Button>
-		</div>
+		</fieldset>
 	);
 }
