@@ -2,6 +2,9 @@ name: Deploy to Cloudflare Pages
 on:
   push:
     branches: [main]
+concurrency:
+  group: deploy-cloudflare
+  cancel-in-progress: true
 permissions:
   contents: read
   deployments: write

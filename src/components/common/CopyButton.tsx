@@ -20,6 +20,7 @@ export default function CopyButton({
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = useCallback(async () => {
+		if (copied) return;
 		try {
 			await navigator.clipboard.writeText(text);
 			setCopied(true);
@@ -37,7 +38,7 @@ export default function CopyButton({
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		}
-	}, [text]);
+	}, [text, copied]);
 
 	return (
 		<Button

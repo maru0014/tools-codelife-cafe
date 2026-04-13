@@ -62,6 +62,7 @@ export default function ExportButtons({
 
 	// CSVダウンロード
 	const handleDownloadCsv = () => {
+		if (copiedCSV) return;
 		const exportResults = getExportResults();
 		const csv = generateCsvOutput(exportResults, exportColumns);
 		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -80,6 +81,7 @@ export default function ExportButtons({
 
 	// クリップボードへE.164をコピー
 	const handleCopyClipboard = async () => {
+		if (copiedClip) return;
 		const exportResults = getExportResults();
 		const e164List = exportResults
 			.filter((r) => r.valid && r.formats?.e164)
