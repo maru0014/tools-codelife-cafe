@@ -1,0 +1,2 @@
+/*
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' https://pagead2.googlesyndication.com https://www.googletagservices.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://pagead2.googlesyndication.com https://cloudflareinsights.com; font-src 'self'; frame-src https://googleads.g.doubleclick.net https://tpc.googlesyndication.com
