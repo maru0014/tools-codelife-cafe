@@ -30,53 +30,38 @@ export const COMMON_PATTERNS = [
 	},
 ];
 
-export function testRegex(
+const TIMEOUT_MS = 500;
+
+export async function testRegex(
 	pattern: string,
 	flags: string,
 	text: string,
 	replacement?: string,
-): RegexResult {
+): Promise<RegexResult> {
 	if (!pattern) return { matches: [] };
 
-	try {
-		const regex = new RegExp(pattern, flags);
-		const matches: RegexMatch[] = [];
+	return new Promise((resolve) => {
+		const worker = new Worker(new URL('./regex-worker.ts', import.meta.url), {
+			type: 'module',
+		});
 
-		if (regex.global) {
-			let match: RegExpExecArray | null = regex.exec(text);
-			while (match !== null) {
-				matches.push({
-					value: match[0],
-					index: match.index,
-					groups: match.slice(1),
-				});
-				// Avoid infinite loops with zero-length matches
-				if (match.index === regex.lastIndex) {
-					regex.lastIndex++;
-				}
-				match = regex.exec(text);
-			}
-		} else {
-			const match = regex.exec(text);
-			if (match) {
-				matches.push({
-					value: match[0],
-					index: match.index,
-					groups: match.slice(1),
-				});
-			}
-		}
+		const timeoutId = setTimeout(() => {
+			worker.terminate();
+			resolve({ matches: [], error: 'タイムアウト：正規表現が複雑すぎます' });
+		}, TIMEOUT_MS);
 
-		let replacedText: string | undefined;
-		if (replacement !== undefined) {
-			replacedText = text.replace(regex, replacement);
-		}
-
-		return { matches, replacedText };
-	} catch (err: unknown) {
-		return {
-			matches: [],
-			error: err instanceof Error ? err.message : String(err),
+		worker.onmessage = (event: MessageEvent<RegexResult>) => {
+			clearTimeout(timeoutId);
+			worker.terminate();
+			resolve(event.data);
 		};
-	}
+
+		worker.onerror = (event: ErrorEvent) => {
+			clearTimeout(timeoutId);
+			worker.terminate();
+			resolve({ matches: [], error: event.message });
+		};
+
+		worker.postMessage({ pattern, flags, text, replacement });
+	});
 }
