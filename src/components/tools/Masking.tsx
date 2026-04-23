@@ -104,7 +104,7 @@ export default function Masking() {
 			nodes.push(
 				<mark
 					key={`m-${i}`}
-					className="bg-primary/30 text-transparent rounded-[2px]"
+					className="bg-primary/30 dark:bg-primary/50 text-transparent rounded-[2px]"
 					title={range.type}
 				>
 					{text.slice(range.start, range.end)}
