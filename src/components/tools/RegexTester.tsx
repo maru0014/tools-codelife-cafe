@@ -1,5 +1,5 @@
 import { Trash2, XCircle } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
 import {
 	Accordion,
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import type { RegexResult } from '@/lib/tools/regex-tester';
 import { COMMON_PATTERNS, testRegex } from '@/lib/tools/regex-tester';
 
 export default function RegexTester() {
@@ -39,13 +40,18 @@ export default function RegexTester() {
 		);
 	};
 
-	const result = useMemo(() => {
-		return testRegex(
-			pattern,
-			flags,
-			text,
-			showReplace ? replacement : undefined,
+	const [result, setResult] = useState<RegexResult>({ matches: [] });
+
+	useEffect(() => {
+		let cancelled = false;
+		testRegex(pattern, flags, text, showReplace ? replacement : undefined).then(
+			(r) => {
+				if (!cancelled) setResult(r);
+			},
 		);
+		return () => {
+			cancelled = true;
+		};
 	}, [pattern, flags, text, showReplace, replacement]);
 
 	// Handle synchronized scrolling for highlight overlay
