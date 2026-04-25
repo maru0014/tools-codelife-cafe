@@ -24,10 +24,11 @@ src/
 │   ├── tools/           # 各ツールのReact UIコンポーネント
 │   └── common/          # CopyButton, ThemeToggle, ToolCard, ToolLayout
 ├── layouts/
-│   └── BaseLayout.astro # 全ページ共通レイアウト（SEO, OG, View Transitions）
+│   └── BaseLayout.astro # 全ページ共通レイアウト（SEO, OG, View Transitions, SW登録）
 ├── pages/
 │   ├── index.astro      # トップページ（Bento Grid）
 │   ├── [tool-name].astro # 各ツールのAstroページ（直下に配置）
+│   ├── offline.astro    # オフラインフォールバックページ（Service Worker が返す）
 │   ├── privacy.astro
 │   └── about.astro
 ├── lib/
@@ -35,6 +36,12 @@ src/
 │   └── utils.ts         # shadcn/ui ユーティリティ（cn関数）
 └── styles/
     └── global.css       # Tailwind CSS v4 設定、カラートークン、アニメーション
+public/
+├── sw.js                # Service Worker テンプレート（ビルド後に dist/sw.js として上書き生成）
+├── manifest.webmanifest # PWA マニフェスト
+└── icon-{192,512}x512.png # PWA アイコン
+scripts/
+└── generate-sw.mjs      # ビルド後に dist/sw.js へ全ページ・アセット URL を注入
 ```
 
 ## 絶対に守るべきルール
@@ -67,6 +74,15 @@ src/
 
 GitHub Actions（`.github/workflows/deploy.yml`）で `main` ブランチへのpush時に自動デプロイ。
 Cloudflare Pages にデプロイされる。Secrets: `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`。
+
+## ビルドプロセス
+
+`npm run build` = `astro build && node scripts/generate-sw.mjs`
+
+`generate-sw.mjs` は `dist/` を走査して全ページ URL・アセット URL を収集し、
+`public/sw.js` のプレースホルダーを置換した `dist/sw.js` を生成する。
+`CACHE_NAME` に埋め込まれるハッシュはアセット内容から自動計算され、
+デプロイのたびに古いキャッシュが自動失効する。
 
 ## エージェントのタスク完了条件 (DoD)
 - **Implementation Plan (実装計画)** が作成され、ユーザーの承認済みであること（新ツール作成・大幅改修時）
