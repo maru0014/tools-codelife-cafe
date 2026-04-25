@@ -49,6 +49,14 @@ const output = template
   .replace('[/* __ALL_PAGES__ */]', JSON.stringify(pageURLs, null, 2))
   .replace('[/* __ALL_ASSETS__ */]', JSON.stringify(assetURLs, null, 2));
 
+// プレースホルダーが残っている場合はテンプレートの構造が変わっている
+if (output.includes('__HASH__') || output.includes('__ALL_PAGES__') || output.includes('__ALL_ASSETS__')) {
+  throw new Error(
+    '[generate-sw] Template replacement failed: placeholder still present in output. ' +
+    'Verify that public/sw.js contains the expected placeholder strings.'
+  );
+}
+
 await writeFile(join(DIST, 'sw.js'), output, 'utf8');
 
 console.log(`[generate-sw] CACHE_NAME: cl-tools-${hash}`);
