@@ -33,3 +33,6 @@ playwright-report/
 # Temporary files
 *.txt.bak
 report.json
+
+# Superpowers brainstorming
+.superpowers/
