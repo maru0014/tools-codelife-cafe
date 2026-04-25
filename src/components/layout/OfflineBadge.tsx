@@ -56,7 +56,7 @@ export default function OfflineBadge() {
 			<PopoverTrigger asChild>
 				<button
 					type="button"
-					className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground font-medium hover:text-foreground transition-colors"
+					className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground font-medium hover:text-foreground transition-colors cursor-pointer"
 					aria-label="PWAインストール手順を表示"
 				>
 					<Download className="h-3.5 w-3.5" />
