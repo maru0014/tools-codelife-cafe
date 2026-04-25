@@ -17,7 +17,6 @@ function getBadgeState(): BadgeState {
 
 export default function OfflineBadge() {
 	const [state, setState] = useState<BadgeState>('uninstalled');
-	const [open, setOpen] = useState(false);
 
 	useEffect(() => {
 		setState(getBadgeState());
@@ -53,7 +52,7 @@ export default function OfflineBadge() {
 	}
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover>
 			<PopoverTrigger asChild>
 				<button
 					type="button"
