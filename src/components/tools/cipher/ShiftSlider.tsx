@@ -11,7 +11,7 @@ interface ShiftSliderProps {
 export function ShiftSlider({ shift, maxShift, onChange }: ShiftSliderProps) {
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		let value = parseInt(e.target.value, 10);
-		if (isNaN(value)) return;
+		if (Number.isNaN(value)) return;
 
 		// Clamp between 1 and maxShift
 		if (value < 1) value = 1;
