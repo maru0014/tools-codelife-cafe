@@ -58,7 +58,7 @@ export function BruteForcePanel({
 					<div className="max-h-[400px] overflow-y-auto space-y-1 pr-2 mt-2">
 						{patterns.map(({ shift, output }) => {
 							const _output =
-								output.length > 100 ? output.slice(0, 100) + '...' : output;
+								output.length > 100 ? `${output.slice(0, 100)}...` : output;
 							const isSelected = shift === currentShift;
 
 							return (

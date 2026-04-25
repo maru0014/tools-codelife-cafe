@@ -1,6 +1,7 @@
 ---
 import ThemeToggle from '../common/ThemeToggle.tsx';
 import SearchModal from '../common/SearchModal.tsx';
+import OfflineBadge from './OfflineBadge.tsx';
 ---
 
 <header class="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-lg">
@@ -29,10 +30,7 @@ import SearchModal from '../common/SearchModal.tsx';
 
     <!-- Right: Theme toggle -->
     <div class="flex items-center gap-3">
-      <span class="hidden lg:flex items-center gap-1.5 text-xs text-safety font-medium">
-        <span class="inline-block h-2 w-2 rounded-full bg-safety pulse-dot"></span>
-        オフライン対応
-      </span>
+      <OfflineBadge client:load />
       <ThemeToggle client:load />
     </div>
   </div>
