@@ -37,6 +37,9 @@ const adsenseId = import.meta.env.PUBLIC_ADSENSE_ID;
   <meta name="twitter:description" content={description} />
   <link rel="canonical" href={`${siteUrl}${path}`} />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <meta name="theme-color" content="#0C0A09" media="(prefers-color-scheme: dark)" />
+  <meta name="theme-color" content="#FAFAF9" media="(prefers-color-scheme: light)" />
   <ClientRouter />
   <script is:inline>
     const setDarkMode = () => {
@@ -83,6 +86,31 @@ const adsenseId = import.meta.env.PUBLIC_ADSENSE_ID;
     <slot />
   </main>
   <Footer />
-  <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "64c327a84e3548d3a7ceaeaa644fb01c"}'></script><!-- End Cloudflare Web Analytics -->
+  <script is:inline>
+    if ('serviceWorker' in navigator) {
+      const triggerPrecache = async () => {
+        const reg = await navigator.serviceWorker.ready;
+        reg.active?.postMessage({ type: 'PRECACHE_ALL' });
+      };
+
+      window.addEventListener('load', async () => {
+        try {
+          await navigator.serviceWorker.register('/sw.js');
+        } catch (err) {
+          console.error('SW registration failed:', err);
+          return;
+        }
+
+        // PWA インストール直後
+        window.addEventListener('appinstalled', triggerPrecache);
+
+        // スタンドアロンモード（PWAとして起動）なら毎回プリキャッシュを送る
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+          triggerPrecache();
+        }
+      });
+    }
+  </script>
+  <!-- Cloudflare Web Analytics --><script is:inline defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "64c327a84e3548d3a7ceaeaa644fb01c"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
