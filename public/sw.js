@@ -40,13 +40,17 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// PWA インストール時に全ページ・全アセットをプリキャッシュ
+// PWA インストール時に全ページ・全アセットをプリキャッシュ（未キャッシュURLのみ取得）
 self.addEventListener('message', (event) => {
   if (event.data?.type !== 'PRECACHE_ALL') return;
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      Promise.allSettled([...ALL_PAGES, ...ALL_ASSETS].map((url) => cache.add(url)))
-    )
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const urls = [...ALL_PAGES, ...ALL_ASSETS];
+      const uncached = (
+        await Promise.all(urls.map(async (url) => ((await cache.match(url)) ? null : url)))
+      ).filter(Boolean);
+      return Promise.allSettled(uncached.map((url) => cache.add(url)));
+    })
   );
 });
 
@@ -66,7 +70,9 @@ self.addEventListener('fetch', (event) => {
         const cached = await cache.match(reqUrl, { ignoreVary: true });
         if (cached) return cached;
         const response = await fetch(event.request);
-        cache.put(reqUrl, response.clone());
+        if (response.ok) {
+          cache.put(reqUrl, response.clone());
+        }
         return response;
       })
     );

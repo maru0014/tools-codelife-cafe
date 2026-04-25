@@ -15,12 +15,30 @@ const pageURLs = [
 ];
 
 // dist/_astro/ 配下の全ファイルを収集
-const assetFiles = await readdir(join(DIST, '_astro'));
+let assetFiles = [];
+try {
+  assetFiles = await readdir(join(DIST, '_astro'));
+} catch {
+  // _astro/ が存在しない場合は空配列のまま続行
+}
 const assetURLs = assetFiles.map((f) => `/_astro/${f}`);
 
-// アセット内容に基づくキャッシュバージョンハッシュ（変更があると自動失効）
+// ページHTML内容 + アセットURLからキャッシュバージョンハッシュを計算（内容変更時に自動失効）
+const pageContents = await Promise.all(
+  pageURLs.map(async (url) => {
+    const filePath =
+      url === '/'
+        ? join(DIST, 'index.html')
+        : join(DIST, url.replace(/^\//, '').replace(/\/$/, ''), 'index.html');
+    try {
+      return await readFile(filePath, 'utf8');
+    } catch {
+      return url;
+    }
+  })
+);
 const hash = createHash('md5')
-  .update([...pageURLs, ...assetURLs].sort().join('\n'))
+  .update([...pageContents, ...assetURLs].sort().join('\n'))
   .digest('hex')
   .slice(0, 8);
 
