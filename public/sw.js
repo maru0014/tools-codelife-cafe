@@ -19,6 +19,7 @@ const ALL_ASSETS = [/* __ALL_ASSETS__ */];
 self.addEventListener('install', (event) => {
   event.waitUntil(
     Promise.all([
+      // 全アセットがハッシュ付きURLで管理されているため、即時アクティベートしても安全
       self.skipWaiting(),
       caches.open(CACHE_NAME).then((cache) =>
         Promise.allSettled(MIN_ASSETS.map((url) => cache.add(url)))
