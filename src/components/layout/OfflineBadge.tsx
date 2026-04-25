@@ -11,7 +11,8 @@ type BadgeState = 'offline' | 'installed' | 'uninstalled';
 function getBadgeState(): BadgeState {
 	if (typeof window === 'undefined') return 'uninstalled';
 	if (!navigator.onLine) return 'offline';
-	if (window.matchMedia('(display-mode: standalone)').matches) return 'installed';
+	if (window.matchMedia('(display-mode: standalone)').matches)
+		return 'installed';
 	return 'uninstalled';
 }
 
@@ -72,9 +73,16 @@ export default function OfflineBadge() {
 						PWAとしてインストールすると、ネット接続なしでもツールを使えます。
 					</p>
 					<div className="rounded-md bg-muted p-3 text-xs text-muted-foreground space-y-1.5">
-						<p>🍎 <strong>iOS/Safari:</strong> 共有 → ホーム画面に追加</p>
-						<p>🤖 <strong>Android/Chrome:</strong> メニュー → アプリをインストール</p>
-						<p>🖥️ <strong>PC/Chrome:</strong> アドレスバー右の ＋ をクリック</p>
+						<p>
+							🍎 <strong>iOS/Safari:</strong> 共有 → ホーム画面に追加
+						</p>
+						<p>
+							🤖 <strong>Android/Chrome:</strong> メニュー →
+							アプリをインストール
+						</p>
+						<p>
+							🖥️ <strong>PC/Chrome:</strong> アドレスバー右の ＋ をクリック
+						</p>
 					</div>
 				</div>
 			</PopoverContent>
