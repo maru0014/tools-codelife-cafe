@@ -93,15 +93,21 @@ export default function BgRemove() {
 
 	// --- URL クリーンアップ ---
 	useEffect(() => {
-		return () => { if (sourceUrl) URL.revokeObjectURL(sourceUrl); };
+		return () => {
+			if (sourceUrl) URL.revokeObjectURL(sourceUrl);
+		};
 	}, [sourceUrl]);
 
 	useEffect(() => {
-		return () => { if (resultUrl) URL.revokeObjectURL(resultUrl); };
+		return () => {
+			if (resultUrl) URL.revokeObjectURL(resultUrl);
+		};
 	}, [resultUrl]);
 
 	useEffect(() => {
-		return () => { if (compositeUrlRef.current) URL.revokeObjectURL(compositeUrlRef.current); };
+		return () => {
+			if (compositeUrlRef.current) URL.revokeObjectURL(compositeUrlRef.current);
+		};
 	}, []);
 
 	// --- ファイル検証 ---
