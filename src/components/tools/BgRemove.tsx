@@ -82,7 +82,7 @@ export default function BgRemove() {
 	// D&D
 	const [isDragOver, setIsDragOver] = useState(false);
 	const fileInputRef = useRef<HTMLInputElement>(null);
-	const dropZoneRef = useRef<HTMLDivElement>(null);
+	const dropZoneRef = useRef<HTMLButtonElement>(null);
 
 	// --- 先行初期化 ---
 	useEffect(() => {

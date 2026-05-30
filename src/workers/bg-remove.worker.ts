@@ -133,7 +133,7 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
 			const { width, height, data } = output;
 
 			// ArrayBuffer として transferable 送信
-			const buffer = (data as Uint8ClampedArray).buffer.slice(0);
+			const buffer = (data as Uint8ClampedArray).buffer.slice(0) as ArrayBuffer;
 
 			self.postMessage(
 				{
@@ -143,7 +143,7 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
 					height,
 					data: buffer,
 				} satisfies WorkerResultMessage,
-				[buffer],
+				{ transfer: [buffer] },
 			);
 		} finally {
 			URL.revokeObjectURL(url);
