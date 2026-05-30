@@ -13,9 +13,12 @@ env.useBrowserCache = true;
 
 // WASMスレッド制限の回避: マルチスレッドとプロキシをオフにし、
 // cdn.jsdelivr.net からのスレッド動的モジュールインポートによるCSPエラーを完全に防止する。
-env.backends.onnx.wasm.numThreads = 1;
-env.backends.onnx.wasm.simd = true;
-env.backends.onnx.wasm.proxy = false;
+const wasmBackend = env.backends.onnx.wasm;
+if (wasmBackend) {
+	wasmBackend.numThreads = 1;
+	wasmBackend.simd = true;
+	wasmBackend.proxy = false;
+}
 
 // フェッチが中断された場合などのWorker内未処理拒否をサイレントに抑制
 self.addEventListener('unhandledrejection', (event) => {
