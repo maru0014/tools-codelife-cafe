@@ -1,6 +1,13 @@
 import { expect, test } from './fixtures/base';
 
 test.describe('背景削除ツール', () => {
+	test.beforeEach(async ({ page }) => {
+		// AIモデルのダウンロードをブロックして networkidle を確保
+		await page.route('**/*.onnx*', (route) => route.abort());
+		await page.route('**/*huggingface*', (route) => route.abort());
+		await page.route('**/*models.tools.codelife*', (route) => route.abort());
+	});
+
 	test('ページが正常に読み込まれ、ドロップゾーンが表示される', async ({
 		page,
 		createToolPage,
