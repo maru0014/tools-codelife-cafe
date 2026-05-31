@@ -112,14 +112,24 @@ export default function SqlFormatter() {
 		const container = document.getElementById('tool-layout-container');
 		if (container) {
 			if (newExpanded) {
-				container.classList.remove('max-w-[800px]');
+				container.classList.remove('max-w-[800px]', 'xl:max-w-5xl');
 				container.classList.add('max-w-full');
 			} else {
 				container.classList.remove('max-w-full');
-				container.classList.add('max-w-[800px]');
+				container.classList.add('max-w-[800px]', 'xl:max-w-5xl');
 			}
 		}
 	};
+
+	useEffect(() => {
+		return () => {
+			const container = document.getElementById('tool-layout-container');
+			if (container) {
+				container.classList.remove('max-w-full');
+				container.classList.add('max-w-[800px]', 'xl:max-w-5xl');
+			}
+		};
+	}, []);
 
 	// Basic syntax highlighter
 	const highlightedNodes = useMemo(() => {
