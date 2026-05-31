@@ -59,6 +59,73 @@ export default function TextDiff() {
 			.join('\n');
 	}, [result]);
 
+	// unified ビュー用の行番号付きパート計算
+	const unifiedLines = useMemo(() => {
+		if (!result) return [];
+		const lines: Array<{
+			type: 'added' | 'removed' | 'unchanged';
+			content: string;
+			lineA: number | null;
+			lineB: number | null;
+		}> = [];
+		let lineA = 1;
+		let lineB = 1;
+
+		for (const part of result.parts) {
+			const partLines = part.value.split('\n').filter(Boolean);
+			for (const line of partLines) {
+				if (part.type === 'removed') {
+					lines.push({ type: 'removed', content: line, lineA, lineB: null });
+					lineA++;
+				} else if (part.type === 'added') {
+					lines.push({ type: 'added', content: line, lineA: null, lineB });
+					lineB++;
+				} else {
+					lines.push({ type: 'unchanged', content: line, lineA, lineB });
+					lineA++;
+					lineB++;
+				}
+			}
+		}
+		return lines;
+	}, [result]);
+
+	// split ビュー用の行番号付きパート計算
+	const splitLines = useMemo(() => {
+		if (!result) return { left: [], right: [] };
+		const left: Array<{
+			type: 'removed' | 'unchanged';
+			content: string;
+			lineNum: number;
+		}> = [];
+		const right: Array<{
+			type: 'added' | 'unchanged';
+			content: string;
+			lineNum: number;
+		}> = [];
+		let lineA = 1;
+		let lineB = 1;
+
+		for (const part of result.parts) {
+			const partLines = part.value.split('\n').filter(Boolean);
+			for (const line of partLines) {
+				if (part.type === 'removed') {
+					left.push({ type: 'removed', content: line, lineNum: lineA });
+					lineA++;
+				} else if (part.type === 'added') {
+					right.push({ type: 'added', content: line, lineNum: lineB });
+					lineB++;
+				} else {
+					left.push({ type: 'unchanged', content: line, lineNum: lineA });
+					right.push({ type: 'unchanged', content: line, lineNum: lineB });
+					lineA++;
+					lineB++;
+				}
+			}
+		}
+		return { left, right };
+	}, [result]);
+
 	return (
 		<div className="space-y-6">
 			{/* Mode Toggle */}
@@ -188,22 +255,25 @@ export default function TextDiff() {
 									テキストA（変更前）
 								</div>
 								<div className="w-full min-w-max">
-									{result.parts
-										.filter((p) => p.type !== 'added')
-										.map((part) => (
-											<div
-												key={`l-${part.type}-${part.value.slice(0, 30)}`}
-												className={`px-4 py-0.5 min-w-max ${part.type === 'removed' ? 'bg-red-500/10 text-red-700 dark:text-red-300' : ''}`}
-											>
-												{part.type === 'removed' && (
+									{splitLines.left.map((line, i) => (
+										<div
+											key={`l-${line.lineNum}-${i}`}
+											className={`flex min-w-max ${line.type === 'removed' ? 'bg-red-500/10 text-red-700 dark:text-red-300' : ''}`}
+										>
+											<span className="inline-block w-10 shrink-0 text-right pr-2 text-xs text-muted-foreground select-none border-r border-border/50 py-0.5 bg-muted/30">
+												{line.lineNum}
+											</span>
+											<span className="px-2 py-0.5">
+												{line.type === 'removed' && (
 													<span className="select-none opacity-50">- </span>
 												)}
-												{part.type === 'unchanged' && (
-													<span className="select-none opacity-30"> </span>
+												{line.type === 'unchanged' && (
+													<span className="select-none opacity-30">  </span>
 												)}
-												{part.value}
-											</div>
-										))}
+												{line.content}
+											</span>
+										</div>
+									))}
 								</div>
 							</div>
 							<div className="rounded-xl border border-border bg-card overflow-x-auto whitespace-pre font-mono-tool text-sm min-h-[100px]">
@@ -211,48 +281,62 @@ export default function TextDiff() {
 									テキストB（変更後）
 								</div>
 								<div className="w-full min-w-max">
-									{result.parts
-										.filter((p) => p.type !== 'removed')
-										.map((part) => (
-											<div
-												key={`r-${part.type}-${part.value.slice(0, 30)}`}
-												className={`px-4 py-0.5 min-w-max ${part.type === 'added' ? 'bg-green-500/10 text-green-700 dark:text-green-300' : ''}`}
-											>
-												{part.type === 'added' && (
+									{splitLines.right.map((line, i) => (
+										<div
+											key={`r-${line.lineNum}-${i}`}
+											className={`flex min-w-max ${line.type === 'added' ? 'bg-green-500/10 text-green-700 dark:text-green-300' : ''}`}
+										>
+											<span className="inline-block w-10 shrink-0 text-right pr-2 text-xs text-muted-foreground select-none border-r border-border/50 py-0.5 bg-muted/30">
+												{line.lineNum}
+											</span>
+											<span className="px-2 py-0.5">
+												{line.type === 'added' && (
 													<span className="select-none opacity-50">+ </span>
 												)}
-												{part.type === 'unchanged' && (
-													<span className="select-none opacity-30"> </span>
+												{line.type === 'unchanged' && (
+													<span className="select-none opacity-30">  </span>
 												)}
-												{part.value}
-											</div>
-										))}
+												{line.content}
+											</span>
+										</div>
+									))}
 								</div>
 							</div>
 						</div>
 					) : (
 						<div className="rounded-xl border border-border bg-card overflow-hidden font-mono-tool text-sm">
-							{result.parts.map((part) => (
+							{unifiedLines.map((line, i) => (
 								<div
-									key={`u-${part.type}-${part.value.slice(0, 30)}`}
-									className={`px-4 py-0.5 whitespace-pre-wrap break-all ${
-										part.type === 'added'
+									key={`u-${i}`}
+									className={`flex whitespace-pre-wrap break-all ${
+										line.type === 'added'
 											? 'bg-green-500/10 text-green-700 dark:text-green-300'
-											: part.type === 'removed'
+											: line.type === 'removed'
 												? 'bg-red-500/10 text-red-700 dark:text-red-300'
 												: ''
 									}`}
 								>
-									{part.type === 'added' && (
-										<span className="select-none opacity-50">+ </span>
-									)}
-									{part.type === 'removed' && (
-										<span className="select-none opacity-50">- </span>
-									)}
-									{part.type === 'unchanged' && (
-										<span className="select-none opacity-30"> </span>
-									)}
-									{part.value}
+									{/* 行番号A */}
+									<span className="inline-block w-10 shrink-0 text-right pr-2 text-xs text-muted-foreground select-none border-r border-border/50 py-0.5 bg-muted/30">
+										{line.lineA ?? ''}
+									</span>
+									{/* 行番号B */}
+									<span className="inline-block w-10 shrink-0 text-right pr-2 text-xs text-muted-foreground select-none border-r border-border/50 py-0.5 bg-muted/30">
+										{line.lineB ?? ''}
+									</span>
+									{/* コンテンツ */}
+									<span className="px-2 py-0.5 flex-1">
+										{line.type === 'added' && (
+											<span className="select-none opacity-50">+ </span>
+										)}
+										{line.type === 'removed' && (
+											<span className="select-none opacity-50">- </span>
+										)}
+										{line.type === 'unchanged' && (
+											<span className="select-none opacity-30">  </span>
+										)}
+										{line.content}
+									</span>
 								</div>
 							))}
 						</div>

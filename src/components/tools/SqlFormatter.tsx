@@ -1,5 +1,6 @@
 import { Code2, Download, Maximize2, Minimize2, Trash2 } from 'lucide-react';
 import { type UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
+import CodeBlock from '@/components/common/CodeBlock';
 import CopyButton from '@/components/common/CopyButton';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -402,33 +403,33 @@ export default function SqlFormatter() {
 							<CopyButton text={output} />
 						</div>
 					</div>
-					<div
-						className={`rounded-xl border shadow-sm h-[400px] overflow-auto bg-card relative ${
-							error ? 'border-red-500 border-2' : ''
-						} ${output ? 'shimmer' : ''}`}
-					>
-						{error ? (
+					{error ? (
+						<div className="rounded-xl border-2 border-red-500 shadow-sm h-[400px] overflow-auto bg-card">
 							<div className="p-4 text-red-500 font-medium font-mono-tool text-sm whitespace-pre-wrap flex items-start gap-2 max-w-full">
 								<Code2 className="h-5 w-5 mt-0.5 flex-shrink-0" />
 								<div className="break-all">{error}</div>
 							</div>
-						) : output && (autoFormat || manualOutput) ? (
-							<pre className="p-4 m-0 font-mono-tool text-sm text-foreground overflow-auto w-full h-full">
-								<code>{highlightedNodes}</code>
-							</pre>
-						) : (
-							<div className="flex h-full items-center justify-center text-muted-foreground p-6 text-center">
-								<div>
-									<Code2 className="h-10 w-10 mx-auto mb-3 opacity-20" />
-									<p className="text-sm">
-										左側（または上）にSQLを入力すると
-										<br />
-										整形されたコードが表示されます
-									</p>
-								</div>
+						</div>
+					) : output && (autoFormat || manualOutput) ? (
+						<CodeBlock
+							content={output}
+							className="h-[400px] shimmer"
+							minHeight="400px"
+						>
+							{highlightedNodes}
+						</CodeBlock>
+					) : (
+						<div className="rounded-xl border shadow-sm h-[400px] overflow-auto bg-card flex items-center justify-center text-muted-foreground p-6 text-center">
+							<div>
+								<Code2 className="h-10 w-10 mx-auto mb-3 opacity-20" />
+								<p className="text-sm">
+									左側（または上）にSQLを入力すると
+									<br />
+									整形されたコードが表示されます
+								</p>
 							</div>
-						)}
-					</div>
+						</div>
+					)}
 				</div>
 			</div>
 		</div>

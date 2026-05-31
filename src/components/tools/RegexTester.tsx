@@ -1,5 +1,5 @@
 import { Trash2, XCircle } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { type UIEvent, useEffect, useMemo, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
 import {
 	Accordion,
@@ -55,11 +55,15 @@ export default function RegexTester() {
 	}, [pattern, flags, text, showReplace, replacement]);
 
 	// Handle synchronized scrolling for highlight overlay
-	const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+	const handleScroll = (e: UIEvent<HTMLTextAreaElement>) => {
 		const overlay = document.getElementById('highlight-overlay');
+		const gutter = document.getElementById('regex-line-numbers');
 		if (overlay) {
 			overlay.scrollTop = e.currentTarget.scrollTop;
 			overlay.scrollLeft = e.currentTarget.scrollLeft;
+		}
+		if (gutter) {
+			gutter.scrollTop = e.currentTarget.scrollTop;
 		}
 	};
 
@@ -211,23 +215,41 @@ export default function RegexTester() {
 				</div>
 
 				{/* Highlight Overlay Container */}
-				<div className="relative min-h-[160px] rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden">
-					{/* Highlight Layer */}
+				<div className="relative min-h-[160px] rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden flex">
+					{/* 行番号ガター */}
 					<div
-						id="highlight-overlay"
-						className="absolute inset-0 pointer-events-none px-3 py-2 text-sm whitespace-pre-wrap break-words font-mono-tool overflow-hidden"
+						id="regex-line-numbers"
+						className="shrink-0 w-12 border-r bg-muted/40 text-right pr-2 py-2 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none z-10"
 						aria-hidden="true"
 					>
-						{highlightNodes}
+						{Array.from(
+							{ length: Math.max((text.match(/\n/g) || []).length + 1, 8) },
+							(_, i) => i + 1,
+						).map((num) => (
+							<div key={num} className="leading-5 h-5">
+								{num}
+							</div>
+						))}
 					</div>
-					{/* Actual Textarea */}
-					<Textarea
-						value={text}
-						onChange={(e) => setText(e.target.value)}
-						onScroll={handleScroll}
-						className="absolute inset-0 min-h-0 bg-transparent text-foreground font-mono-tool resize-none border-none ring-0 shadow-none focus-visible:ring-0 rounded-xl"
-						spellCheck={false}
-					/>
+					{/* コンテンツラッパー */}
+					<div className="relative flex-1">
+						{/* Highlight Layer */}
+						<div
+							id="highlight-overlay"
+							className="absolute inset-0 pointer-events-none px-3 py-2 text-sm whitespace-pre-wrap break-words font-mono-tool overflow-hidden"
+							aria-hidden="true"
+						>
+							{highlightNodes}
+						</div>
+						{/* Actual Textarea */}
+						<Textarea
+							value={text}
+							onChange={(e) => setText(e.target.value)}
+							onScroll={handleScroll}
+							className="absolute inset-0 min-h-0 bg-transparent text-foreground font-mono-tool resize-none border-none ring-0 shadow-none focus-visible:ring-0 rounded-none"
+							spellCheck={false}
+						/>
+					</div>
 				</div>
 			</div>
 
