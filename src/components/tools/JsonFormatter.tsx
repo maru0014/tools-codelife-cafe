@@ -1,5 +1,6 @@
 import { AlertCircle, Download, Minimize2, Wand2 } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { type UIEvent, useCallback, useMemo, useState } from 'react';
+import CodeBlock from '@/components/common/CodeBlock';
 import CopyButton from '@/components/common/CopyButton';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -50,11 +51,35 @@ export default function JsonFormatter() {
 	const [error, setError] = useState<string | null>(null);
 	const [errorPosition, setErrorPosition] = useState<number | null>(null);
 
-	const _errorLine = useState<number | null>(null);
 	const currentErrorLine =
 		errorPosition !== null && input
 			? input.substring(0, errorPosition).split('\n').length
 			: null;
+
+	// 入力側行番号
+	const inputLineCount = useMemo(
+		() => (input.match(/\n/g) || []).length + 1,
+		[input],
+	);
+	const inputLines = Array.from(
+		{ length: Math.max(inputLineCount, 10) },
+		(_, i) => i + 1,
+	);
+
+	const handleInputScroll = (e: UIEvent<HTMLTextAreaElement>) => {
+		const gutter = document.getElementById('json-input-line-numbers');
+		if (gutter) {
+			gutter.scrollTop = e.currentTarget.scrollTop;
+		}
+	};
+
+	// エラー行ハイライト（出力用）
+	const outputHighlightLines = useMemo(() => {
+		if (currentErrorLine) {
+			return new Set([currentErrorLine]);
+		}
+		return undefined;
+	}, [currentErrorLine]);
 
 	const handleFormat = useCallback(() => {
 		const result = formatJson(input, indent);
@@ -169,13 +194,35 @@ export default function JsonFormatter() {
 			{/* Input */}
 			<div>
 				<Label className="text-sm font-medium mb-2 block">入力JSON</Label>
-				<Textarea
-					value={input}
-					onChange={(e) => handleInputChange(e.target.value)}
-					placeholder={'{"name":"太郎","age":30,"city":"東京"}'}
-					className="min-h-[200px] font-mono-tool rounded-xl focus:ring-2 focus:ring-primary"
-					spellCheck={false}
-				/>
+				<div className="relative rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden flex h-[250px]">
+					{/* 行番号ガター */}
+					<div
+						id="json-input-line-numbers"
+						className="w-12 border-r bg-muted/40 text-right pr-2 py-3 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none"
+					>
+						{inputLines.map((num) => (
+							<div
+								key={num}
+								className={`leading-5 h-5${
+									currentErrorLine === num
+										? ' bg-destructive/20 text-destructive font-bold rounded-sm px-1'
+										: ''
+								}`}
+							>
+								{num}
+							</div>
+						))}
+					</div>
+					{/* Textarea */}
+					<Textarea
+						value={input}
+						onChange={(e) => handleInputChange(e.target.value)}
+						onScroll={handleInputScroll}
+						placeholder={'{"name":"太郎","age":30,"city":"東京"}'}
+						className="flex-1 min-h-0 bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 resize-none border-none ring-0 shadow-none focus-visible:ring-0 rounded-none whitespace-pre"
+						spellCheck={false}
+					/>
+				</div>
 			</div>
 
 			{/* Output */}
@@ -196,10 +243,12 @@ export default function JsonFormatter() {
 					</div>
 				</div>
 				{output ? (
-					<div
-						className="min-h-[200px] font-mono-tool text-sm rounded-xl border border-border bg-muted/50 p-3 overflow-auto whitespace-pre-wrap break-all shimmer"
-						// biome-ignore lint/security/noDangerouslySetInnerHtml: syntax highlighting output is sanitized
-						dangerouslySetInnerHTML={{ __html: highlightJson(output) }}
+					<CodeBlock
+						content={output}
+						htmlContent={highlightJson(output)}
+						highlightLines={outputHighlightLines}
+						className="shimmer"
+						minHeight="200px"
 					/>
 				) : (
 					<Textarea
