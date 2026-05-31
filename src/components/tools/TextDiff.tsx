@@ -50,11 +50,11 @@ export default function TextDiff() {
 			.map((p) => {
 				const prefix =
 					p.type === 'added' ? '+ ' : p.type === 'removed' ? '- ' : '  ';
-				return p.value
-					.split('\n')
-					.filter(Boolean)
-					.map((line) => `${prefix}${line}`)
-					.join('\n');
+				const partLines = p.value.split('\n');
+				if (p.value.endsWith('\n')) {
+					partLines.pop();
+				}
+				return partLines.map((line) => `${prefix}${line}`).join('\n');
 			})
 			.join('\n');
 	}, [result]);
@@ -72,7 +72,10 @@ export default function TextDiff() {
 		let lineB = 1;
 
 		for (const part of result.parts) {
-			const partLines = part.value.split('\n').filter(Boolean);
+			const partLines = part.value.split('\n');
+			if (part.value.endsWith('\n')) {
+				partLines.pop();
+			}
 			for (const line of partLines) {
 				if (part.type === 'removed') {
 					lines.push({ type: 'removed', content: line, lineA, lineB: null });
@@ -107,7 +110,10 @@ export default function TextDiff() {
 		let lineB = 1;
 
 		for (const part of result.parts) {
-			const partLines = part.value.split('\n').filter(Boolean);
+			const partLines = part.value.split('\n');
+			if (part.value.endsWith('\n')) {
+				partLines.pop();
+			}
 			for (const line of partLines) {
 				if (part.type === 'removed') {
 					left.push({ type: 'removed', content: line, lineNum: lineA });

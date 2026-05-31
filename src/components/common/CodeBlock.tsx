@@ -78,7 +78,7 @@ export default function CodeBlock({
 			<pre
 				ref={contentRef}
 				onScroll={handleScroll}
-				className="flex-1 p-3 m-0 overflow-auto whitespace-pre-wrap break-all leading-5"
+				className="flex-1 p-3 m-0 overflow-auto whitespace-pre leading-5"
 			>
 				{children ? (
 					<code>{children}</code>
