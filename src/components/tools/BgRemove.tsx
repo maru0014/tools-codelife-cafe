@@ -433,7 +433,7 @@ export default function BgRemove() {
 									<p className="text-xs text-muted-foreground mt-0.5">
 										{status === 'loading'
 											? `AIモデル（${mode === 'high' ? '高精度: 約209MB' : '人物特化高速: 約25.9MB'}）を準備しています。これには数十秒かかる場合があります。`
-											: 'ダウンロードが完了しました。画像から背景を自動で切り抜いています。これには2〜5秒程度かかります。'}
+											: `AIモデル（${mode === 'high' ? '高精度' : '人物特化高速'}）の準備が完了しました。画像から背景を自動で切り抜いています。`}
 									</p>
 								</div>
 								{status === 'loading' && progressPercent > 0 && (
