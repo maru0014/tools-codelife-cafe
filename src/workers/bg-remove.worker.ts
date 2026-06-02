@@ -123,6 +123,13 @@ self.onmessage = async (e: MessageEvent<WorkerRequest>) => {
 	try {
 		const pipe = await ensurePipeline(mode);
 
+		// キャッシュ済みの場合は progress_callback が発火しないため、
+		// 毎回 'ready' を送って UI の loading→processing 遷移を保証する
+		self.postMessage({
+			type: 'progress',
+			payload: { status: 'ready' },
+		} satisfies WorkerProgressMessage);
+
 		// preload のみ: パイプライン初期化だけして終了
 		if (preloadOnly) {
 			self.postMessage({ type: 'ready', id } satisfies WorkerReadyMessage);
