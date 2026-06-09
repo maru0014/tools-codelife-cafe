@@ -1,15 +1,10 @@
+import { toolCatalog } from '../../src/lib/tools/catalog';
 import { expect, test } from './fixtures/base';
 
-const TOOLS = [
-	'zenkaku-hankaku',
-	'char-count',
-	'json-formatter',
-	'text-diff',
-	'qr-generator',
-];
+const toolSlugs = toolCatalog.map((tool) => tool.id);
 
 test.describe('Smoke Tests - Tools', () => {
-	for (const toolSlug of TOOLS) {
+	for (const toolSlug of toolSlugs) {
 		test(`Tool page /${toolSlug} should load and show safety badge`, async ({
 			page,
 			createToolPage,
