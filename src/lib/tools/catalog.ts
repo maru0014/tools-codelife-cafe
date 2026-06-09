@@ -20,7 +20,7 @@ export type ToolCatalogItem = {
 	keywords: readonly string[];
 };
 
-export const toolCatalog = [
+export const toolCatalog: readonly ToolCatalogItem[] = [
 	{
 		id: 'zenkaku-hankaku',
 		title: '全角↔半角変換',
@@ -220,12 +220,23 @@ export const toolCatalog = [
 		categoryColor: 'border-l-chart-5',
 		keywords: ['背景削除', '透過', 'AI', '画像', 'アップロード不要'],
 	},
-] as const satisfies readonly ToolCatalogItem[];
+];
+
+// カテゴリーサマリーのチップ色（categoryColor の border-l-* と対になる bg/text クラス）
+// Tailwind の静的解析に拾わせるため、クラス名は literal で保持する
+const categoryChipColor: Record<ToolCategory, string> = {
+	テキスト変換: 'bg-primary/10 text-primary',
+	テキスト解析: 'bg-accent/10 text-accent',
+	開発ツール: 'bg-chart-1/10 text-chart-1',
+	生成ツール: 'bg-chart-3/10 text-chart-3',
+	ユーティリティ: 'bg-chart-2/10 text-chart-2',
+	'エンコード/デコード': 'bg-primary/10 text-primary',
+	データ処理: 'bg-chart-4/10 text-chart-4',
+	'AI/画像': 'bg-chart-5/10 text-chart-5',
+};
 
 export const toolCategories = [
-	...new Map(
-		toolCatalog.map((tool) => [tool.category, tool.categoryColor]),
-	).entries(),
-].map(([name, color]) => ({ name, color }));
+	...new Set(toolCatalog.map((t) => t.category)),
+].map((name) => ({ name, color: categoryChipColor[name] }));
 
 export const toolSlugs = toolCatalog.map((tool) => tool.id);

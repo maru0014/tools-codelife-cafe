@@ -61,7 +61,7 @@ const schema = {
         <p class="text-sm text-muted-foreground mb-3">ツールを公開中</p>
         <div class="flex flex-wrap justify-center gap-1.5">
           {toolCategories.map((category) => (
-            <span class="text-xs rounded-full bg-primary/10 text-primary px-2 py-0.5">
+            <span class={`text-xs rounded-full px-2 py-0.5 ${category.color}`}>
               {category.name}
             </span>
           ))}

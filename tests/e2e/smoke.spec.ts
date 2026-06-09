@@ -1,7 +1,5 @@
-import { toolCatalog } from '../../src/lib/tools/catalog';
+import { toolSlugs } from '../../src/lib/tools/catalog';
 import { expect, test } from './fixtures/base';
-
-const toolSlugs = toolCatalog.map((tool) => tool.id);
 
 test.describe('Smoke Tests - Tools', () => {
 	for (const toolSlug of toolSlugs) {
