@@ -220,6 +220,24 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		categoryColor: 'border-l-chart-5',
 		keywords: ['背景削除', '透過', 'AI', '画像', 'アップロード不要'],
 	},
+	{
+		id: 'image-mosaic',
+		title: '画像モザイク・ぼかし',
+		description:
+			'スクショの機密箇所をドラッグ選択で安全にマスキング。画像はアップロードされません。',
+		href: '/image-mosaic',
+		icon: '🟫',
+		category: 'AI/画像',
+		categoryColor: 'border-l-chart-5',
+		keywords: [
+			'モザイク',
+			'ぼかし',
+			'画像',
+			'マスキング',
+			'スクリーンショット',
+			'ピクセル化',
+		],
+	},
 ];
 
 // カテゴリーサマリーのチップ色（categoryColor の border-l-* と対になる bg/text クラス）
