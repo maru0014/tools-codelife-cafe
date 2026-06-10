@@ -204,6 +204,18 @@ export function downloadBlob(blob: Blob, filename: string): void {
 	setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/**
+ * レイヤー・領域用のID生成。
+ * crypto.randomUUID は Safari 15.4 未満に存在しないためフォールバックを持つ
+ * （ぼかしの stack blur フォールバックがカバーする旧Safariと整合させる）。
+ */
+export function createId(): string {
+	if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+		return crypto.randomUUID();
+	}
+	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
 function clamp(value: number, min: number, max: number): number {
 	return Math.min(max, Math.max(min, value));
 }

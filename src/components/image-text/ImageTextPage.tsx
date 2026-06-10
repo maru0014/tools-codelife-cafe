@@ -7,6 +7,7 @@ import { ExportBar } from '@/components/common/ExportBar';
 import { ImageDropzone } from '@/components/common/ImageDropzone';
 import { Button } from '@/components/ui/button';
 import {
+	createId,
 	DOWNSCALE_EDGE,
 	downscaleImage,
 	loadImageFile,
@@ -93,7 +94,7 @@ export default function ImageTextPage() {
 			if (!target) return prev;
 			const copy: TextLayer = {
 				...target,
-				id: crypto.randomUUID(),
+				id: createId(),
 				x: target.x + 16,
 				y: target.y + 16,
 			};

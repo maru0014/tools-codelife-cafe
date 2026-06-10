@@ -142,6 +142,28 @@ export function TextCanvas({
 				cancelAnimationFrame(rafRef.current);
 				rafRef.current = null;
 			}
+			// pending rAF を破棄した分を含め、リリース座標で最終位置を確定する
+			const { x, y } = clientToImage(canvas, e.clientX, e.clientY);
+			onMoveLayer(
+				drag.layerId,
+				Math.round(x - drag.offsetX),
+				Math.round(y - drag.offsetY),
+			);
+			setIsDragging(false);
+		},
+		[onMoveLayer],
+	);
+
+	// タッチキャンセルやブラウザジェスチャでドラッグが中断された場合の後始末
+	const handlePointerCancel = useCallback(
+		(e: React.PointerEvent<HTMLCanvasElement>) => {
+			const drag = dragRef.current;
+			if (!drag || drag.pointerId !== e.pointerId) return;
+			dragRef.current = null;
+			if (rafRef.current !== null) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
 			setIsDragging(false);
 		},
 		[],
@@ -160,6 +182,7 @@ export function TextCanvas({
 				onPointerDown={handlePointerDown}
 				onPointerMove={handlePointerMove}
 				onPointerUp={handlePointerUp}
+				onPointerCancel={handlePointerCancel}
 			/>
 			{/* 選択レイヤーの破線バウンディングボックス（DOMオーバーレイ） */}
 			{selectedLayer &&

@@ -185,6 +185,22 @@ export function CanvasEditor({
 		[regions, onAddRegion, onSelectRegion],
 	);
 
+	// タッチキャンセルやブラウザジェスチャでドラッグが中断された場合の後始末
+	// （領域は追加せず破棄する）
+	const handlePointerCancel = useCallback(
+		(e: React.PointerEvent<HTMLCanvasElement>) => {
+			const drag = dragRef.current;
+			if (!drag || drag.pointerId !== e.pointerId) return;
+			dragRef.current = null;
+			if (rafRef.current !== null) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
+			setDragRect(null);
+		},
+		[],
+	);
+
 	// 領域選択中は Delete / Backspace キーで削除（入力欄へのタイプは除外）
 	useEffect(() => {
 		if (!selectedId) return;
@@ -223,6 +239,7 @@ export function CanvasEditor({
 				onPointerDown={handlePointerDown}
 				onPointerMove={handlePointerMove}
 				onPointerUp={handlePointerUp}
+				onPointerCancel={handlePointerCancel}
 				onPointerLeave={() => setHoveredId(null)}
 			/>
 			{/* 既存領域のアウトライン（DOMオーバーレイ） */}

@@ -7,6 +7,12 @@ type History<T> = {
 	past: T[];
 	present: T;
 	future: T[];
+	/**
+	 * transient 編集（スライダードラッグ等）開始時点の present。
+	 * commit 時はこの値を past に積むことで、undo がドラッグ前の状態に戻る。
+	 * null = transient 編集中ではない
+	 */
+	transientBase: T | null;
 };
 
 export type HistoryState<T> = {
@@ -28,16 +34,19 @@ export function useHistoryState<T>(initial: T, limit = 50): HistoryState<T> {
 		past: [],
 		present: initial,
 		future: [],
+		transientBase: null,
 	});
 
 	const set = useCallback(
 		(next: T) => {
 			setHistory((h) => {
-				const past = [...h.past, h.present];
+				// transient 編集中なら、その開始時点の状態を履歴に積む
+				const past = [...h.past, h.transientBase ?? h.present];
 				return {
 					past: past.length > limit ? past.slice(past.length - limit) : past,
 					present: next,
 					future: [],
+					transientBase: null,
 				};
 			});
 		},
@@ -45,7 +54,11 @@ export function useHistoryState<T>(initial: T, limit = 50): HistoryState<T> {
 	);
 
 	const setTransient = useCallback((next: T) => {
-		setHistory((h) => ({ ...h, present: next }));
+		setHistory((h) => ({
+			...h,
+			present: next,
+			transientBase: h.transientBase ?? h.present,
+		}));
 	}, []);
 
 	const undo = useCallback(() => {
@@ -55,6 +68,7 @@ export function useHistoryState<T>(initial: T, limit = 50): HistoryState<T> {
 				past: h.past.slice(0, -1),
 				present: h.past[h.past.length - 1],
 				future: [h.present, ...h.future],
+				transientBase: null,
 			};
 		});
 	}, []);
@@ -66,12 +80,13 @@ export function useHistoryState<T>(initial: T, limit = 50): HistoryState<T> {
 				past: [...h.past, h.present],
 				present: h.future[0],
 				future: h.future.slice(1),
+				transientBase: null,
 			};
 		});
 	}, []);
 
 	const reset = useCallback((next: T) => {
-		setHistory({ past: [], present: next, future: [] });
+		setHistory({ past: [], present: next, future: [], transientBase: null });
 	}, []);
 
 	return {

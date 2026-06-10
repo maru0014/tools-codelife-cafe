@@ -131,6 +131,20 @@ test.describe('画像モザイク・ぼかし', () => {
 		await expect
 			.poll(() => getCanvasPixel(page, 'editor-canvas', 96, 100))
 			.not.toEqual(before);
+
+		// スライダー変更は1操作=1履歴: undoを繰り返すと変更前の強度に戻り、
+		// さらにundoすると領域追加自体が取り消される
+		for (let i = 0; i < 10; i++) {
+			await page.getByRole('button', { name: '元に戻す' }).click();
+		}
+		await expect
+			.poll(() => getCanvasPixel(page, 'editor-canvas', 96, 100))
+			.toEqual(before);
+
+		await page.getByRole('button', { name: '元に戻す' }).click();
+		await expect
+			.poll(() => getCanvasPixel(page, 'editor-canvas', 96, 100))
+			.toEqual(WHITE);
 	});
 
 	test('undo / redo / リセットでピクセル状態が戻る', async ({ page }) => {

@@ -32,6 +32,8 @@ export const LINE_HEIGHT = 1.4;
 /** 背景ボックスのパディング(px) */
 export const BG_PADDING = 4;
 
+import { createId } from './image-common';
+
 export const FONT_FAMILIES: readonly { value: FontFamily; label: string }[] = [
 	{ value: 'sans-serif', label: 'ゴシック体' },
 	{ value: 'serif', label: '明朝体' },
@@ -45,7 +47,7 @@ export function createTextLayer(
 	overrides?: Partial<Omit<TextLayer, 'id'>>,
 ): TextLayer {
 	return {
-		id: crypto.randomUUID(),
+		id: createId(),
 		text: 'テキスト',
 		x,
 		y,

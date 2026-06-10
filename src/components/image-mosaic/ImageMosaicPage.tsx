@@ -8,6 +8,7 @@ import { ImageDropzone } from '@/components/common/ImageDropzone';
 import { useHistoryState } from '@/components/common/useHistoryState';
 import { Button } from '@/components/ui/button';
 import {
+	createId,
 	DOWNSCALE_EDGE,
 	downscaleImage,
 	loadImageFile,
@@ -90,7 +91,7 @@ export default function ImageMosaicPage() {
 	const handleAddRegion = useCallback(
 		(rect: Rect) => {
 			const region: MaskRegion = {
-				id: crypto.randomUUID(),
+				id: createId(),
 				rect,
 				mode,
 				strength: strengths[mode],
