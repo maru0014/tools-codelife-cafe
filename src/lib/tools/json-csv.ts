@@ -38,6 +38,40 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 	);
 }
 
+function getOwnValue(obj: Record<string, unknown>, key: string): unknown {
+	return Object.hasOwn(obj, key) ? obj[key] : undefined;
+}
+
+function setOwnValue(
+	obj: Record<string, unknown>,
+	key: string,
+	value: unknown,
+): void {
+	Object.defineProperty(obj, key, {
+		value,
+		enumerable: true,
+		configurable: true,
+		writable: true,
+	});
+}
+
+function makeUniqueHeaders(headers: readonly string[]): string[] {
+	const used = new Set<string>();
+	const counts = new Map<string, number>();
+	return headers.map((header) => {
+		let count = (counts.get(header) ?? 0) + 1;
+		counts.set(header, count);
+		let candidate = count === 1 ? header : `${header}_${count}`;
+		while (used.has(candidate)) {
+			count++;
+			counts.set(header, count);
+			candidate = `${header}_${count}`;
+		}
+		used.add(candidate);
+		return candidate;
+	});
+}
+
 /**
  * ネスト構造をドット記法（user.name）にフラット化する。配列はインデックス記法（items.0）。
  * 空オブジェクト・空配列はキーを生成しない（完全復元は対象外）。
@@ -59,8 +93,11 @@ export function flattenObject(
 			}
 			return;
 		}
-		out[prefix] =
-			typeof value === 'object' && value !== null ? String(value) : value;
+		setOwnValue(
+			out,
+			prefix,
+			typeof value === 'object' && value !== null ? String(value) : value,
+		);
 	};
 	for (const [key, value] of Object.entries(obj)) {
 		walk(value, key);
@@ -84,13 +121,13 @@ export function unflattenObject(
 			const nextIsIndex = /^\d+$/.test(segments[i + 1]);
 			let child = Array.isArray(current)
 				? current[Number(segment)]
-				: current[segment];
+				: getOwnValue(current, segment);
 			if (child == null || typeof child !== 'object') {
 				child = nextIsIndex ? [] : {};
 				if (Array.isArray(current)) {
 					current[Number(segment)] = child;
 				} else {
-					current[segment] = child;
+					setOwnValue(current, segment, child);
 				}
 			}
 			current = child as Record<string, unknown> | unknown[];
@@ -99,7 +136,7 @@ export function unflattenObject(
 		if (Array.isArray(current)) {
 			current[Number(last)] = value;
 		} else {
-			current[last] = value;
+			setOwnValue(current, last, value);
 		}
 	}
 	return root;
@@ -319,7 +356,7 @@ export function csvToJson(
 	let headers: string[];
 	let dataRows: string[][];
 	if (options.hasHeader) {
-		headers = rawRows[0];
+		headers = makeUniqueHeaders(rawRows[0]);
 		dataRows = rawRows.slice(1);
 	} else {
 		const maxCols = Math.max(...rawRows.map((row) => row.length));
@@ -335,7 +372,7 @@ export function csvToJson(
 			const key =
 				i < headers.length ? headers[i] : `extra_${i - headers.length + 1}`;
 			const raw = i < row.length ? row[i] : '';
-			record[key] = options.inferTypes ? inferCellValue(raw) : raw;
+			setOwnValue(record, key, options.inferTypes ? inferCellValue(raw) : raw);
 		}
 		return options.unflattenDotKeys ? unflattenObject(record) : record;
 	});

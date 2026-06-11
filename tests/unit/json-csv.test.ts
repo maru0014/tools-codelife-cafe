@@ -157,6 +157,33 @@ test('csvToJson: hasHeader OFF は column_N キー', () => {
 	]);
 });
 
+test('csvToJson: 重複ヘッダーは一意化して値を保持する', () => {
+	const result = expectOk(csvToJson('a,a,a_2\r\n1,2,3', CSV_OPTS));
+	assert.deepEqual(JSON.parse(result.output), [{ a: 1, a_2: 2, a_2_2: 3 }]);
+});
+
+test('csvToJson: __proto__ ヘッダーを通常列として保持する', () => {
+	const result = expectOk(
+		csvToJson('__proto__,constructor,prototype,x\r\np,c,t,1', {
+			...CSV_OPTS,
+			inferTypes: false,
+		}),
+	);
+	assert.equal(
+		result.output,
+		[
+			'[',
+			'  {',
+			'    "__proto__": "p",',
+			'    "constructor": "c",',
+			'    "prototype": "t",',
+			'    "x": "1"',
+			'  }',
+			']',
+		].join('\n'),
+	);
+});
+
 test('csvToJson: BOM付き入力の自動除去', () => {
 	const result = expectOk(csvToJson('\u{FEFF}a\r\n1', CSV_OPTS));
 	assert.deepEqual(JSON.parse(result.output), [{ a: 1 }]);
@@ -224,6 +251,23 @@ test('csvToJson: unflattenDotKeys ON でネスト復元', () => {
 	]);
 });
 
+test('csvToJson: unflattenDotKeys ON でも prototype pollution しない', () => {
+	const result = expectOk(
+		csvToJson('__proto__.polluted,constructor.prototype.x\r\nyes,no', {
+			...CSV_OPTS,
+			inferTypes: false,
+			unflattenDotKeys: true,
+		}),
+	);
+	assert.equal(({} as Record<string, unknown>).polluted, undefined);
+	assert.equal(({} as Record<string, unknown>).x, undefined);
+	assert.deepEqual(JSON.parse(result.output), [
+		JSON.parse(
+			'{"__proto__":{"polluted":"yes"},"constructor":{"prototype":{"x":"no"}}}',
+		),
+	]);
+});
+
 test('csvToJson: データ行なしはエラー', () => {
 	const result = expectError(csvToJson('a,b', CSV_OPTS));
 	assert.match(result.error, /データ行/);
@@ -287,6 +331,15 @@ test('flattenObject / unflattenObject: ネスト+配列の往復', () => {
 		active: true,
 	});
 	assert.deepEqual(unflattenObject(flat), original);
+});
+
+test('flattenObject / unflattenObject: __proto__ をデータキーとして扱う', () => {
+	const flat = flattenObject(JSON.parse('{"__proto__":{"value":"safe"}}'));
+	assert.equal(JSON.stringify(flat), '{"__proto__.value":"safe"}');
+
+	const nested = unflattenObject({ '__proto__.polluted': 'no' });
+	assert.equal(JSON.stringify(nested), '{"__proto__":{"polluted":"no"}}');
+	assert.equal(({} as Record<string, unknown>).polluted, undefined);
 });
 
 test('往復変換: JSON→CSV→JSON で構造が保たれる', () => {
