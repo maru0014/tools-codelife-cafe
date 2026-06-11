@@ -7,11 +7,15 @@ import { join } from 'path';
 const DIST = './dist';
 
 // dist/ 直下のディレクトリ（各ルートページ）を収集
+// `data` は静的データ配信用（/data/zipcode/*.json 等）でページではないため除外。
+// これらはプリキャッシュせず、Service Worker のランタイム cache-first で扱う。
 const entries = await readdir(DIST, { withFileTypes: true });
 const pageURLs = [
 	'/',
 	...entries
-		.filter((d) => d.isDirectory() && !d.name.startsWith('_'))
+		.filter(
+			(d) => d.isDirectory() && !d.name.startsWith('_') && d.name !== 'data',
+		)
 		.map((d) => `/${d.name}/`),
 ];
 

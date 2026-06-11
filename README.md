@@ -6,7 +6,7 @@
 
 🔗 **[https://tools.codelife.cafe](https://tools.codelife.cafe)**
 
-## 📦 収録ツール（20種）
+## 📦 収録ツール（24種）
 
 ### テキスト処理
 
@@ -27,6 +27,7 @@
 | [CSV文字化け修復](/csv-fixer) | CSVの文字コード自動判定・変換（Shift_JIS/UTF-8/EUC-JP等） |
 | [電話番号フォーマッタ](/phone-formatter) | 日本語の電話番号をE.164・国際表記・国内表記に即変換。CSV一括変換対応。 |
 | [ダミーデータ生成](/dummy-data) | 日本語の氏名・住所・電話番号等の一括生成（JSON/CSV/TSV） |
+| [郵便番号→住所変換](/zipcode) | 郵便番号から住所を検索・一括変換。Excel貼り付け・CSV出力対応（データは外部送信なし） |
 
 ### ユーティリティ
 
@@ -35,6 +36,7 @@
 | [背景削除](/bg-remove) | AIがブラウザ内で画像の背景を自動削除。差し替えにも対応（完全ローカル実行） |
 | [画像モザイク・ぼかし](/image-mosaic) | ドラッグ選択した範囲にモザイク・ぼかしを適用（完全ローカル実行） |
 | [画像テキスト挿入](/image-text) | 画像への文字入れ・注釈。縁取り・背景ボックス対応（完全ローカル実行） |
+| [画像圧縮・リサイズ](/image-compress) | JPEG/PNG/WebPの圧縮・リサイズ・変換。一括処理・目標サイズ指定・ZIP出力（完全ローカル実行） |
 | [QRコード生成](/qr-generator) | テキスト・URLからQRコードを生成しPNG/SVGダウンロード |
 | [Base64エンコード/デコード](/base64) | テキスト・ファイルのBase64変換、Data URI出力対応 |
 | [URLエンコード/デコード](/url-encoder) | 日本語を含むURLやクエリを安全に双方向変換。コンポーネント/フルURLモード対応 |
@@ -105,6 +107,22 @@ bash scripts/upload-models-to-r2.sh codelife-models
 ```bash
 wrangler r2 bucket cors set codelife-models --file scripts/r2-cors.json
 ```
+
+## 📮 郵便番号データの更新
+
+郵便番号→住所変換ツールの住所データは [日本郵便 郵便番号データ](https://www.post.japanpost.jp/service/search/zipcode/download/)（自由に配布・利用可能）を元に、上2桁チャンクJSON（`public/data/zipcode/{00..99}.json`）として同梱しています。日本郵便の月次更新に追従する場合のみ、以下を実行してコミットします（ビルドでは実行しません）。
+
+```bash
+# 1. utf_ken_all.zip を取得・展開して scripts/.cache/utf_ken_all.csv に配置
+#    （scripts/.cache/ は .gitignore 対象。入力CSVはコミットしない）
+#    Windows: Expand-Archive utf_ken_all.zip -DestinationPath scripts/.cache
+#    macOS/Linux: unzip utf_ken_all.zip -d scripts/.cache
+# 2. チャンクJSON + metadata.json を生成
+node scripts/generate-zipcode-data.ts
+# 3. public/data/zipcode/ の差分をコミット
+```
+
+生成スクリプトは冪等で、`public/data/zipcode/metadata.json` に出典・件数・データバージョン（`YYYY-MM`）を記録します。ページの「○○時点」表記はこのメタデータから生成されます。
 
 ---
 
