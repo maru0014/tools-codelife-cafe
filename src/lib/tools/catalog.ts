@@ -210,6 +210,17 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		keywords: ['暗号', '難読化', 'ROT13', 'モールス信号', 'シーザー暗号'],
 	},
 	{
+		id: 'hash',
+		title: 'ハッシュ値計算',
+		description:
+			'MD5・SHA-256等のハッシュ値をテキスト・ファイルから計算。ファイルの改ざん・破損チェックに。',
+		href: '/hash',
+		icon: '🔏',
+		category: '開発ツール',
+		categoryColor: 'border-l-chart-1',
+		keywords: ['ハッシュ', 'MD5', 'SHA-256', 'チェックサム', 'CRC32', '改ざん'],
+	},
+	{
 		id: 'bg-remove',
 		title: '背景削除',
 		description:
