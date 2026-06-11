@@ -270,6 +270,25 @@ function drawBitmap(
 	return canvas;
 }
 
+/** source canvas を背景色で塗ったキャンバスに合成する（透過→JPEG変換時の黒化防止） */
+function compositeOnBackground(
+	source: AnyCanvas,
+	background: string,
+): AnyCanvas {
+	const canvas = createCanvas(source.width, source.height);
+	const ctx = canvas.getContext('2d') as
+		| CanvasRenderingContext2D
+		| OffscreenCanvasRenderingContext2D
+		| null;
+	if (!ctx) {
+		throw new Error('Canvas 2D コンテキストの取得に失敗しました。');
+	}
+	ctx.fillStyle = background || DEFAULT_BACKGROUND;
+	ctx.fillRect(0, 0, source.width, source.height);
+	ctx.drawImage(source as CanvasImageSource, 0, 0);
+	return canvas;
+}
+
 /**
  * canvas を指定形式でエンコードする。WebP 非対応環境（toBlob が WebP を返さない）では
  * JPEG にフォールバックし 'format-fallback' 警告を返す。
@@ -278,14 +297,18 @@ async function encodeCanvas(
 	canvas: AnyCanvas,
 	mime: string,
 	quality: number,
+	background: string,
 ): Promise<{ blob: Blob; mime: string; warning?: CompressWarning }> {
 	const blob = await canvasToBlob(canvas, mime, quality);
 	if (blob && blob.type === mime) {
 		return { blob, mime };
 	}
-	// WebP 非対応（旧Safari等）: toBlob が null または別形式を返す → JPEG フォールバック
+	// WebP 非対応（旧Safari等）: toBlob が null または別形式を返す → JPEG フォールバック。
+	// WebP は透過対応のため drawBitmap で背景を塗っていない。JPEG は透過非対応のため、
+	// ここで背景色に合成してから書き出して透過部分の黒化を防ぐ。
 	if (mime === 'image/webp') {
-		const jpeg = await canvasToBlob(canvas, 'image/jpeg', quality);
+		const composite = compositeOnBackground(canvas, background);
+		const jpeg = await canvasToBlob(composite, 'image/jpeg', quality);
 		if (jpeg) {
 			return { blob: jpeg, mime: 'image/jpeg', warning: 'format-fallback' };
 		}
@@ -327,7 +350,12 @@ export async function compressImage(
 			options.resize,
 		);
 		const canvas = drawBitmap(bitmap, width, height, mime, options.background);
-		const encoded = await encodeCanvas(canvas, mime, options.quality);
+		const encoded = await encodeCanvas(
+			canvas,
+			mime,
+			options.quality,
+			options.background,
+		);
 		const ext = extensionForMime(encoded.mime);
 		return {
 			blob: encoded.blob,
@@ -373,7 +401,12 @@ export async function compressToTargetSize(
 		let resolvedMime = mime;
 		let fallbackWarning: CompressWarning | undefined;
 		const encode = async (quality: number): Promise<EncodeProbe> => {
-			const encoded = await encodeCanvas(canvas, resolvedMime, quality);
+			const encoded = await encodeCanvas(
+				canvas,
+				resolvedMime,
+				quality,
+				options.background,
+			);
 			resolvedMime = encoded.mime;
 			if (encoded.warning === 'format-fallback')
 				fallbackWarning = 'format-fallback';

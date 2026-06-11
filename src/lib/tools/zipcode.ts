@@ -60,10 +60,11 @@ function extractZipFromLine(line: string): string | null {
 	// まず行全体の正規化を試みる（最も一般的な「1行=1郵便番号」ケース）
 	const whole = normalizeZip(line);
 	if (whole) return whole;
-	// 行内に余分な文字がある場合は 3桁-4桁 / 連続7桁 のパターンを探す
+	// 行内に余分な文字がある場合は 3桁-4桁 / 連続7桁 のパターンを探す。
+	// 前後に数字が隣接する場合（8桁以上の数字列・口座番号等）は誤変換を避けるため除外する。
 	let s = '';
 	for (const ch of line) s += ZEN_TO_HAN[ch] ?? ch;
-	const match = s.match(/(\d{3})[\s　\-‐-―ー−]?(\d{4})/);
+	const match = s.match(/(?<!\d)(\d{3})[\s　\-‐-―ー−]?(\d{4})(?!\d)/);
 	if (match) return match[1] + match[2];
 	return null;
 }
