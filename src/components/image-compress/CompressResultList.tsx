@@ -147,6 +147,7 @@ export function CompressResultList({
 									size="sm"
 									variant="outline"
 									onClick={() => onDownload(item)}
+									aria-label="ダウンロード"
 								>
 									<Download className="h-4 w-4" />
 									<span className="ml-1 hidden sm:inline">ダウンロード</span>
@@ -156,6 +157,7 @@ export function CompressResultList({
 										size="sm"
 										variant="ghost"
 										onClick={() => onDownloadOriginal(item)}
+										aria-label="元画像をダウンロード"
 									>
 										<ImageIcon className="h-4 w-4" />
 										<span className="ml-1 hidden sm:inline">元画像</span>

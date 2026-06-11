@@ -143,6 +143,15 @@ fs.writeFileSync(
 	),
 );
 
+// 6b. 画像圧縮ツールE2E用の透過PNG（透過→JPEG変換の背景塗り・複数ファイルZIP用）
+//     120×90: 全面透過 + 中央 (40,30)〜(79,59) に不透明の青 [40,80,220]
+fs.writeFileSync(
+	path.join(fixturesDir, 'compress-alpha.png'),
+	makePng(120, 90, (x, y) =>
+		x >= 40 && x < 80 && y >= 30 && y < 60 ? [40, 80, 220, 255] : [0, 0, 0, 0],
+	),
+);
+
 // 7. ハッシュツール用の固定内容テキスト（期待ハッシュ値が決定的になる）
 // 内容を変更すると tests/e2e/hash.spec.ts の期待値も更新が必要
 fs.writeFileSync(
