@@ -6,7 +6,7 @@
 
 🔗 **[https://tools.codelife.cafe](https://tools.codelife.cafe)**
 
-## 📦 収録ツール（20種）
+## 📦 収録ツール（22種）
 
 ### テキスト処理
 
