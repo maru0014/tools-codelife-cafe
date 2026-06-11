@@ -271,6 +271,45 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		categoryColor: 'border-l-chart-5',
 		keywords: ['テキスト', '文字入れ', '画像', '注釈', 'キャプション'],
 	},
+	{
+		id: 'image-compress',
+		title: '画像圧縮・リサイズ',
+		description:
+			'一括圧縮・目標サイズ指定・WebP変換に対応。画像はアップロードされません。',
+		href: '/image-compress',
+		icon: '🗜️',
+		category: 'AI/画像',
+		categoryColor: 'border-l-chart-5',
+		keywords: [
+			'画像圧縮',
+			'リサイズ',
+			'WebP変換',
+			'容量',
+			'一括',
+			'目標サイズ',
+			'JPEG',
+			'PNG',
+		],
+	},
+	{
+		id: 'zipcode',
+		title: '郵便番号→住所変換',
+		description:
+			'郵便番号から住所を検索・一括変換。CSV出力対応。データは外部送信なし。',
+		href: '/zipcode',
+		icon: '📮',
+		category: 'データ処理',
+		categoryColor: 'border-l-chart-4',
+		keywords: [
+			'郵便番号',
+			'住所',
+			'変換',
+			'一括変換',
+			'Excel',
+			'CSV',
+			'オフライン',
+		],
+	},
 ];
 
 // カテゴリーサマリーのチップ色（categoryColor の border-l-* と対になる bg/text クラス）
