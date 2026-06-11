@@ -22,6 +22,7 @@
 | ツール | 説明 |
 |--------|------|
 | [JSON整形](/json-formatter) | JSONの整形・圧縮・バリデーション |
+| [JSON ↔ CSV 変換](/json-csv) | JSONとCSVの相互変換。ネスト展開・型推論・BOM付きUTF-8出力（Excel文字化け対策） |
 | [CSVビューア/エディタ](/csv-editor) | CSVをテーブル形式で閲覧・編集・エクスポート |
 | [CSV文字化け修復](/csv-fixer) | CSVの文字コード自動判定・変換（Shift_JIS/UTF-8/EUC-JP等） |
 | [電話番号フォーマッタ](/phone-formatter) | 日本語の電話番号をE.164・国際表記・国内表記に即変換。CSV一括変換対応。 |
@@ -44,6 +45,7 @@
 | ツール | 説明 |
 |--------|------|
 | [正規表現チェッカー](/regex-tester) | リアルタイムマッチング・置換・キャプチャグループ表示 |
+| [ハッシュ値計算](/hash) | MD5・SHA-1・SHA-256・SHA-512・CRC32の計算と期待値照合（ファイルの改ざんチェック） |
 | [SQLフォーマッター](/sql-formatter) | SQL文の整形（MySQL, PostgreSQL等の方言対応） |
 | [個人情報マスキング](/masking) | メール・電話番号・カード番号等を自動検出してマスキング |
 | [暗号変換](/cipher) | シーザー暗号・ROT13・モールス信号・逆順等のテキスト変換 |
@@ -73,6 +75,7 @@
 | `npm run build` | 本番用に静的ビルド＋SW生成（`dist/`） |
 | `npm run preview` | ビルド結果をローカルプレビュー |
 | `npx playwright test --headed` | E2Eテストを実行（ブラウザ表示あり） |
+| `npm run test:unit` | コアロジックの単体テストを実行（Node 22 の `node --test`、runner追加なし） |
 
 ## 🚀 Cloudflare R2 モデル配信
 

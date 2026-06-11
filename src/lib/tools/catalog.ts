@@ -210,6 +210,28 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		keywords: ['暗号', '難読化', 'ROT13', 'モールス信号', 'シーザー暗号'],
 	},
 	{
+		id: 'json-csv',
+		title: 'JSON ↔ CSV 変換',
+		description:
+			'JSONとCSVを相互変換。ネスト展開・型推論・Excel文字化け対策のBOM付きUTF-8出力に対応。',
+		href: '/json-csv',
+		icon: '🔁',
+		category: 'データ処理',
+		categoryColor: 'border-l-chart-4',
+		keywords: ['JSON', 'CSV', '変換', 'BOM', 'Excel', 'フラット化'],
+	},
+	{
+		id: 'hash',
+		title: 'ハッシュ値計算',
+		description:
+			'MD5・SHA-256等のハッシュ値をテキスト・ファイルから計算。ファイルの改ざん・破損チェックに。',
+		href: '/hash',
+		icon: '🔏',
+		category: '開発ツール',
+		categoryColor: 'border-l-chart-1',
+		keywords: ['ハッシュ', 'MD5', 'SHA-256', 'チェックサム', 'CRC32', '改ざん'],
+	},
+	{
 		id: 'bg-remove',
 		title: '背景削除',
 		description:
