@@ -88,7 +88,10 @@ export function ConvertOptionsPanel({
 									})
 								}
 							>
-								<SelectTrigger className="w-[130px] h-8 rounded-lg bg-background">
+								<SelectTrigger
+									aria-label="区切り文字"
+									className="w-[130px] h-8 rounded-lg bg-background"
+								>
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -111,7 +114,10 @@ export function ConvertOptionsPanel({
 									})
 								}
 							>
-								<SelectTrigger className="w-[150px] h-8 rounded-lg bg-background">
+								<SelectTrigger
+									aria-label="改行コード"
+									className="w-[150px] h-8 rounded-lg bg-background"
+								>
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -158,7 +164,10 @@ export function ConvertOptionsPanel({
 									})
 								}
 							>
-								<SelectTrigger className="w-[130px] h-8 rounded-lg bg-background">
+								<SelectTrigger
+									aria-label="区切り文字"
+									className="w-[130px] h-8 rounded-lg bg-background"
+								>
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
