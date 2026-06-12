@@ -32,9 +32,9 @@ export default function OfflineBadge() {
 	const stateRef = useRef<BadgeState>(state);
 	stateRef.current = state;
 
-	const checkCacheStatus = useCallback(async () => {
+	const checkCacheStatus = useCallback(async (force = false) => {
 		if (typeof window === 'undefined') return;
-		if (stateRef.current === 'downloading') return;
+		if (stateRef.current === 'downloading' && !force) return;
 		if (!('serviceWorker' in navigator)) {
 			setState('available');
 			return;
@@ -100,7 +100,7 @@ export default function OfflineBadge() {
 				});
 			} else if (data.type === 'PRECACHE_COMPLETE') {
 				setState('ready');
-				checkCacheStatus(); // 最新のキャッシュ情報を再確認
+				checkCacheStatus(true); // 最新のキャッシュ情報を再確認
 			}
 		};
 
