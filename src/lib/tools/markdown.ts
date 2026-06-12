@@ -23,7 +23,8 @@ export async function markdownToHtml(src: string): Promise<string> {
  * - marked（GFM有効: テーブル・タスクリスト・打ち消し線・自動リンク、breaksオフ）でHTML化
  * - DOMPurifyでサニタイズ（script・iframe・イベントハンドラ属性・javascript: URLを除去）
  * - リンクには target="_blank" + rel="noopener noreferrer" を付与
- * - 外部URLの画像は src を除去（外部リクエストを発生させない。data: URIのみ表示可）
+ * - URL読み込み属性（src/srcset/poster）を全要素から除去し、video/audio/SVG等も不許可。
+ *   外部リクエストを一切発生させない（<img> の data: URIのみ表示可）
  *
  * DOMPurifyはブラウザのwindowを必要とするため、Node環境（unit test）では呼び出せない。
  * Node環境向けのテストは markdownToHtml / buildStandaloneHtml を直接対象にする。
@@ -44,18 +45,23 @@ export async function renderMarkdown(src: string): Promise<string> {
 			node.setAttribute('target', '_blank');
 			node.setAttribute('rel', 'noopener noreferrer');
 		}
-		// 外部URLの画像はプレビュー描画時に外部リクエストが発生し、
-		// 「データを外部送信しない」保証に反するため src を除去する（data: URIのみ許可）
-		if (node.tagName === 'IMG') {
-			const src = node.getAttribute('src') ?? '';
-			if (!/^data:image\//i.test(src)) {
-				node.removeAttribute('src');
-			}
-			node.removeAttribute('srcset');
+		// URLを読み込む属性はプレビュー描画時に外部リクエストを発生させ、
+		// 「データを外部送信しない」保証に反するため、タグを問わず全要素から除去する。
+		// 例外は <img> の data: URI 画像のみ（埋め込みデータなので外部通信なし）
+		const src = node.getAttribute('src');
+		if (
+			src !== null &&
+			!(node.tagName === 'IMG' && /^data:image\//i.test(src))
+		) {
+			node.removeAttribute('src');
 		}
+		node.removeAttribute('srcset');
+		node.removeAttribute('poster');
 	});
 
 	const sanitized = purifier.sanitize(rawHtml, {
+		// HTMLプロファイル限定（SVG/MathMLを全面不許可。<svg><image href> 等の外部読み込み経路を遮断）
+		USE_PROFILES: { html: true },
 		FORBID_TAGS: [
 			'script',
 			'iframe',
@@ -65,6 +71,9 @@ export async function renderMarkdown(src: string): Promise<string> {
 			'form',
 			'picture',
 			'source',
+			'video',
+			'audio',
+			'track',
 		],
 		FORBID_ATTR: ['style'],
 		ALLOW_DATA_ATTR: false,

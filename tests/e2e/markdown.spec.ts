@@ -88,6 +88,12 @@ test.describe('Markdownプレビュー Tool', () => {
 					'',
 					'<iframe src="https://attacker.invalid"></iframe>',
 					'',
+					'<video src="https://attacker.invalid/v.mp4" poster="https://attacker.invalid/p.png"></video>',
+					'',
+					'<audio src="https://attacker.invalid/a.mp3"></audio>',
+					'',
+					'<svg><image href="https://attacker.invalid/s.svg" /></svg>',
+					'',
 					'[クリック](javascript:alert(1))',
 					'',
 					'![外部画像](https://attacker.invalid/pixel.png)',
@@ -99,16 +105,20 @@ test.describe('Markdownプレビュー Tool', () => {
 		const preview = page.getByTestId('markdown-preview');
 		await expect(preview).toContainText('本文テキスト');
 
-		// iframe・イベントハンドラ属性は除去される
+		// iframe・video・audio・svg・イベントハンドラ属性は除去される
 		await expect(preview.locator('iframe')).toHaveCount(0);
+		await expect(preview.locator('video')).toHaveCount(0);
+		await expect(preview.locator('audio')).toHaveCount(0);
+		await expect(preview.locator('svg')).toHaveCount(0);
 		await expect(preview.locator('[onerror]')).toHaveCount(0);
 
 		// javascript: リンクは無害化される
 		const html = await preview.innerHTML();
 		expect(html).not.toContain('javascript:');
 
-		// 外部URL画像の src は除去され、外部リクエストは発生しない
-		await expect(preview.locator('img[src*="attacker.invalid"]')).toHaveCount(
+		// 外部URLを参照する src/srcset/poster は除去され、外部リクエストは発生しない
+		await expect(preview.locator('[src*="attacker.invalid"]')).toHaveCount(0);
+		await expect(preview.locator('[poster*="attacker.invalid"]')).toHaveCount(
 			0,
 		);
 		expect(externalImageRequests).toEqual([]);
