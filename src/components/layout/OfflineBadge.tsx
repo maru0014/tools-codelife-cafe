@@ -5,7 +5,7 @@ import {
 	RefreshCw,
 	WifiOff,
 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
 	Popover,
 	PopoverContent,
@@ -29,8 +29,12 @@ export default function OfflineBadge() {
 	});
 	const [cacheInfo, setCacheInfo] = useState({ cachedCount: 0, totalCount: 0 });
 
-	const checkCacheStatus = useCallback(async () => {
+	const stateRef = useRef<BadgeState>(state);
+	stateRef.current = state;
+
+	const checkCacheStatus = useCallback(async (force = false) => {
 		if (typeof window === 'undefined') return;
+		if (stateRef.current === 'downloading' && !force) return;
 		if (!('serviceWorker' in navigator)) {
 			setState('available');
 			return;
@@ -83,7 +87,9 @@ export default function OfflineBadge() {
 				if (data.isComplete) {
 					setState('ready');
 				} else {
-					setState('available');
+					setState((prev) =>
+						prev === 'downloading' ? 'downloading' : 'available',
+					);
 				}
 			} else if (data.type === 'PRECACHE_PROGRESS') {
 				setState('downloading');
@@ -94,7 +100,7 @@ export default function OfflineBadge() {
 				});
 			} else if (data.type === 'PRECACHE_COMPLETE') {
 				setState('ready');
-				checkCacheStatus(); // 最新のキャッシュ情報を再確認
+				checkCacheStatus(true); // 最新のキャッシュ情報を再確認
 			}
 		};
 
@@ -142,18 +148,24 @@ export default function OfflineBadge() {
 
 	if (state === 'offline') {
 		return (
-			<span className="hidden lg:flex items-center gap-1.5 text-xs text-amber-400 font-medium">
+			<span
+				className="flex items-center gap-1.5 text-xs text-amber-400 font-medium"
+				title="オフラインモードで動作中"
+			>
 				<WifiOff className="h-3.5 w-3.5" />
-				オフラインモードで動作中
+				<span className="hidden lg:inline">オフラインモードで動作中</span>
 			</span>
 		);
 	}
 
 	if (state === 'checking') {
 		return (
-			<span className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground font-medium">
+			<span
+				className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium"
+				title="接続確認中..."
+			>
 				<RefreshCw className="h-3 w-3 animate-spin" />
-				接続確認中...
+				<span className="hidden lg:inline">接続確認中...</span>
 			</span>
 		);
 	}
@@ -164,38 +176,43 @@ export default function OfflineBadge() {
 				{state === 'ready' ? (
 					<button
 						type="button"
-						className="hidden lg:flex items-center gap-1.5 text-xs text-safety font-medium hover:opacity-80 transition-opacity cursor-pointer"
+						className="flex items-center gap-1.5 text-xs text-safety font-medium hover:opacity-80 transition-opacity cursor-pointer"
 						aria-label="オフライン状態を確認"
+						title="オフライン対応済み"
 					>
 						<span className="inline-block h-2 w-2 rounded-full bg-safety pulse-dot" />
-						オフライン対応済み
+						<span className="hidden lg:inline">オフライン対応済み</span>
 					</button>
 				) : state === 'downloading' ? (
 					<button
 						type="button"
-						className="hidden lg:flex items-center gap-1.5 text-xs text-primary font-medium hover:opacity-80 transition-opacity cursor-pointer"
+						className="flex items-center gap-1.5 text-xs text-primary font-medium hover:opacity-80 transition-opacity cursor-pointer"
 						aria-label="ダウンロード進捗を確認"
+						title={`ダウンロード中 (${progress.percentage}%)`}
 					>
 						<RefreshCw className="h-3 w-3 animate-spin text-primary" />
-						ダウンロード中 ({progress.percentage}%)
+						<span className="hidden lg:inline">ダウンロード中 </span>
+						<span>({progress.percentage}%)</span>
 					</button>
 				) : state === 'error' ? (
 					<button
 						type="button"
-						className="hidden lg:flex items-center gap-1.5 text-xs text-destructive font-medium hover:opacity-80 transition-opacity cursor-pointer"
+						className="flex items-center gap-1.5 text-xs text-destructive font-medium hover:opacity-80 transition-opacity cursor-pointer"
 						aria-label="エラー状態を確認"
+						title="エラーが発生しました"
 					>
 						<AlertTriangle className="h-3.5 w-3.5" />
-						エラーが発生しました
+						<span className="hidden lg:inline">エラーが発生しました</span>
 					</button>
 				) : (
 					<button
 						type="button"
-						className="hidden lg:flex items-center gap-1.5 text-xs text-muted-foreground font-medium hover:text-foreground transition-colors cursor-pointer"
+						className="flex items-center gap-1.5 text-xs text-muted-foreground font-medium hover:text-foreground transition-colors cursor-pointer"
 						aria-label="オフラインモードの設定を開く"
+						title="オフラインモードを有効化"
 					>
 						<Download className="h-3.5 w-3.5" />
-						オフラインモードを有効化
+						<span className="hidden lg:inline">オフラインモードを有効化</span>
 					</button>
 				)}
 			</PopoverTrigger>
