@@ -3,10 +3,13 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import {
+	calculateInvoiceTax,
 	calculateTax,
 	MAX_AMOUNT,
+	MAX_QUANTITY,
 	TAX_RATE_HISTORY,
 	validateAmount,
+	validateQuantity,
 } from '../../src/lib/tools/tax.ts';
 
 // ---------------------------------------------------------------------------
@@ -150,6 +153,93 @@ test('calculateTax: 税込→税抜は端数処理によって税抜→税込の
 });
 
 // ---------------------------------------------------------------------------
+// calculateInvoiceTax
+// ---------------------------------------------------------------------------
+
+test('calculateInvoiceTax: 複数明細は税率ごとに合計してから端数処理する', () => {
+	const result = calculateInvoiceTax({
+		direction: 'exclusive-to-inclusive',
+		rounding: 'floor',
+		lines: [
+			{
+				id: 'food-1',
+				name: '食品A',
+				amount: 101,
+				quantity: 1,
+				rate: 8,
+				reduced: true,
+			},
+			{
+				id: 'food-2',
+				name: '食品B',
+				amount: 101,
+				quantity: 1,
+				rate: 8,
+				reduced: true,
+			},
+		],
+	});
+
+	// 明細ごとに切り捨てると 8円 + 8円 = 16円だが、
+	// インボイス対応では 202円 × 8% = 16.16円 を税率ごとに1回だけ切り捨てる。
+	assert.deepEqual(result.summaries, [
+		{ rate: 8, reduced: true, base: 202, tax: 16, total: 218 },
+	]);
+	assert.deepEqual(
+		{ base: result.base, tax: result.tax, total: result.total },
+		{ base: 202, tax: 16, total: 218 },
+	);
+});
+
+test('calculateInvoiceTax: 8%軽減税率と10%標準税率を別々に集計する', () => {
+	const result = calculateInvoiceTax({
+		direction: 'exclusive-to-inclusive',
+		rounding: 'round',
+		lines: [
+			{
+				id: 'food',
+				name: '食品',
+				amount: 1_000,
+				quantity: 2,
+				rate: 8,
+				reduced: true,
+			},
+			{
+				id: 'goods',
+				name: '雑貨',
+				amount: 1_500,
+				quantity: 1,
+				rate: 10,
+			},
+		],
+	});
+
+	assert.deepEqual(result.summaries, [
+		{ rate: 8, reduced: true, base: 2_000, tax: 160, total: 2_160 },
+		{ rate: 10, reduced: undefined, base: 1_500, tax: 150, total: 1_650 },
+	]);
+	assert.deepEqual(
+		{ base: result.base, tax: result.tax, total: result.total },
+		{ base: 3_500, tax: 310, total: 3_810 },
+	);
+});
+
+test('calculateInvoiceTax: 税込明細は税率ごとの税込合計から税額を逆算する', () => {
+	const result = calculateInvoiceTax({
+		direction: 'inclusive-to-exclusive',
+		rounding: 'round',
+		lines: [
+			{ id: 'a', name: 'A', amount: 55, quantity: 1, rate: 10 },
+			{ id: 'b', name: 'B', amount: 55, quantity: 1, rate: 10 },
+		],
+	});
+
+	assert.deepEqual(result.summaries, [
+		{ rate: 10, reduced: undefined, base: 100, tax: 10, total: 110 },
+	]);
+});
+
+// ---------------------------------------------------------------------------
 // validateAmount
 // ---------------------------------------------------------------------------
 
@@ -230,6 +320,30 @@ test('validateAmount: 非数値はエラー', () => {
 	if (!result.ok) {
 		assert.match(result.message, /数値を入力/);
 	}
+});
+
+// ---------------------------------------------------------------------------
+// validateQuantity
+// ---------------------------------------------------------------------------
+
+test('validateQuantity: 全角数字とカンマを正規化する', () => {
+	const result = validateQuantity('１，２３');
+	assert.deepEqual(result, {
+		ok: true,
+		quantity: 123,
+		normalizedInput: '123',
+	});
+});
+
+test('validateQuantity: 0・小数・上限超過はエラー', () => {
+	const zero = validateQuantity('0');
+	assert.equal(zero.ok, false);
+
+	const decimal = validateQuantity('1.5');
+	assert.equal(decimal.ok, false);
+
+	const overMax = validateQuantity(String(MAX_QUANTITY + 1));
+	assert.equal(overMax.ok, false);
 });
 
 // ---------------------------------------------------------------------------
