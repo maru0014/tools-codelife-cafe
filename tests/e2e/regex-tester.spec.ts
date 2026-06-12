@@ -17,7 +17,7 @@ test.describe('Regex Tester Tool', () => {
 		await expect(matchCount).toHaveText('2');
 
 		// 2. Change pattern to \d+
-		const patternInput = page.locator('input[placeholder="\\d{3}-\\d{4}"]');
+		const patternInput = page.locator('input').first();
 		await patternInput.fill('\\d+');
 
 		// 3. Verify match count updates to 4 (100, 0001, 530, 0001)

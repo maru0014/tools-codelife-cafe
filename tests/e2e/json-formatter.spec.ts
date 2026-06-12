@@ -27,7 +27,7 @@ test.describe('JSON Formatter', () => {
 		await inputArea.fill('{"a":1');
 
 		// Verify error banner is visible
-		const errorBanner = page.locator('.text-destructive');
+		const errorBanner = page.locator('.bg-destructive\\/10');
 		await expect(errorBanner).toBeVisible();
 		await expect(errorBanner).toContainText('エラー');
 	});
