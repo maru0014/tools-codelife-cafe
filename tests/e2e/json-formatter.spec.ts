@@ -10,16 +10,28 @@ test.describe('JSON Formatter', () => {
 		await expect(page.getByRole('button', { name: /整形/ })).toBeVisible();
 	});
 
-	test('has working format button', async ({ page, createToolPage }) => {
+	test('should format valid JSON and show error for invalid JSON', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('json-formatter');
 		await toolPage.goto();
 
-		// The format button should be clickable
-		const formatBtn = page.getByRole('button', { name: /整形/ });
-		await expect(formatBtn).toBeVisible();
-		await formatBtn.click();
+		// 1. Input valid JSON
+		const inputArea = page.getByRole('textbox').first();
+		await inputArea.fill('{"a":1,"b":"hello"}');
 
-		// After clicking format with no/default input, page should not crash
-		await expect(page.getByRole('textbox').first()).toBeVisible();
+		// Verify output is formatted (should contain newline and indentation)
+		const outputContainer = page.locator('pre');
+		await expect(outputContainer).toContainText('"a": 1');
+		await expect(outputContainer).toContainText('"b": "hello"');
+
+		// 2. Input invalid JSON
+		await inputArea.fill('{"a":1');
+
+		// Verify error banner is visible
+		const errorBanner = page.locator('.bg-destructive\\/10');
+		await expect(errorBanner).toBeVisible();
+		await expect(errorBanner).toContainText('エラー');
 	});
 });
