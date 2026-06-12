@@ -17,8 +17,10 @@ import {
 } from '@/lib/tools/image-common';
 import {
 	BLUR_RADIUS,
+	DEFAULT_EMOJI_STAMP,
 	type MaskMode,
 	type MaskRegion,
+	type MaskShape,
 	MOSAIC_BLOCK,
 	type Rect,
 	renderMasked,
@@ -40,10 +42,16 @@ export default function ImageMosaicPage() {
 	const [error, setError] = useState<string | null>(null);
 	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [mode, setMode] = useState<MaskMode>('mosaic');
-	const [strengths, setStrengths] = useState<Record<MaskMode, number>>({
-		mosaic: MOSAIC_BLOCK.default,
-		blur: BLUR_RADIUS.default,
-	});
+	const [shape, setShape] = useState<MaskShape>('rect');
+	const [emoji, setEmoji] = useState(DEFAULT_EMOJI_STAMP);
+	const [stampImage, setStampImage] = useState<HTMLImageElement | null>(null);
+	const [stampImageName, setStampImageName] = useState<string | null>(null);
+	const [strengths, setStrengths] = useState<Record<'mosaic' | 'blur', number>>(
+		{
+			mosaic: MOSAIC_BLOCK.default,
+			blur: BLUR_RADIUS.default,
+		},
+	);
 	const regions = useHistoryState<MaskRegion[]>([]);
 
 	const startEditing = useCallback(
@@ -84,21 +92,41 @@ export default function ImageMosaicPage() {
 			? (regions.state.find((r) => r.id === selectedId) ?? null)
 			: null;
 
-	// ツールバーに表示するモード/強度（領域選択中はその領域の値）
+	// ツールバーに表示する設定（領域選択中はその領域の値）
 	const activeMode = selectedRegion?.mode ?? mode;
-	const activeStrength = selectedRegion?.strength ?? strengths[activeMode];
+	const activeShape = selectedRegion?.shape ?? shape;
+	const activeStrength =
+		activeMode === 'mosaic' || activeMode === 'blur'
+			? (selectedRegion?.strength ?? strengths[activeMode])
+			: strengths.mosaic;
+	const activeEmoji = selectedRegion?.emoji ?? emoji;
+	const activeStampImageName = selectedRegion?.stampImageName ?? stampImageName;
 
 	const handleAddRegion = useCallback(
 		(rect: Rect) => {
+			if (mode === 'image' && !stampImage) {
+				setError(
+					'画像スタンプを使うには、先に任意画像ファイルを選択してください',
+				);
+				return;
+			}
 			const region: MaskRegion = {
 				id: createId(),
 				rect,
 				mode,
-				strength: strengths[mode],
+				shape,
+				strength:
+					mode === 'mosaic' || mode === 'blur'
+						? strengths[mode]
+						: strengths.mosaic,
+				emoji: mode === 'emoji' ? emoji : undefined,
+				stampImage: mode === 'image' ? (stampImage ?? undefined) : undefined,
+				stampImageName:
+					mode === 'image' ? (stampImageName ?? undefined) : undefined,
 			};
 			regions.set([...regions.state, region]);
 		},
-		[mode, strengths, regions],
+		[mode, stampImage, shape, strengths, emoji, stampImageName, regions],
 	);
 
 	const handleDeleteRegion = useCallback(
@@ -112,18 +140,98 @@ export default function ImageMosaicPage() {
 	const handleModeChange = useCallback(
 		(next: MaskMode) => {
 			if (selectedRegion) {
-				const range = next === 'mosaic' ? MOSAIC_BLOCK : BLUR_RADIUS;
-				const strength = Math.min(
-					range.max,
-					Math.max(range.min, selectedRegion.strength),
-				);
+				const range = next === 'blur' ? BLUR_RADIUS : MOSAIC_BLOCK;
+				const strength =
+					next === 'mosaic' || next === 'blur'
+						? Math.min(range.max, Math.max(range.min, selectedRegion.strength))
+						: selectedRegion.strength;
 				regions.set(
 					regions.state.map((r) =>
-						r.id === selectedRegion.id ? { ...r, mode: next, strength } : r,
+						r.id === selectedRegion.id
+							? {
+									...r,
+									mode: next,
+									strength,
+									emoji: next === 'emoji' ? activeEmoji : r.emoji,
+									stampImage:
+										next === 'image'
+											? (stampImage ?? r.stampImage)
+											: r.stampImage,
+									stampImageName:
+										next === 'image'
+											? (stampImageName ?? r.stampImageName)
+											: r.stampImageName,
+								}
+							: r,
 					),
 				);
 			}
 			setMode(next);
+		},
+		[selectedRegion, regions, activeEmoji, stampImage, stampImageName],
+	);
+
+	const handleShapeChange = useCallback(
+		(next: MaskShape) => {
+			if (selectedRegion) {
+				regions.set(
+					regions.state.map((r) =>
+						r.id === selectedRegion.id ? { ...r, shape: next } : r,
+					),
+				);
+			}
+			setShape(next);
+		},
+		[selectedRegion, regions],
+	);
+
+	const handleEmojiChange = useCallback(
+		(next: string) => {
+			setEmoji(next);
+			if (selectedRegion) {
+				regions.set(
+					regions.state.map((r) =>
+						r.id === selectedRegion.id ? { ...r, emoji: next } : r,
+					),
+				);
+			}
+		},
+		[selectedRegion, regions],
+	);
+
+	const handleStampImageChange = useCallback(
+		async (file: File) => {
+			setError(null);
+			const validation = validateImageFile(file);
+			if (!validation.ok) {
+				setError(validation.message);
+				return;
+			}
+			try {
+				const image = await loadImageFile(file);
+				setStampImage(image);
+				setStampImageName(file.name);
+				if (selectedRegion) {
+					regions.set(
+						regions.state.map((r) =>
+							r.id === selectedRegion.id
+								? {
+										...r,
+										mode: 'image',
+										stampImage: image,
+										stampImageName: file.name,
+									}
+								: r,
+						),
+					);
+				}
+			} catch (err) {
+				setError(
+					err instanceof Error
+						? err.message
+						: '画像スタンプの読み込みに失敗しました',
+				);
+			}
 		},
 		[selectedRegion, regions],
 	);
@@ -139,7 +247,7 @@ export default function ImageMosaicPage() {
 				} else {
 					regions.setTransient(next);
 				}
-			} else {
+			} else if (activeMode === 'mosaic' || activeMode === 'blur') {
 				setStrengths((s) => ({ ...s, [activeMode]: value }));
 			}
 		},
@@ -156,6 +264,8 @@ export default function ImageMosaicPage() {
 		setError(null);
 		regions.reset([]);
 		setSelectedId(null);
+		setStampImage(null);
+		setStampImageName(null);
 	}, [regions]);
 
 	return (
@@ -207,7 +317,13 @@ export default function ImageMosaicPage() {
 					<MaskToolbar
 						mode={activeMode}
 						strength={activeStrength}
+						shape={activeShape}
+						emoji={activeEmoji}
+						stampImageName={activeStampImageName}
 						onModeChange={handleModeChange}
+						onShapeChange={handleShapeChange}
+						onEmojiChange={handleEmojiChange}
+						onStampImageChange={handleStampImageChange}
 						onStrengthChange={handleStrengthChange}
 						canUndo={regions.canUndo}
 						canRedo={regions.canRedo}
@@ -217,7 +333,7 @@ export default function ImageMosaicPage() {
 						editingRegion={selectedRegion !== null}
 					/>
 					<p className="text-xs text-muted-foreground">
-						キャンバス上をドラッグして、モザイク・ぼかしをかける範囲を選択してください。領域をクリックすると選択でき、Deleteキーまたは✕ボタンで削除できます。
+						キャンバス上をドラッグして、モザイク・ぼかし範囲またはスタンプ配置範囲を選択してください。モザイク・ぼかしは四角形/円形を切り替えられます。領域をクリックすると選択でき、Deleteキーまたは✕ボタンで削除できます。
 					</p>
 					<div className="text-center">
 						<CanvasEditor
@@ -227,6 +343,8 @@ export default function ImageMosaicPage() {
 							onAddRegion={handleAddRegion}
 							onSelectRegion={setSelectedId}
 							onDeleteRegion={handleDeleteRegion}
+							drawingMode={activeMode}
+							drawingShape={activeShape}
 						/>
 					</div>
 					<div className="flex flex-wrap items-center justify-between gap-3">

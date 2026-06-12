@@ -7,7 +7,9 @@ import { X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { clientToImage } from '@/lib/tools/image-common';
 import {
+	type MaskMode,
 	type MaskRegion,
+	type MaskShape,
 	type Rect,
 	renderMasked,
 } from '@/lib/tools/image-mosaic';
@@ -25,6 +27,8 @@ type CanvasEditorProps = {
 	onAddRegion: (rect: Rect) => void;
 	onSelectRegion: (id: string | null) => void;
 	onDeleteRegion: (id: string) => void;
+	drawingMode: MaskMode;
+	drawingShape: MaskShape;
 };
 
 type DragState = {
@@ -52,13 +56,22 @@ function hitTest(
 ): MaskRegion | null {
 	// 後の領域（上に描画されたもの）を優先
 	for (let i = regions.length - 1; i >= 0; i--) {
-		const { rect } = regions[i];
-		if (
+		const { rect, mode, shape } = regions[i];
+		const inBounds =
 			x >= rect.x &&
 			x <= rect.x + rect.width &&
 			y >= rect.y &&
-			y <= rect.y + rect.height
-		) {
+			y <= rect.y + rect.height;
+		if (!inBounds) continue;
+		if ((mode === 'mosaic' || mode === 'blur') && shape === 'ellipse') {
+			const rx = rect.width / 2;
+			const ry = rect.height / 2;
+			const cx = rect.x + rx;
+			const cy = rect.y + ry;
+			if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1) {
+				return regions[i];
+			}
+		} else {
 			return regions[i];
 		}
 	}
@@ -72,6 +85,8 @@ export function CanvasEditor({
 	onAddRegion,
 	onSelectRegion,
 	onDeleteRegion,
+	drawingMode,
+	drawingShape,
 }: CanvasEditorProps) {
 	const canvasRef = useRef<HTMLCanvasElement>(null);
 	const dragRef = useRef<DragState | null>(null);
@@ -249,7 +264,7 @@ export function CanvasEditor({
 				return (
 					<div
 						key={region.id}
-						className={`pointer-events-none absolute border border-dashed transition-colors ${
+						className={`pointer-events-none absolute border border-dashed transition-colors ${(region.mode === 'mosaic' || region.mode === 'blur') && region.shape === 'ellipse' ? 'rounded-full' : ''} ${
 							isSelected
 								? 'border-primary border-2 bg-primary/10'
 								: isHovered
@@ -277,7 +292,12 @@ export function CanvasEditor({
 			{/* ドラッグ中の選択矩形 */}
 			{dragRect && (
 				<div
-					className="pointer-events-none absolute border-2 border-dashed border-primary bg-primary/10"
+					className={`pointer-events-none absolute border-2 border-dashed border-primary bg-primary/10 ${
+						(drawingMode === 'mosaic' || drawingMode === 'blur') &&
+						drawingShape === 'ellipse'
+							? 'rounded-full'
+							: ''
+					}`}
 					style={pctStyle(dragRect)}
 				/>
 			)}

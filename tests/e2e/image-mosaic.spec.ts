@@ -18,6 +18,11 @@ const FIXTURE = path.join(
 
 const WHITE = [255, 255, 255, 255];
 const RED = [220, 40, 40, 255];
+const BLUE = [0, 0, 255, 255];
+const BLUE_PNG = Buffer.from(
+	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADUlEQVR42mNkYPj/HwAEAQH/foH7YAAAAABJRU5ErkJggg==',
+	'base64',
+);
 
 // フィクスチャは白地 + (100,80)〜(219,169) の赤矩形。
 // 赤/白の境界をまたぐ位置にマスクをかけると、ブロック平均/ぼかしの結果が
@@ -107,6 +112,48 @@ test.describe('画像モザイク・ぼかし', () => {
 		expect(await getCanvasPixel(page, 'editor-canvas', 300, 200)).toEqual(
 			WHITE,
 		);
+	});
+
+	test('円形範囲のモザイクは円外を変更しない', async ({ page }) => {
+		await uploadSample(page);
+		const canvas = page.getByTestId('editor-canvas');
+
+		await page.getByRole('tab', { name: '円形' }).click();
+		await dragOnCanvas(page, canvas, { x: 90, y: 70 }, { x: 220, y: 190 });
+
+		// 円内かつ赤/白境界をまたぐブロックは平均色になる
+		await expect
+			.poll(() => getCanvasPixel(page, 'editor-canvas', 100, 115))
+			.not.toEqual(WHITE);
+		expect(await getCanvasPixel(page, 'editor-canvas', 100, 115)).not.toEqual(
+			RED,
+		);
+		// 選択矩形の内側でも円外にある赤ピクセルは元のまま
+		expect(await getCanvasPixel(page, 'editor-canvas', 210, 85)).toEqual(RED);
+	});
+
+	test('絵文字スタンプと任意画像スタンプを配置できる', async ({ page }) => {
+		await uploadSample(page);
+		const canvas = page.getByTestId('editor-canvas');
+
+		await page.getByRole('tab', { name: '絵文字' }).click();
+		await page.getByLabel('絵文字スタンプ').fill('★');
+		await dragOnCanvas(page, canvas, { x: 40, y: 40 }, { x: 90, y: 90 });
+		await expect
+			.poll(() => getCanvasPixel(page, 'editor-canvas', 65, 65))
+			.not.toEqual(WHITE);
+
+		await page.getByRole('tab', { name: '画像スタンプ' }).click();
+		await page.getByLabel('画像スタンプファイル').setInputFiles({
+			name: 'blue.png',
+			mimeType: 'image/png',
+			buffer: BLUE_PNG,
+		});
+		await expect(page.getByText('blue.png')).toBeVisible();
+		await dragOnCanvas(page, canvas, { x: 260, y: 200 }, { x: 320, y: 260 });
+		await expect
+			.poll(() => getCanvasPixel(page, 'editor-canvas', 290, 230))
+			.toEqual(BLUE);
 	});
 
 	test('強度スライダーで選択領域の出力が変わる', async ({ page }) => {
