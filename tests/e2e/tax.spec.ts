@@ -4,7 +4,9 @@ test.describe('消費税・税込計算ツール', () => {
 	test('ページが正しく表示されること', async ({ createToolPage }) => {
 		const toolPage = createToolPage('tax');
 		await toolPage.goto();
-		await toolPage.expectTitle('消費税計算（税込・税抜・軽減税率対応）');
+		await toolPage.expectTitle(
+			'消費税計算（税込・税抜・複数明細・軽減税率対応）',
+		);
 		await toolPage.expectSafetyBadge();
 	});
 
