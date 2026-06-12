@@ -8,7 +8,10 @@ test.describe('Wareki Converter Tool', () => {
 		await toolPage.expectSafetyBadge();
 	});
 
-	test('should convert seireki to wareki and vice versa', async ({ page, createToolPage }) => {
+	test('should convert seireki to wareki and vice versa', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('wareki-converter');
 		await toolPage.goto();
 
@@ -30,4 +33,3 @@ test.describe('Wareki Converter Tool', () => {
 		await expect(page.getByText('2020年')).toBeVisible();
 	});
 });
-

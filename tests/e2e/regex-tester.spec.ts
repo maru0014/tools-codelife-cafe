@@ -8,7 +8,10 @@ test.describe('Regex Tester Tool', () => {
 		await toolPage.expectSafetyBadge();
 	});
 
-	test('should display regex matches and handle pattern changes', async ({ page, createToolPage }) => {
+	test('should display regex matches and handle pattern changes', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('regex-tester');
 		await toolPage.goto();
 
@@ -24,4 +27,3 @@ test.describe('Regex Tester Tool', () => {
 		await expect(matchCount).toHaveText('4');
 	});
 });
-

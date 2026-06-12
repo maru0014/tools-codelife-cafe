@@ -8,13 +8,20 @@ test.describe('Personal Info Masking Tool', () => {
 		await toolPage.expectSafetyBadge();
 	});
 
-	test('should mask personal information automatically', async ({ page, createToolPage }) => {
+	test('should mask personal information automatically', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('masking');
 		await toolPage.goto();
 
 		// 1. Fill personal info in the input textbox
 		const textareas = page.getByRole('textbox');
-		await textareas.first().fill('私のメールは test@example.com です。電話番号は 090-1234-5678 です。');
+		await textareas
+			.first()
+			.fill(
+				'私のメールは test@example.com です。電話番号は 090-1234-5678 です。',
+			);
 
 		// 2. Check if output textbox contains masked values
 		await expect(textareas.last()).toContainText('***');
@@ -22,4 +29,3 @@ test.describe('Personal Info Masking Tool', () => {
 		await expect(textareas.last()).not.toContainText('090-1234-5678');
 	});
 });
-

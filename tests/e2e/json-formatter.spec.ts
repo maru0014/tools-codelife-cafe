@@ -10,7 +10,10 @@ test.describe('JSON Formatter', () => {
 		await expect(page.getByRole('button', { name: /整形/ })).toBeVisible();
 	});
 
-	test('should format valid JSON and show error for invalid JSON', async ({ page, createToolPage }) => {
+	test('should format valid JSON and show error for invalid JSON', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('json-formatter');
 		await toolPage.goto();
 
@@ -32,4 +35,3 @@ test.describe('JSON Formatter', () => {
 		await expect(errorBanner).toContainText('エラー');
 	});
 });
-

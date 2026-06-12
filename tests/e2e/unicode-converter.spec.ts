@@ -1,4 +1,4 @@
-import { expect, test } from './fixtures/base';
+import { test } from './fixtures/base';
 
 test.describe('Unicode Converter Tool', () => {
 	test('should load the page correctly', async ({ createToolPage }) => {
@@ -8,7 +8,10 @@ test.describe('Unicode Converter Tool', () => {
 		await toolPage.expectSafetyBadge();
 	});
 
-	test('should convert text to unicode and vice versa', async ({ page, createToolPage }) => {
+	test('should convert text to unicode and vice versa', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('unicode-converter');
 		await toolPage.goto();
 
@@ -22,4 +25,3 @@ test.describe('Unicode Converter Tool', () => {
 		await toolPage.expectOutputContains('あ');
 	});
 });
-

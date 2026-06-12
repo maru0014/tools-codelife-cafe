@@ -14,7 +14,10 @@ test.describe('Character Counter', () => {
 		await expect(page.getByRole('textbox').first()).toBeVisible();
 	});
 
-	test('should count characters and bytes in real-time', async ({ page, createToolPage }) => {
+	test('should count characters and bytes in real-time', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('char-count');
 		await toolPage.goto();
 
@@ -23,11 +26,14 @@ test.describe('Character Counter', () => {
 		await textbox.fill('テスト');
 
 		// Verify stats are calculated correctly
-		const charCountCard = page.locator('.rounded-xl', { hasText: '文字数（空白含む）' });
+		const charCountCard = page.locator('.rounded-xl', {
+			hasText: '文字数（空白含む）',
+		});
 		await expect(charCountCard.locator('.text-2xl')).toHaveText('3');
 
-		const byteCountCard = page.locator('.rounded-xl', { hasText: 'バイト数（UTF-8）' });
+		const byteCountCard = page.locator('.rounded-xl', {
+			hasText: 'バイト数（UTF-8）',
+		});
 		await expect(byteCountCard.locator('.text-2xl')).toHaveText('9');
 	});
 });
-

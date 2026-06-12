@@ -8,7 +8,10 @@ test.describe('Dummy Data Generator Tool', () => {
 		await toolPage.expectSafetyBadge();
 	});
 
-	test('should generate dummy data and switch formats', async ({ page, createToolPage }) => {
+	test('should generate dummy data and switch formats', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('dummy-data');
 		await toolPage.goto();
 
@@ -28,4 +31,3 @@ test.describe('Dummy Data Generator Tool', () => {
 		await expect(previewContainer).toContainText('name');
 	});
 });
-

@@ -8,7 +8,10 @@ test.describe('Base64 Converter Tool', () => {
 		await toolPage.expectSafetyBadge();
 	});
 
-	test('should encode and decode text correctly', async ({ page, createToolPage }) => {
+	test('should encode and decode text correctly', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('base64');
 		await toolPage.goto();
 
@@ -26,4 +29,3 @@ test.describe('Base64 Converter Tool', () => {
 		await expect(page.getByRole('textbox').first()).toHaveValue('');
 	});
 });
-

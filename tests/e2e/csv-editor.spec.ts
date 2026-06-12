@@ -8,7 +8,10 @@ test.describe('CSV Editor Tool', () => {
 		await toolPage.expectSafetyBadge();
 	});
 
-	test('should parse CSV and allow editing', async ({ page, createToolPage }) => {
+	test('should parse CSV and allow editing', async ({
+		page,
+		createToolPage,
+	}) => {
 		const toolPage = createToolPage('csv-editor');
 		await toolPage.goto();
 
@@ -20,7 +23,9 @@ test.describe('CSV Editor Tool', () => {
 		await page.getByRole('button', { name: 'パースして編集へ' }).click();
 
 		// 3. Verify table view is active
-		await expect(page.getByRole('tab', { name: 'テーブル編集' })).toHaveAttribute('data-state', 'active');
+		await expect(
+			page.getByRole('tab', { name: 'テーブル編集' }),
+		).toHaveAttribute('data-state', 'active');
 		await expect(page.getByRole('button', { name: /行を追加/i })).toBeVisible();
 		await expect(page.getByRole('button', { name: /列を追加/i })).toBeVisible();
 
@@ -32,4 +37,3 @@ test.describe('CSV Editor Tool', () => {
 		await expect(inputs.nth(3)).toHaveValue('Alice');
 	});
 });
-
