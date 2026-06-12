@@ -113,7 +113,7 @@ export function MarkdownPreviewPage() {
 					入力したテキストはサーバーに送信されません。すべてブラウザ内で処理されます。
 				</p>
 				<p>
-					Mermaid・数式（KaTeX）・シンタックスハイライトには対応していません。
+					Mermaid・数式（KaTeX）・シンタックスハイライトには対応していません。外部URLの画像はプライバシー保護のため読み込みません。
 				</p>
 			</div>
 

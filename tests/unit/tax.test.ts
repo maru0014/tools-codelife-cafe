@@ -128,24 +128,25 @@ test('calculateTax: 過去税率3%/5%/8%（税抜→税込）', () => {
 });
 
 test('calculateTax: 税込→税抜は端数処理によって税抜→税込の逆算と一致しない場合がある', () => {
-	// 101円(税抜)×10% -> 税込111円(round)。逆に111円を税込→税抜すると
-	// tax = round(111 * 10 / 110) = round(10.09..) = 10, base = 101 で一致する例
-	const toInclusive = calculateTax({
-		amount: 101,
-		rate: 10,
-		direction: 'exclusive-to-inclusive',
-		rounding: 'round',
-	});
-	assert.equal(toInclusive.total, 111);
-
+	// 税込104円(round)を税抜に戻すと: tax = round(104 * 10 / 110) = round(9.45..) = 9, base = 95
 	const backToExclusive = calculateTax({
-		amount: toInclusive.total,
+		amount: 104,
 		rate: 10,
 		direction: 'inclusive-to-exclusive',
 		rounding: 'round',
 	});
-	// 端数処理の影響で必ずしも完全往復するとは限らないことを確認（差は1円以内）
-	assert.ok(Math.abs(backToExclusive.base - 101) <= 1);
+	assert.deepEqual(backToExclusive, { base: 95, tax: 9, total: 104 });
+
+	// その税抜95円を税込にすると: tax = round(95 * 10 / 100) = round(9.5) = 10, total = 105
+	// となり、元の税込104円とは一致しない（非対称性の具体例）
+	const toInclusive = calculateTax({
+		amount: backToExclusive.base,
+		rate: 10,
+		direction: 'exclusive-to-inclusive',
+		rounding: 'round',
+	});
+	assert.deepEqual(toInclusive, { base: 95, tax: 10, total: 105 });
+	assert.notEqual(toInclusive.total, 104);
 });
 
 // ---------------------------------------------------------------------------

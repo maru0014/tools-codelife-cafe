@@ -65,6 +65,55 @@ test.describe('Markdownプレビュー Tool', () => {
 		expect(html).not.toContain('<script>');
 	});
 
+	test('危険な属性・iframe・javascript:リンク・外部画像がサニタイズされること', async ({
+		page,
+		createToolPage,
+	}) => {
+		const toolPage = createToolPage('markdown');
+		await toolPage.goto();
+
+		// 外部画像URLへのリクエストが発生しないことを監視する
+		const externalImageRequests: string[] = [];
+		page.on('request', (request) => {
+			if (request.url().includes('attacker.invalid')) {
+				externalImageRequests.push(request.url());
+			}
+		});
+
+		await page
+			.getByLabel('Markdown入力')
+			.fill(
+				[
+					'<img src="https://attacker.invalid/x.png" onerror="alert(1)">',
+					'',
+					'<iframe src="https://attacker.invalid"></iframe>',
+					'',
+					'[クリック](javascript:alert(1))',
+					'',
+					'![外部画像](https://attacker.invalid/pixel.png)',
+					'',
+					'本文テキスト',
+				].join('\n'),
+			);
+
+		const preview = page.getByTestId('markdown-preview');
+		await expect(preview).toContainText('本文テキスト');
+
+		// iframe・イベントハンドラ属性は除去される
+		await expect(preview.locator('iframe')).toHaveCount(0);
+		await expect(preview.locator('[onerror]')).toHaveCount(0);
+
+		// javascript: リンクは無害化される
+		const html = await preview.innerHTML();
+		expect(html).not.toContain('javascript:');
+
+		// 外部URL画像の src は除去され、外部リクエストは発生しない
+		await expect(preview.locator('img[src*="attacker.invalid"]')).toHaveCount(
+			0,
+		);
+		expect(externalImageRequests).toEqual([]);
+	});
+
 	test('HTMLダウンロードでファイルがダウンロードされ入力由来のテキストを含むこと', async ({
 		page,
 		createToolPage,

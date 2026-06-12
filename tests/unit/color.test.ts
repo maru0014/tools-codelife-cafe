@@ -331,3 +331,16 @@ test('parseColor: 不正入力はnull', () => {
 	assert.equal(parseColor('hsl(0, 150%, 50%)'), null);
 	assert.equal(parseColor('cmyk(0%, 0%, 0%, 150%)'), null);
 });
+
+test('parseColor: 不正な小数トークン（1..2 / 1.2.3 等）はnull', () => {
+	assert.equal(parseColor('rgb(1..2, 0, 0)'), null);
+	assert.equal(parseColor('rgb(1.2.3, 0, 0)'), null);
+	assert.equal(parseColor('rgb(., 0, 0)'), null);
+	assert.equal(parseColor('hsl(1.2.3, 50%, 50%)'), null);
+	assert.equal(parseColor('hsl(120, 5..0%, 50%)'), null);
+	assert.equal(parseColor('cmyk(0..1%, 0%, 0%, 0%)'), null);
+	// 正常な小数は引き続き受理される
+	assert.notEqual(parseColor('rgb(1.5, 0, 0)'), null);
+	assert.notEqual(parseColor('rgb(.5, 0, 0)'), null);
+	assert.notEqual(parseColor('hsl(120.5, 50%, 50%)'), null);
+});

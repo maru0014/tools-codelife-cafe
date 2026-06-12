@@ -23,6 +23,7 @@ export async function markdownToHtml(src: string): Promise<string> {
  * - marked（GFM有効: テーブル・タスクリスト・打ち消し線・自動リンク、breaksオフ）でHTML化
  * - DOMPurifyでサニタイズ（script・iframe・イベントハンドラ属性・javascript: URLを除去）
  * - リンクには target="_blank" + rel="noopener noreferrer" を付与
+ * - 外部URLの画像は src を除去（外部リクエストを発生させない。data: URIのみ表示可）
  *
  * DOMPurifyはブラウザのwindowを必要とするため、Node環境（unit test）では呼び出せない。
  * Node環境向けのテストは markdownToHtml / buildStandaloneHtml を直接対象にする。
@@ -43,10 +44,28 @@ export async function renderMarkdown(src: string): Promise<string> {
 			node.setAttribute('target', '_blank');
 			node.setAttribute('rel', 'noopener noreferrer');
 		}
+		// 外部URLの画像はプレビュー描画時に外部リクエストが発生し、
+		// 「データを外部送信しない」保証に反するため src を除去する（data: URIのみ許可）
+		if (node.tagName === 'IMG') {
+			const src = node.getAttribute('src') ?? '';
+			if (!/^data:image\//i.test(src)) {
+				node.removeAttribute('src');
+			}
+			node.removeAttribute('srcset');
+		}
 	});
 
 	const sanitized = purifier.sanitize(rawHtml, {
-		FORBID_TAGS: ['script', 'iframe', 'style', 'object', 'embed', 'form'],
+		FORBID_TAGS: [
+			'script',
+			'iframe',
+			'style',
+			'object',
+			'embed',
+			'form',
+			'picture',
+			'source',
+		],
 		FORBID_ATTR: ['style'],
 		ALLOW_DATA_ATTR: false,
 	});

@@ -267,6 +267,21 @@ export function formatCmyk(cmyk: Cmyk): string {
 // パース（自動判定）
 // ---------------------------------------------------------------------------
 
+// 厳密な数値トークン（123 / 1.5 / .5）。"1..2" や "1.2.3" のような不正値を弾く
+const NUM = String.raw`(?:\d+(?:\.\d+)?|\.\d+)`;
+const RGB_PATTERN = new RegExp(
+	String.raw`^rgba?\(\s*(${NUM}%?)\s*,\s*(${NUM}%?)\s*,\s*(${NUM}%?)\s*(?:,\s*(${NUM}%?)\s*)?\)$`,
+	'i',
+);
+const HSL_PATTERN = new RegExp(
+	String.raw`^hsla?\(\s*(${NUM})(?:deg)?\s*,\s*(${NUM})%\s*,\s*(${NUM})%\s*(?:,\s*(${NUM}%?)\s*)?\)$`,
+	'i',
+);
+const CMYK_PATTERN = new RegExp(
+	String.raw`^cmyk\(\s*(${NUM})%?\s*,\s*(${NUM})%?\s*,\s*(${NUM})%?\s*,\s*(${NUM})%?\s*\)$`,
+	'i',
+);
+
 function parseHexInput(input: string): ParsedColor | null {
 	if (!/^#?[0-9a-fA-F]+$/.test(input)) return null;
 	const rgb = hexToRgb(input);
@@ -275,9 +290,7 @@ function parseHexInput(input: string): ParsedColor | null {
 }
 
 function parseRgbInput(input: string): ParsedColor | null {
-	const match = input.match(
-		/^rgba?\(\s*([\d.]+%?)\s*,\s*([\d.]+%?)\s*,\s*([\d.]+%?)\s*(?:,\s*([\d.]+%?)\s*)?\)$/i,
-	);
+	const match = input.match(RGB_PATTERN);
 	if (!match) return null;
 
 	const parseChannel = (value: string): number | null => {
@@ -315,9 +328,7 @@ function parseRgbInput(input: string): ParsedColor | null {
 }
 
 function parseHslInput(input: string): ParsedColor | null {
-	const match = input.match(
-		/^hsla?\(\s*([\d.]+)(?:deg)?\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*(?:,\s*([\d.]+%?)\s*)?\)$/i,
-	);
+	const match = input.match(HSL_PATTERN);
 	if (!match) return null;
 
 	const h = Number.parseFloat(match[1]);
@@ -348,9 +359,7 @@ function parseHslInput(input: string): ParsedColor | null {
 }
 
 function parseCmykInput(input: string): ParsedColor | null {
-	const match = input.match(
-		/^cmyk\(\s*([\d.]+)%?\s*,\s*([\d.]+)%?\s*,\s*([\d.]+)%?\s*,\s*([\d.]+)%?\s*\)$/i,
-	);
+	const match = input.match(CMYK_PATTERN);
 	if (!match) return null;
 
 	const c = Number.parseFloat(match[1]);
