@@ -114,26 +114,26 @@ export default function ImageMosaicPage() {
 	const handleAddRegion = useCallback(
 		(rect: Rect) => {
 			let region: MaskRegion;
-			if (isMaskEffectMode(mode)) {
+			if (isMaskEffectMode(activeMode)) {
 				region = {
 					id: createId(),
 					rect,
-					mode,
-					shape,
-					strength: strengths[mode],
+					mode: activeMode,
+					shape: activeShape,
+					strength: activeStrength,
 				};
-			} else if (mode === 'emoji') {
+			} else if (activeMode === 'emoji') {
 				region = {
 					id: createId(),
 					rect,
-					mode,
-					emoji,
+					mode: activeMode,
+					emoji: activeEmoji,
 				};
-			} else if (stampImage) {
+			} else if (activeMode === 'image' && stampImage) {
 				region = {
 					id: createId(),
 					rect,
-					mode,
+					mode: activeMode,
 					stampImage,
 					stampImageName: stampImageName ?? undefined,
 				};
@@ -145,7 +145,15 @@ export default function ImageMosaicPage() {
 			}
 			regions.set([...regions.state, region]);
 		},
-		[mode, stampImage, shape, strengths, emoji, stampImageName, regions],
+		[
+			activeMode,
+			activeShape,
+			activeStrength,
+			activeEmoji,
+			stampImage,
+			stampImageName,
+			regions,
+		],
 	);
 
 	const handleDeleteRegion = useCallback(

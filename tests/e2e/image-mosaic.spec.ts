@@ -20,7 +20,7 @@ const WHITE = [255, 255, 255, 255];
 const RED = [220, 40, 40, 255];
 const BLUE = [0, 0, 255, 255];
 const BLUE_PNG = Buffer.from(
-	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADUlEQVR42mNkYPj/HwAEAQH/foH7YAAAAABJRU5ErkJggg==',
+	'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAIAAACQd1PeAAAADElEQVR4nGNgYPgPAAEDAQAIicLsAAAAAElFTkSuQmCC',
 	'base64',
 );
 
@@ -124,9 +124,9 @@ test.describe('画像モザイク・ぼかし', () => {
 		// 円内かつ赤/白境界をまたぐブロックは平均色になる
 		await expect
 			.poll(() => getCanvasPixel(page, 'editor-canvas', 100, 115))
-			.not.toEqual(WHITE);
+			.not.toEqual(RED);
 		expect(await getCanvasPixel(page, 'editor-canvas', 100, 115)).not.toEqual(
-			RED,
+			WHITE,
 		);
 		// 選択矩形の内側でも円外にある赤ピクセルは元のまま
 		expect(await getCanvasPixel(page, 'editor-canvas', 210, 85)).toEqual(RED);
