@@ -3,6 +3,7 @@ import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
 
 import { toolCatalog } from '@/lib/tools/catalog';
+import { searchTools } from '@/lib/tools/search';
 
 export default function SearchModal() {
 	const [isOpen, setIsOpen] = useState(false);
@@ -10,18 +11,7 @@ export default function SearchModal() {
 	const [activeIndex, setActiveIndex] = useState(0);
 	const inputRef = useRef<HTMLInputElement>(null);
 
-	const filteredTools = query
-		? toolCatalog.filter((tool) =>
-				(
-					tool.title +
-					tool.description +
-					tool.category +
-					tool.keywords.join(' ')
-				)
-					.toLowerCase()
-					.includes(query.toLowerCase()),
-			)
-		: toolCatalog;
+	const filteredTools = query ? searchTools(query) : toolCatalog;
 
 	// Search trigger & Keyboard shortcuts
 	useEffect(() => {
@@ -130,6 +120,7 @@ export default function SearchModal() {
 								<a
 									key={tool.id}
 									href={tool.href}
+									data-testid="search-result"
 									className={`flex flex-col gap-1 px-4 py-3 rounded-lg transition-colors ${
 										index === activeIndex
 											? 'bg-primary/10 text-foreground'
