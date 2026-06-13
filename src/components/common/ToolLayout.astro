@@ -1,4 +1,5 @@
 ---
+import { toolCatalog } from '../../lib/tools/catalog';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SafetyBadge from '../layout/SafetyBadge.tsx';
 import ToolJsonLd from '../common/ToolJsonLd.astro';
@@ -10,14 +11,58 @@ interface Props {
 }
 
 const { title, description, path } = Astro.props;
+
+const SITE_URL = 'https://tools.codelife.cafe';
+
+// パンくずリスト: カタログから path でカテゴリを解決する
+const tool = toolCatalog.find((t) => t.href === path);
+const category = tool?.category;
+const categoryHref = category ? `/?category=${encodeURIComponent(category)}` : undefined;
+
+const breadcrumbItems: { name: string; url?: string }[] = [
+  { name: 'ホーム', url: `${SITE_URL}/` },
+  ...(category && categoryHref ? [{ name: category, url: `${SITE_URL}${categoryHref}` }] : []),
+  { name: title },
+];
+
+const breadcrumbSchema = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: breadcrumbItems.map((item, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: item.name,
+    ...(item.url ? { item: item.url } : {}),
+  })),
+};
 ---
 
 <BaseLayout title={title} description={description} path={path}>
   <Fragment slot="head">
     <ToolJsonLd name={title} description={description} url={`https://tools.codelife.cafe${path}`} />
+    <script type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema)} />
   </Fragment>
 
   <div id="tool-layout-container" class="transition-all duration-300 mx-auto max-w-[800px] xl:max-w-5xl px-4 sm:px-6 py-8">
+    <!-- Breadcrumbs -->
+    <nav aria-label="パンくずリスト" class="mb-3">
+      <ol class="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground">
+        <li>
+          <a href="/" class="hover:text-foreground transition-colors">ホーム</a>
+        </li>
+        {category && categoryHref && (
+          <li class="flex items-center gap-1.5">
+            <span aria-hidden="true">›</span>
+            <a href={categoryHref} class="hover:text-foreground transition-colors">{category}</a>
+          </li>
+        )}
+        <li class="flex items-center gap-1.5">
+          <span aria-hidden="true">›</span>
+          <span aria-current="page" class="text-foreground">{title}</span>
+        </li>
+      </ol>
+    </nav>
+
     <!-- Tool Header -->
     <div class="mb-6">
       <h1 class="text-2xl font-bold mb-2">{title}</h1>

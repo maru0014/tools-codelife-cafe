@@ -53,6 +53,68 @@ test.describe('Layout & Navigation', () => {
 		await expect(searchInput).toBeFocused();
 	});
 
+	test('Breadcrumbs are displayed on tool pages', async ({ page }) => {
+		await page.goto('/csv-editor');
+
+		const nav = page.getByRole('navigation', { name: 'パンくずリスト' });
+		await expect(nav).toBeVisible();
+
+		// ホームリンク
+		const homeLink = nav.getByRole('link', { name: 'ホーム' });
+		await expect(homeLink).toBeVisible();
+		await expect(homeLink).toHaveAttribute('href', '/');
+
+		// カテゴリリンク（/?category=<カテゴリ名> へのリンク）
+		const categoryLink = nav.getByRole('link', { name: 'データ処理' });
+		await expect(categoryLink).toBeVisible();
+		await expect(categoryLink).toHaveAttribute(
+			'href',
+			`/?category=${encodeURIComponent('データ処理')}`,
+		);
+
+		// 現在ページ（リンクなし、aria-current="page"）
+		const current = nav.locator('[aria-current="page"]');
+		await expect(current).toHaveText('CSVビューア/エディタ');
+		await expect(
+			nav.getByRole('link', { name: 'CSVビューア/エディタ' }),
+		).toHaveCount(0);
+	});
+
+	test('BreadcrumbList JSON-LD is present and valid', async ({ page }) => {
+		await page.goto('/csv-editor');
+
+		const jsonLdTexts = await page
+			.locator('script[type="application/ld+json"]')
+			.allTextContents();
+		const breadcrumb = jsonLdTexts
+			.map((text) => JSON.parse(text))
+			.find((schema) => schema['@type'] === 'BreadcrumbList');
+
+		expect(breadcrumb).toBeTruthy();
+		expect(breadcrumb['@context']).toBe('https://schema.org');
+		expect(breadcrumb.itemListElement).toHaveLength(3);
+
+		const [home, category, current] = breadcrumb.itemListElement;
+		expect(home).toMatchObject({
+			'@type': 'ListItem',
+			position: 1,
+			name: 'ホーム',
+			item: 'https://tools.codelife.cafe/',
+		});
+		expect(category).toMatchObject({
+			'@type': 'ListItem',
+			position: 2,
+			name: 'データ処理',
+			item: `https://tools.codelife.cafe/?category=${encodeURIComponent('データ処理')}`,
+		});
+		expect(current).toMatchObject({
+			'@type': 'ListItem',
+			position: 3,
+			name: 'CSVビューア/エディタ',
+		});
+		expect(current.item).toBeUndefined();
+	});
+
 	test('Footer links are present', async ({ page }) => {
 		const footer = page.locator('footer');
 		await expect(footer).toBeVisible();
