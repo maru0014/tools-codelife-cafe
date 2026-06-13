@@ -63,6 +63,9 @@ export default function SearchModal() {
 		if (!isOpen) return;
 
 		const handleModalKeyDown = (e: KeyboardEvent) => {
+			// IME変換中のキー操作（変換確定のEnter・候補選択の矢印キー）は無視する
+			// keyCode 229 は一部ブラウザでIME処理中を示すフォールバック
+			if (e.isComposing || e.keyCode === 229) return;
 			if (filteredTools.length === 0) return;
 
 			if (e.key === 'ArrowDown') {
