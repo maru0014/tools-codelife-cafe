@@ -81,6 +81,38 @@ test.describe('Search after page navigation', () => {
 		}
 	});
 
+	test('Enter during IME composition does not navigate', async ({ page }) => {
+		// 1. トップページにアクセスして検索モーダルを開く
+		await page.goto('/');
+		await page.waitForTimeout(1000);
+
+		await page.keyboard.press('Control+k');
+		const searchInput = page.getByPlaceholder(/ツールを検索/i);
+		await expect(searchInput).toBeVisible({ timeout: 5000 });
+		await expect(searchInput).toBeFocused();
+
+		// 2. IME変換中（isComposing: true）の Enter をディスパッチ
+		await page.evaluate(() => {
+			window.dispatchEvent(
+				new KeyboardEvent('keydown', {
+					key: 'Enter',
+					isComposing: true,
+					bubbles: true,
+				}),
+			);
+		});
+		await page.waitForTimeout(500);
+
+		// 3. ページ遷移せず、モーダルが開いたままであることを確認
+		expect(new URL(page.url()).pathname).toBe('/');
+		await expect(searchInput).toBeVisible();
+
+		// 4. 通常の Enter では選択中ツールへ遷移することを確認
+		await page.keyboard.press('Enter');
+		await page.waitForTimeout(1000);
+		expect(new URL(page.url()).pathname).not.toBe('/');
+	});
+
 	test('Keyboard shortcut label shows correct OS key', async ({ page }) => {
 		// Playwright runs on non-Mac typically, so expect Ctrl+K
 		await page.goto('/');
