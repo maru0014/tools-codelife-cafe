@@ -247,7 +247,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		id: 'image-mosaic',
 		title: '画像モザイク・ぼかし',
 		description:
-			'スクショの機密箇所をドラッグ選択で安全にマスキング。画像はアップロードされません。',
+			'四角形/円形のモザイク・ぼかしと絵文字・任意画像スタンプで安全にマスキング。画像はアップロードされません。',
 		href: '/image-mosaic',
 		icon: '🟫',
 		category: 'AI/画像',
@@ -259,6 +259,9 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'マスキング',
 			'スクリーンショット',
 			'ピクセル化',
+			'円形',
+			'絵文字スタンプ',
+			'画像スタンプ',
 		],
 	},
 	{

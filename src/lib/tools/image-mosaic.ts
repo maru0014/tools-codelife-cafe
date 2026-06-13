@@ -4,18 +4,53 @@
 /** 元画像座標系の矩形（width/height > 0 に正規化済みであること） */
 export type Rect = { x: number; y: number; width: number; height: number };
 
-export type MaskMode = 'mosaic' | 'blur';
+export type MaskMode = 'mosaic' | 'blur' | 'emoji' | 'image';
+export type MaskShape = 'rect' | 'ellipse';
 
-export type MaskRegion = {
+type BaseRegion = {
 	id: string;
 	rect: Rect;
-	mode: MaskMode;
+};
+
+export type MaskEffectRegion = BaseRegion & {
+	mode: 'mosaic' | 'blur';
+	/** モザイク・ぼかしの適用形状 */
+	shape: MaskShape;
 	/** mosaic: ブロックサイズ(px) / blur: 半径(px) */
 	strength: number;
 };
 
+export type EmojiStampRegion = BaseRegion & {
+	mode: 'emoji';
+	/** emoji モードで描画する文字 */
+	emoji: string;
+};
+
+export type ImageStampRegion = BaseRegion & {
+	mode: 'image';
+	/** image モードで描画するスタンプ画像 */
+	stampImage: HTMLImageElement | HTMLCanvasElement;
+	/** 任意画像スタンプのファイル名（UI表示用） */
+	stampImageName?: string;
+};
+
+export type MaskRegion = MaskEffectRegion | EmojiStampRegion | ImageStampRegion;
+
 export const MOSAIC_BLOCK = { min: 4, max: 64, default: 12 } as const;
 export const BLUR_RADIUS = { min: 2, max: 30, default: 8 } as const;
+export const DEFAULT_EMOJI_STAMP = '🙈';
+
+export function isMaskEffectMode(
+	mode: MaskMode,
+): mode is MaskEffectRegion['mode'] {
+	return mode === 'mosaic' || mode === 'blur';
+}
+
+export function isMaskEffectRegion(
+	region: MaskRegion,
+): region is MaskEffectRegion {
+	return isMaskEffectMode(region.mode);
+}
 
 /** 矩形を canvas 境界内にクリップする。交差しない場合は null */
 export function clampRect(
@@ -29,6 +64,27 @@ export function clampRect(
 	const bottom = Math.min(height, Math.ceil(rect.y + rect.height));
 	if (right - x < 1 || bottom - y < 1) return null;
 	return { x, y, width: right - x, height: bottom - y };
+}
+
+function clipRegionPath(
+	ctx: CanvasRenderingContext2D,
+	rect: Rect,
+	shape: MaskShape,
+): void {
+	ctx.beginPath();
+	if (shape === 'ellipse') {
+		ctx.ellipse(
+			rect.x + rect.width / 2,
+			rect.y + rect.height / 2,
+			rect.width / 2,
+			rect.height / 2,
+			0,
+			0,
+			Math.PI * 2,
+		);
+	} else {
+		ctx.rect(rect.x, rect.y, rect.width, rect.height);
+	}
 }
 
 /**
@@ -268,6 +324,97 @@ export function applyBlur(
 	}
 }
 
+function applyEffectWithShape(
+	ctx: CanvasRenderingContext2D,
+	region: MaskEffectRegion,
+	effect: (target: CanvasRenderingContext2D) => void,
+): void {
+	const clipped = clampRect(region.rect, ctx.canvas.width, ctx.canvas.height);
+	if (!clipped) return;
+	if (region.shape === 'rect') {
+		effect(ctx);
+		return;
+	}
+
+	const offscreen = document.createElement('canvas');
+	offscreen.width = ctx.canvas.width;
+	offscreen.height = ctx.canvas.height;
+	const offCtx = offscreen.getContext('2d', { willReadFrequently: true });
+	if (!offCtx) return;
+	offCtx.drawImage(ctx.canvas, 0, 0);
+	effect(offCtx);
+
+	ctx.save();
+	clipRegionPath(ctx, clipped, 'ellipse');
+	ctx.clip();
+	ctx.drawImage(offscreen, 0, 0);
+	ctx.restore();
+}
+
+export function applyMosaicRegion(
+	ctx: CanvasRenderingContext2D,
+	region: MaskEffectRegion,
+): void {
+	applyEffectWithShape(ctx, region, (target) =>
+		applyMosaic(target, region.rect, region.strength),
+	);
+}
+
+export function applyBlurRegion(
+	ctx: CanvasRenderingContext2D,
+	region: MaskEffectRegion,
+): void {
+	applyEffectWithShape(ctx, region, (target) =>
+		applyBlur(target, region.rect, region.strength),
+	);
+}
+
+export function applyEmojiStamp(
+	ctx: CanvasRenderingContext2D,
+	rect: Rect,
+	emoji: string,
+): void {
+	const clipped = clampRect(rect, ctx.canvas.width, ctx.canvas.height);
+	if (!clipped) return;
+	const stamp = emoji.trim() || DEFAULT_EMOJI_STAMP;
+	const size = Math.max(1, Math.min(clipped.width, clipped.height) * 0.86);
+	ctx.save();
+	ctx.textAlign = 'center';
+	ctx.textBaseline = 'middle';
+	ctx.font = `${size}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif`;
+	ctx.fillText(
+		stamp,
+		clipped.x + clipped.width / 2,
+		clipped.y + clipped.height / 2,
+		clipped.width,
+	);
+	ctx.restore();
+}
+
+export function applyImageStamp(
+	ctx: CanvasRenderingContext2D,
+	rect: Rect,
+	image: HTMLImageElement | HTMLCanvasElement,
+): void {
+	const clipped = clampRect(rect, ctx.canvas.width, ctx.canvas.height);
+	if (!clipped) return;
+	const sourceWidth =
+		image instanceof HTMLImageElement ? image.naturalWidth : image.width;
+	const sourceHeight =
+		image instanceof HTMLImageElement ? image.naturalHeight : image.height;
+	if (sourceWidth < 1 || sourceHeight < 1) return;
+
+	const scale = Math.min(
+		clipped.width / sourceWidth,
+		clipped.height / sourceHeight,
+	);
+	const width = sourceWidth * scale;
+	const height = sourceHeight * scale;
+	const x = clipped.x + (clipped.width - width) / 2;
+	const y = clipped.y + (clipped.height - height) / 2;
+	ctx.drawImage(image, x, y, width, height);
+}
+
 /**
  * 元画像にマスク領域を順に適用した Canvas を返す純粋レンダーパイプライン。
  * プレビューとエクスポートの両方がこの関数を単一ソースとして使う。
@@ -293,9 +440,13 @@ export function renderMasked(
 
 	for (const region of regions) {
 		if (region.mode === 'mosaic') {
-			applyMosaic(ctx, region.rect, region.strength);
-		} else {
-			applyBlur(ctx, region.rect, region.strength);
+			applyMosaicRegion(ctx, region);
+		} else if (region.mode === 'blur') {
+			applyBlurRegion(ctx, region);
+		} else if (region.mode === 'emoji') {
+			applyEmojiStamp(ctx, region.rect, region.emoji);
+		} else if (region.mode === 'image') {
+			applyImageStamp(ctx, region.rect, region.stampImage);
 		}
 	}
 
