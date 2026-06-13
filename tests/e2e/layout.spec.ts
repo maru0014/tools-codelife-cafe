@@ -1,3 +1,4 @@
+import { getCategoryId, toolCatalog } from '../../src/lib/tools/catalog';
 import { expect, test } from './fixtures/base';
 
 test.describe('Layout & Navigation', () => {
@@ -51,6 +52,101 @@ test.describe('Layout & Navigation', () => {
 		const searchInput = page.getByPlaceholder(/ツールを検索/i);
 		await expect(searchInput).toBeVisible({ timeout: 5000 });
 		await expect(searchInput).toBeFocused();
+	});
+
+	test('Breadcrumbs are displayed on tool pages', async ({ page }) => {
+		await page.goto('/csv-editor');
+
+		const nav = page.getByRole('navigation', { name: 'パンくずリスト' });
+		await expect(nav).toBeVisible();
+
+		// ホームリンク
+		const homeLink = nav.getByRole('link', { name: 'ホーム' });
+		await expect(homeLink).toBeVisible();
+		await expect(homeLink).toHaveAttribute('href', '/');
+
+		// カテゴリリンク（/?category=<英語ID> へのリンク。#108 のフィルタ形式と整合）
+		const categoryLink = nav.getByRole('link', { name: 'データ処理' });
+		await expect(categoryLink).toBeVisible();
+		await expect(categoryLink).toHaveAttribute(
+			'href',
+			`/?category=${getCategoryId('データ処理')}`,
+		);
+
+		// 現在ページ（リンクなし、aria-current="page"）
+		const current = nav.locator('[aria-current="page"]');
+		await expect(current).toHaveText('CSVビューア/エディタ');
+		await expect(
+			nav.getByRole('link', { name: 'CSVビューア/エディタ' }),
+		).toHaveCount(0);
+	});
+
+	test('BreadcrumbList JSON-LD is present and valid', async ({ page }) => {
+		await page.goto('/csv-editor');
+
+		const jsonLdTexts = await page
+			.locator('script[type="application/ld+json"]')
+			.allTextContents();
+		const breadcrumb = jsonLdTexts
+			.map((text) => JSON.parse(text))
+			.find((schema) => schema['@type'] === 'BreadcrumbList');
+
+		expect(breadcrumb).toBeTruthy();
+		expect(breadcrumb['@context']).toBe('https://schema.org');
+		expect(breadcrumb.itemListElement).toHaveLength(3);
+
+		const [home, category, current] = breadcrumb.itemListElement;
+		expect(home).toMatchObject({
+			'@type': 'ListItem',
+			position: 1,
+			name: 'ホーム',
+			item: 'https://tools.codelife.cafe/',
+		});
+		expect(category).toMatchObject({
+			'@type': 'ListItem',
+			position: 2,
+			name: 'データ処理',
+			item: `https://tools.codelife.cafe/?category=${getCategoryId('データ処理')}`,
+		});
+		expect(current).toMatchObject({
+			'@type': 'ListItem',
+			position: 3,
+			name: 'CSVビューア/エディタ',
+		});
+		expect(current.item).toBeUndefined();
+	});
+
+	test('パンくずのカテゴリリンクからトップページのフィルタが適用される', async ({
+		page,
+	}) => {
+		// csv-editor は「データ処理」カテゴリ
+		const categoryName = 'データ処理';
+		const categoryId = getCategoryId(categoryName);
+		const categoryCount = toolCatalog.filter(
+			(t) => t.category === categoryName,
+		).length;
+
+		await page.goto('/csv-editor');
+
+		const nav = page.getByRole('navigation', { name: 'パンくずリスト' });
+		await nav.getByRole('link', { name: categoryName }).click();
+
+		// トップページに遷移し、?category=<英語ID> が付与される
+		await expect(page).toHaveURL(new RegExp(`/\\?category=${categoryId}$`));
+
+		// 該当カテゴリのカードのみ表示され、それ以外は非表示になる
+		const visibleCards = page.locator('#tool-grid [data-category]:visible');
+		await expect(visibleCards).toHaveCount(categoryCount);
+		for (const card of await visibleCards.all()) {
+			await expect(card).toHaveAttribute('data-category', categoryId);
+		}
+
+		// 対象カテゴリのフィルタチップがアクティブになる
+		await expect(
+			page
+				.locator('#category-filter')
+				.getByRole('button', { name: categoryName }),
+		).toHaveAttribute('aria-pressed', 'true');
 	});
 
 	test('Footer links are present', async ({ page }) => {
