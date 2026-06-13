@@ -8,9 +8,11 @@ interface Props {
   title: string;
   description: string;
   path: string;
+  /** og:image のパス（省略時はサイト共通画像） */
+  ogImage?: string;
 }
 
-const { title, description, path } = Astro.props;
+const { title, description, path, ogImage = '/og-image.png' } = Astro.props;
 const siteName = "CODE:LIFE Tools";
 const siteUrl = "https://tools.codelife.cafe";
 const fullTitle = `${title} | ${siteName}`;
@@ -27,7 +29,7 @@ const fullTitle = `${title} | ${siteName}`;
   <meta property="og:description" content={description} />
   <meta property="og:type" content="website" />
   <meta property="og:url" content={`${siteUrl}${path}`} />
-  <meta property="og:image" content={`${siteUrl}/og-image.png`} />
+  <meta property="og:image" content={`${siteUrl}${ogImage}`} />
   <meta property="og:locale" content="ja_JP" />
   <meta property="og:site_name" content={siteName} />
   <meta name="twitter:card" content="summary_large_image" />
