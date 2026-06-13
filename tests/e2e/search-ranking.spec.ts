@@ -54,6 +54,72 @@ test.describe('Search result ranking', () => {
 		await expect(results.first()).toContainText('文字数カウント');
 	});
 
+	test('複数語クエリ「json csv」でJSON↔CSV変換がヒットする（AND一致）', async ({
+		page,
+	}) => {
+		await page.goto('/');
+		// React Island のハイドレーション完了を待ってから検索を開く
+		await expect(page.locator('#search-trigger')).toBeVisible();
+		await page.keyboard.press('Control+k');
+
+		const searchInput = page.getByPlaceholder(/ツールを検索/i);
+		await expect(searchInput).toBeVisible({ timeout: 5000 });
+		await searchInput.fill('json csv');
+
+		const results = page.getByTestId('search-result');
+		await expect(results.first()).toBeVisible();
+
+		// 語が別々のキーワードに分かれているエントリもマッチする
+		// （タイトルに "json csv" の連結文字列は含まれないが、
+		//  キーワード ['JSON', 'CSV', ...] の両方にマッチするためヒットする）
+		const titles = await results.locator('span.font-medium').allTextContents();
+		expect(titles).toContain('JSON ↔ CSV 変換');
+	});
+
+	test('複数語クエリに無関係な語を足すとヒットしなくなる（AND一致）', async ({
+		page,
+	}) => {
+		await page.goto('/');
+		// React Island のハイドレーション完了を待ってから検索を開く
+		await expect(page.locator('#search-trigger')).toBeVisible();
+		await page.keyboard.press('Control+k');
+
+		const searchInput = page.getByPlaceholder(/ツールを検索/i);
+		await expect(searchInput).toBeVisible({ timeout: 5000 });
+
+		// 「json csv」単体ではヒットすることを確認
+		await searchInput.fill('json csv');
+		const results = page.getByTestId('search-result');
+		await expect(results.first()).toBeVisible();
+		const hitTitles = await results
+			.locator('span.font-medium')
+			.allTextContents();
+		expect(hitTitles).toContain('JSON ↔ CSV 変換');
+
+		// 無関係な語を足すと、全語AND一致が必要なため結果が空になる
+		await searchInput.fill('json csv 存在しないツールxyz');
+		await expect(
+			page.getByText('一致するツールが見つかりません。'),
+		).toBeVisible();
+	});
+
+	test('全角スペース区切りの複数語クエリでもAND一致する', async ({ page }) => {
+		await page.goto('/');
+		// React Island のハイドレーション完了を待ってから検索を開く
+		await expect(page.locator('#search-trigger')).toBeVisible();
+		await page.keyboard.press('Control+k');
+
+		const searchInput = page.getByPlaceholder(/ツールを検索/i);
+		await expect(searchInput).toBeVisible({ timeout: 5000 });
+		// 全角スペース区切り
+		await searchInput.fill('json　csv');
+
+		const results = page.getByTestId('search-result');
+		await expect(results.first()).toBeVisible();
+		const titles = await results.locator('span.font-medium').allTextContents();
+		expect(titles).toContain('JSON ↔ CSV 変換');
+	});
+
 	test('一致しないクエリでは結果が空になる', async ({ page }) => {
 		await page.goto('/');
 		await page.keyboard.press('Control+k');

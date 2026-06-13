@@ -18,27 +18,57 @@ export function normalizeSearchText(text: string): string {
 }
 
 /**
- * ツール1件に対するクエリの関連度スコアを返す（0 = 不一致）。
+ * 正規化済みの単一検索語に対するツール1件のスコアを返す（0 = 不一致）。
  * 優先順: タイトル前方一致 > タイトル部分一致 > キーワード一致 > カテゴリ・説明文一致
  */
-export function scoreToolMatch(tool: ToolCatalogItem, query: string): number {
-	const q = normalizeSearchText(query);
-	if (!q) return 0;
-
+function scoreSingleTerm(tool: ToolCatalogItem, term: string): number {
 	const title = normalizeSearchText(tool.title);
-	if (title.startsWith(q)) return SCORE_TITLE_PREFIX;
-	if (title.includes(q)) return SCORE_TITLE_PARTIAL;
+	if (title.startsWith(term)) return SCORE_TITLE_PREFIX;
+	if (title.includes(term)) return SCORE_TITLE_PARTIAL;
 
 	if (
-		tool.keywords.some((keyword) => normalizeSearchText(keyword).includes(q))
+		tool.keywords.some((keyword) => normalizeSearchText(keyword).includes(term))
 	) {
 		return SCORE_KEYWORD;
 	}
 
 	const rest = normalizeSearchText(`${tool.category} ${tool.description}`);
-	if (rest.includes(q)) return SCORE_CATEGORY_DESCRIPTION;
+	if (rest.includes(term)) return SCORE_CATEGORY_DESCRIPTION;
 
 	return 0;
+}
+
+/**
+ * クエリを空白（半角・全角）区切りで検索語に分割し、それぞれを正規化する。
+ */
+function splitQueryTerms(query: string): string[] {
+	return query
+		.split(/[\s　]+/)
+		.map((term) => normalizeSearchText(term.trim()))
+		.filter((term) => term.length > 0);
+}
+
+/**
+ * ツール1件に対するクエリの関連度スコアを返す（0 = 不一致）。
+ *
+ * クエリが空白区切りの複数語を含む場合は AND セマンティクスで評価する:
+ * すべての検索語がいずれかのフィールド（タイトル / キーワード /
+ * カテゴリ・説明文）にマッチした場合のみスコアを返し、各語の最良マッチの
+ * 重みを合算する。1語でも一致しなければ 0（不一致）。
+ *
+ * 優先順: タイトル前方一致 > タイトル部分一致 > キーワード一致 > カテゴリ・説明文一致
+ */
+export function scoreToolMatch(tool: ToolCatalogItem, query: string): number {
+	const terms = splitQueryTerms(query);
+	if (terms.length === 0) return 0;
+
+	let total = 0;
+	for (const term of terms) {
+		const termScore = scoreSingleTerm(tool, term);
+		if (termScore === 0) return 0; // 1語でも不一致なら全体を不一致とする
+		total += termScore;
+	}
+	return total;
 }
 
 /**
