@@ -7,25 +7,50 @@ export type Rect = { x: number; y: number; width: number; height: number };
 export type MaskMode = 'mosaic' | 'blur' | 'emoji' | 'image';
 export type MaskShape = 'rect' | 'ellipse';
 
-export type MaskRegion = {
+type BaseRegion = {
 	id: string;
 	rect: Rect;
-	mode: MaskMode;
+};
+
+export type MaskEffectRegion = BaseRegion & {
+	mode: 'mosaic' | 'blur';
 	/** モザイク・ぼかしの適用形状 */
 	shape: MaskShape;
 	/** mosaic: ブロックサイズ(px) / blur: 半径(px) */
 	strength: number;
+};
+
+export type EmojiStampRegion = BaseRegion & {
+	mode: 'emoji';
 	/** emoji モードで描画する文字 */
-	emoji?: string;
+	emoji: string;
+};
+
+export type ImageStampRegion = BaseRegion & {
+	mode: 'image';
 	/** image モードで描画するスタンプ画像 */
-	stampImage?: HTMLImageElement | HTMLCanvasElement;
+	stampImage: HTMLImageElement | HTMLCanvasElement;
 	/** 任意画像スタンプのファイル名（UI表示用） */
 	stampImageName?: string;
 };
 
+export type MaskRegion = MaskEffectRegion | EmojiStampRegion | ImageStampRegion;
+
 export const MOSAIC_BLOCK = { min: 4, max: 64, default: 12 } as const;
 export const BLUR_RADIUS = { min: 2, max: 30, default: 8 } as const;
 export const DEFAULT_EMOJI_STAMP = '🙈';
+
+export function isMaskEffectMode(
+	mode: MaskMode,
+): mode is MaskEffectRegion['mode'] {
+	return mode === 'mosaic' || mode === 'blur';
+}
+
+export function isMaskEffectRegion(
+	region: MaskRegion,
+): region is MaskEffectRegion {
+	return isMaskEffectMode(region.mode);
+}
 
 /** 矩形を canvas 境界内にクリップする。交差しない場合は null */
 export function clampRect(
@@ -301,7 +326,7 @@ export function applyBlur(
 
 function applyEffectWithShape(
 	ctx: CanvasRenderingContext2D,
-	region: MaskRegion,
+	region: MaskEffectRegion,
 	effect: (target: CanvasRenderingContext2D) => void,
 ): void {
 	const clipped = clampRect(region.rect, ctx.canvas.width, ctx.canvas.height);
@@ -328,7 +353,7 @@ function applyEffectWithShape(
 
 export function applyMosaicRegion(
 	ctx: CanvasRenderingContext2D,
-	region: MaskRegion,
+	region: MaskEffectRegion,
 ): void {
 	applyEffectWithShape(ctx, region, (target) =>
 		applyMosaic(target, region.rect, region.strength),
@@ -337,7 +362,7 @@ export function applyMosaicRegion(
 
 export function applyBlurRegion(
 	ctx: CanvasRenderingContext2D,
-	region: MaskRegion,
+	region: MaskEffectRegion,
 ): void {
 	applyEffectWithShape(ctx, region, (target) =>
 		applyBlur(target, region.rect, region.strength),
@@ -419,8 +444,8 @@ export function renderMasked(
 		} else if (region.mode === 'blur') {
 			applyBlurRegion(ctx, region);
 		} else if (region.mode === 'emoji') {
-			applyEmojiStamp(ctx, region.rect, region.emoji ?? DEFAULT_EMOJI_STAMP);
-		} else if (region.stampImage) {
+			applyEmojiStamp(ctx, region.rect, region.emoji);
+		} else if (region.mode === 'image') {
 			applyImageStamp(ctx, region.rect, region.stampImage);
 		}
 	}

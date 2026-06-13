@@ -7,6 +7,8 @@ import { X } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { clientToImage } from '@/lib/tools/image-common';
 import {
+	isMaskEffectMode,
+	isMaskEffectRegion,
 	type MaskMode,
 	type MaskRegion,
 	type MaskShape,
@@ -56,14 +58,15 @@ function hitTest(
 ): MaskRegion | null {
 	// 後の領域（上に描画されたもの）を優先
 	for (let i = regions.length - 1; i >= 0; i--) {
-		const { rect, mode, shape } = regions[i];
+		const region = regions[i];
+		const { rect } = region;
 		const inBounds =
 			x >= rect.x &&
 			x <= rect.x + rect.width &&
 			y >= rect.y &&
 			y <= rect.y + rect.height;
 		if (!inBounds) continue;
-		if ((mode === 'mosaic' || mode === 'blur') && shape === 'ellipse') {
+		if (isMaskEffectRegion(region) && region.shape === 'ellipse') {
 			const rx = rect.width / 2;
 			const ry = rect.height / 2;
 			const cx = rect.x + rx;
@@ -264,7 +267,7 @@ export function CanvasEditor({
 				return (
 					<div
 						key={region.id}
-						className={`pointer-events-none absolute border border-dashed transition-colors ${(region.mode === 'mosaic' || region.mode === 'blur') && region.shape === 'ellipse' ? 'rounded-full' : ''} ${
+						className={`pointer-events-none absolute border border-dashed transition-colors ${isMaskEffectRegion(region) && region.shape === 'ellipse' ? 'rounded-full' : ''} ${
 							isSelected
 								? 'border-primary border-2 bg-primary/10'
 								: isHovered
@@ -293,8 +296,7 @@ export function CanvasEditor({
 			{dragRect && (
 				<div
 					className={`pointer-events-none absolute border-2 border-dashed border-primary bg-primary/10 ${
-						(drawingMode === 'mosaic' || drawingMode === 'blur') &&
-						drawingShape === 'ellipse'
+						isMaskEffectMode(drawingMode) && drawingShape === 'ellipse'
 							? 'rounded-full'
 							: ''
 					}`}

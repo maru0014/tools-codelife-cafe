@@ -18,6 +18,8 @@ import {
 import {
 	BLUR_RADIUS,
 	DEFAULT_EMOJI_STAMP,
+	isMaskEffectMode,
+	isMaskEffectRegion,
 	type MaskMode,
 	type MaskRegion,
 	type MaskShape,
@@ -94,36 +96,53 @@ export default function ImageMosaicPage() {
 
 	// ツールバーに表示する設定（領域選択中はその領域の値）
 	const activeMode = selectedRegion?.mode ?? mode;
-	const activeShape = selectedRegion?.shape ?? shape;
-	const activeStrength =
-		activeMode === 'mosaic' || activeMode === 'blur'
-			? (selectedRegion?.strength ?? strengths[activeMode])
-			: strengths.mosaic;
-	const activeEmoji = selectedRegion?.emoji ?? emoji;
-	const activeStampImageName = selectedRegion?.stampImageName ?? stampImageName;
+	const selectedMaskRegion =
+		selectedRegion && isMaskEffectRegion(selectedRegion)
+			? selectedRegion
+			: null;
+	const activeShape = selectedMaskRegion?.shape ?? shape;
+	const activeStrength = isMaskEffectMode(activeMode)
+		? (selectedMaskRegion?.strength ?? strengths[activeMode])
+		: strengths.mosaic;
+	const activeEmoji =
+		selectedRegion?.mode === 'emoji' ? selectedRegion.emoji : emoji;
+	const activeStampImageName =
+		selectedRegion?.mode === 'image'
+			? (selectedRegion.stampImageName ?? null)
+			: stampImageName;
 
 	const handleAddRegion = useCallback(
 		(rect: Rect) => {
-			if (mode === 'image' && !stampImage) {
+			let region: MaskRegion;
+			if (isMaskEffectMode(mode)) {
+				region = {
+					id: createId(),
+					rect,
+					mode,
+					shape,
+					strength: strengths[mode],
+				};
+			} else if (mode === 'emoji') {
+				region = {
+					id: createId(),
+					rect,
+					mode,
+					emoji,
+				};
+			} else if (stampImage) {
+				region = {
+					id: createId(),
+					rect,
+					mode,
+					stampImage,
+					stampImageName: stampImageName ?? undefined,
+				};
+			} else {
 				setError(
 					'画像スタンプを使うには、先に任意画像ファイルを選択してください',
 				);
 				return;
 			}
-			const region: MaskRegion = {
-				id: createId(),
-				rect,
-				mode,
-				shape,
-				strength:
-					mode === 'mosaic' || mode === 'blur'
-						? strengths[mode]
-						: strengths.mosaic,
-				emoji: mode === 'emoji' ? emoji : undefined,
-				stampImage: mode === 'image' ? (stampImage ?? undefined) : undefined,
-				stampImageName:
-					mode === 'image' ? (stampImageName ?? undefined) : undefined,
-			};
 			regions.set([...regions.state, region]);
 		},
 		[mode, stampImage, shape, strengths, emoji, stampImageName, regions],
@@ -140,58 +159,103 @@ export default function ImageMosaicPage() {
 	const handleModeChange = useCallback(
 		(next: MaskMode) => {
 			if (selectedRegion) {
+				if (
+					next === 'image' &&
+					selectedRegion.mode !== 'image' &&
+					!stampImage
+				) {
+					setSelectedId(null);
+					setMode(next);
+					setError(
+						'画像スタンプを使うには、先に任意画像ファイルを選択してください',
+					);
+					return;
+				}
+				const currentStampImage = stampImage;
 				const range = next === 'blur' ? BLUR_RADIUS : MOSAIC_BLOCK;
-				const strength =
-					next === 'mosaic' || next === 'blur'
-						? Math.min(range.max, Math.max(range.min, selectedRegion.strength))
-						: selectedRegion.strength;
+				const currentStrength = selectedMaskRegion
+					? selectedMaskRegion.strength
+					: strengths[next === 'blur' ? 'blur' : 'mosaic'];
+				const strength = isMaskEffectMode(next)
+					? Math.min(range.max, Math.max(range.min, currentStrength))
+					: currentStrength;
 				regions.set(
-					regions.state.map((r) =>
-						r.id === selectedRegion.id
-							? {
-									...r,
-									mode: next,
-									strength,
-									emoji: next === 'emoji' ? activeEmoji : r.emoji,
-									stampImage:
-										next === 'image'
-											? (stampImage ?? r.stampImage)
-											: r.stampImage,
-									stampImageName:
-										next === 'image'
-											? (stampImageName ?? r.stampImageName)
-											: r.stampImageName,
-								}
-							: r,
-					),
+					regions.state.map((region): MaskRegion => {
+						if (region.id !== selectedRegion.id) return region;
+						if (isMaskEffectMode(next)) {
+							return {
+								id: region.id,
+								rect: region.rect,
+								mode: next,
+								shape: selectedMaskRegion?.shape ?? shape,
+								strength,
+							};
+						}
+						if (next === 'emoji') {
+							return {
+								id: region.id,
+								rect: region.rect,
+								mode: next,
+								emoji: region.mode === 'emoji' ? region.emoji : emoji,
+							};
+						}
+						const nextStampImage =
+							currentStampImage ??
+							(region.mode === 'image' ? region.stampImage : null);
+						if (!nextStampImage) return region;
+						return {
+							id: region.id,
+							rect: region.rect,
+							mode: next,
+							stampImage: nextStampImage,
+							stampImageName:
+								stampImageName ??
+								(region.mode === 'image' ? region.stampImageName : undefined),
+						};
+					}),
 				);
 			}
 			setMode(next);
 		},
-		[selectedRegion, regions, activeEmoji, stampImage, stampImageName],
+		[
+			selectedRegion,
+			selectedMaskRegion,
+			regions,
+			shape,
+			strengths,
+			emoji,
+			stampImage,
+			stampImageName,
+		],
 	);
 
 	const handleShapeChange = useCallback(
 		(next: MaskShape) => {
-			if (selectedRegion) {
+			if (selectedMaskRegion) {
 				regions.set(
-					regions.state.map((r) =>
-						r.id === selectedRegion.id ? { ...r, shape: next } : r,
+					regions.state.map(
+						(region): MaskRegion =>
+							region.id === selectedMaskRegion.id
+								? { ...selectedMaskRegion, shape: next }
+								: region,
 					),
 				);
 			}
 			setShape(next);
 		},
-		[selectedRegion, regions],
+		[selectedMaskRegion, regions],
 	);
 
 	const handleEmojiChange = useCallback(
 		(next: string) => {
 			setEmoji(next);
-			if (selectedRegion) {
+			if (selectedRegion?.mode === 'emoji') {
 				regions.set(
-					regions.state.map((r) =>
-						r.id === selectedRegion.id ? { ...r, emoji: next } : r,
+					regions.state.map(
+						(region): MaskRegion =>
+							region.id === selectedRegion.id
+								? { ...selectedRegion, emoji: next }
+								: region,
 					),
 				);
 			}
@@ -213,15 +277,17 @@ export default function ImageMosaicPage() {
 				setStampImageName(file.name);
 				if (selectedRegion) {
 					regions.set(
-						regions.state.map((r) =>
-							r.id === selectedRegion.id
-								? {
-										...r,
-										mode: 'image',
-										stampImage: image,
-										stampImageName: file.name,
-									}
-								: r,
+						regions.state.map(
+							(region): MaskRegion =>
+								region.id === selectedRegion.id
+									? {
+											id: selectedRegion.id,
+											rect: selectedRegion.rect,
+											mode: 'image',
+											stampImage: image,
+											stampImageName: file.name,
+										}
+									: region,
 						),
 					);
 				}
@@ -238,20 +304,23 @@ export default function ImageMosaicPage() {
 
 	const handleStrengthChange = useCallback(
 		(value: number, commit: boolean) => {
-			if (selectedRegion) {
-				const next = regions.state.map((r) =>
-					r.id === selectedRegion.id ? { ...r, strength: value } : r,
+			if (selectedMaskRegion) {
+				const next = regions.state.map(
+					(region): MaskRegion =>
+						region.id === selectedMaskRegion.id
+							? { ...selectedMaskRegion, strength: value }
+							: region,
 				);
 				if (commit) {
 					regions.set(next);
 				} else {
 					regions.setTransient(next);
 				}
-			} else if (activeMode === 'mosaic' || activeMode === 'blur') {
-				setStrengths((s) => ({ ...s, [activeMode]: value }));
+			} else if (isMaskEffectMode(activeMode)) {
+				setStrengths((current) => ({ ...current, [activeMode]: value }));
 			}
 		},
-		[selectedRegion, regions, activeMode],
+		[selectedMaskRegion, regions, activeMode],
 	);
 
 	const handleReset = useCallback(() => {
