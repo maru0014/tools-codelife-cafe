@@ -22,7 +22,7 @@ import {
 // テスト用バイト列ビルダ
 // ---------------------------------------------------------------------------
 
-function pad(bytes: number[], length: number): Uint8Array {
+function pad(bytes: number[], length: number): Uint8Array<ArrayBuffer> {
 	const out = new Uint8Array(length);
 	out.set(bytes.slice(0, length));
 	return out;

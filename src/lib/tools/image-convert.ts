@@ -273,7 +273,9 @@ export function extractExif(jpegBytes: Uint8Array): Uint8Array | null {
  * デコード時に EXIF Orientation を画素へ反映済みのため、再注入時に二重回転を防ぐ。
  * 解析できない場合は入力のコピーをそのまま返す。
  */
-export function normalizeExifOrientation(segment: Uint8Array): Uint8Array {
+export function normalizeExifOrientation(
+	segment: Uint8Array,
+): Uint8Array<ArrayBuffer> {
 	const out = new Uint8Array(segment);
 	// segment: [FF E1][len(2)]["Exif\0\0"(6)][TIFF...]
 	const tiffStart = 10;
@@ -313,9 +315,9 @@ export function normalizeExifOrientation(segment: Uint8Array): Uint8Array {
 export function injectExif(
 	jpegBytes: Uint8Array,
 	exifSegment: Uint8Array,
-): Uint8Array {
+): Uint8Array<ArrayBuffer> {
 	if (jpegBytes.length < 2 || jpegBytes[0] !== 0xff || jpegBytes[1] !== 0xd8) {
-		return jpegBytes;
+		return new Uint8Array(jpegBytes);
 	}
 	const normalized = normalizeExifOrientation(exifSegment);
 	const out = new Uint8Array(jpegBytes.length + normalized.length);

@@ -180,14 +180,16 @@ fs.writeFileSync(
 		path.join(fixturesDir, 'convert-sample.avif'),
 		await src().avif({ quality: 50 }).toBuffer(),
 	);
-	// EXIF付きJPEG（keep/strip の差分検証用）。DateTimeOriginal を埋め込む。
+	// EXIF付きJPEG（keep/strip の差分検証用）。sharp の Exif 型は IFD0〜IFD3 のみ許可。
 	fs.writeFileSync(
 		path.join(fixturesDir, 'convert-exif.jpg'),
 		await src()
 			.jpeg({ quality: 92 })
 			.withExif({
-				IFD0: { Software: 'cl-tools-fixture', Orientation: '1' },
-				ExifIFD: { DateTimeOriginal: '2024:06:01 12:34:56' },
+				IFD0: {
+					Software: 'cl-tools-fixture',
+					DateTime: '2024:06:01 12:34:56',
+				},
 			})
 			.toBuffer(),
 	);

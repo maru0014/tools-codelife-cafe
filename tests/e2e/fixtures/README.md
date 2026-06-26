@@ -12,7 +12,7 @@ npx tsx scripts/generate-fixtures.ts
 |---|---|---|
 | `convert-sample.webp` | `scripts/generate-fixtures.ts`（sharp） | 64×48・赤地＋中央の青矩形 |
 | `convert-sample.avif` | `scripts/generate-fixtures.ts`（sharp / AV1） | 同上 |
-| `convert-exif.jpg` | `scripts/generate-fixtures.ts`（sharp `.withExif`） | 同上＋EXIF（DateTimeOriginal 等）。keep/strip 差分検証用 |
+| `convert-exif.jpg` | `scripts/generate-fixtures.ts`（sharp `.withExif`） | 同上＋EXIF（IFD0: Software / DateTime）。keep/strip 差分検証用 |
 | `convert-sample.heic` | `scripts/generate-heic-fixture.ts`（ffmpeg + 手書き HEIF コンテナ） | 同上・HEVC/HEIC |
 
 ### convert-sample.heic（HEIC）
