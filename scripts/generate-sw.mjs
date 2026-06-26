@@ -25,22 +25,17 @@ const pageURLs = [
 ];
 
 // dist/_astro/ 配下の全ファイルを収集
+// AVIF エンコーダ（@jsquash/avif）や libheif（HEICデコード）の WASM チャンクも含めて
+// プリキャッシュ対象とする。PWA はオフラインでも全ツールが動作することを前提とするため、
+// オフライン前に一度も HEIC/AVIF を扱っていなくても /image-convert が機能するよう、
+// これらのオンデマンドコーデックも明示的に precache に残す。
 let assetFiles = [];
 try {
 	assetFiles = await readdir(join(DIST, '_astro'));
 } catch {
 	// _astro/ が存在しない場合は空配列のまま続行
 }
-
-// 大容量かつオンデマンド読み込みのコーデックはプリキャッシュから除外する。
-// - avif_enc* : AVIF エンコーダ（@jsquash/avif）。/image-convert で出力AVIF選択時のみロード
-// - wasm-bundle.* : libheif（HEICデコード）。/image-convert に HEIC を投入した時のみロード
-// これらは fetch ハンドラの /_astro cache-first で実行時に取得・キャッシュされるため、
-// 初期プリキャッシュ（PRECACHE_ALL）を数十MB肥大化させないよう除外する。
-const ON_DEMAND_CODEC = /^(avif_(enc|dec)|wasm-bundle\.)/;
-const precacheAssetFiles = assetFiles.filter((f) => !ON_DEMAND_CODEC.test(f));
-const excludedCount = assetFiles.length - precacheAssetFiles.length;
-const assetURLs = precacheAssetFiles.map((f) => `/_astro/${f}`);
+const assetURLs = assetFiles.map((f) => `/_astro/${f}`);
 
 // ページHTML内容 + アセットURLからキャッシュバージョンハッシュを計算（内容変更時に自動失効）
 const pageContents = await Promise.all(
@@ -90,8 +85,5 @@ await writeFile(join(DIST, 'sw.js'), output, 'utf8');
 
 console.log(`[generate-sw] CACHE_NAME: cl-tools-${hash}`);
 console.log(
-	`[generate-sw] pages: ${pageURLs.length}, assets: ${assetURLs.length}` +
-		(excludedCount > 0
-			? ` (オンデマンドコーデック ${excludedCount} 件はプリキャッシュ除外)`
-			: ''),
+	`[generate-sw] pages: ${pageURLs.length}, assets: ${assetURLs.length}`,
 );

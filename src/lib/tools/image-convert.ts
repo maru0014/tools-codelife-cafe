@@ -468,6 +468,13 @@ export async function encode(
 			'画像の書き出しに失敗しました。ブラウザがこの形式に対応していない可能性があります。',
 		);
 	}
+	// 非対応形式（例: 旧Safariの WebP）では toBlob が要求と異なる形式（多くは PNG）を返すため、
+	// 拡張子と中身が食い違ったファイルを出力しないよう、実際の出力形式が一致することを検証する。
+	if (blob.type !== mime) {
+		throw new Error(
+			`このブラウザは ${target.toUpperCase()} 形式の書き出しに対応していません。別の出力形式を選択してください。`,
+		);
+	}
 	return blob;
 }
 
