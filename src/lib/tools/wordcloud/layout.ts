@@ -7,7 +7,11 @@ import type {
 	WordFrequency,
 } from './types.ts';
 
-function getScaleFunction(scaleType: WordCloudLayoutOptions['scale'], minCount: number, maxCount: number) {
+function getScaleFunction(
+	scaleType: WordCloudLayoutOptions['scale'],
+	minCount: number,
+	maxCount: number,
+) {
 	const minSize = 14;
 	const maxSize = 72;
 
@@ -36,7 +40,9 @@ function getColorPalette(paletteName: string): readonly string[] {
 	return chromatic.schemeTableau10;
 }
 
-function getRotationAngle(rotationType: WordCloudLayoutOptions['rotation']): number {
+function getRotationAngle(
+	rotationType: WordCloudLayoutOptions['rotation'],
+): number {
 	if (rotationType === 'none') return 0;
 	if (rotationType === 'orthogonal') {
 		return Math.random() < 0.5 ? 0 : 90;
@@ -77,17 +83,29 @@ export function computeLayout(
 			.rotate(() => getRotationAngle(opts.rotation))
 			.random(() => 0.5);
 
-		layout.on('end', (outputWords: Array<{ text?: string; size?: number; x?: number; y?: number; rotate?: number; color?: string }>) => {
-			const placed: PlacedWord[] = outputWords.map((w) => ({
-				text: w.text || '',
-				size: w.size || 14,
-				x: w.x || 0,
-				y: w.y || 0,
-				rotate: w.rotate || 0,
-				color: w.color || '#333333',
-			}));
-			resolve(placed);
-		});
+		layout.on(
+			'end',
+			(
+				outputWords: Array<{
+					text?: string;
+					size?: number;
+					x?: number;
+					y?: number;
+					rotate?: number;
+					color?: string;
+				}>,
+			) => {
+				const placed: PlacedWord[] = outputWords.map((w) => ({
+					text: w.text || '',
+					size: w.size || 14,
+					x: w.x || 0,
+					y: w.y || 0,
+					rotate: w.rotate || 0,
+					color: w.color || '#333333',
+				}));
+				resolve(placed);
+			},
+		);
 
 		layout.start();
 	});
