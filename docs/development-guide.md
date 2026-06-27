@@ -120,6 +120,19 @@ import { CharCount } from '@/components/tools/CharCount';
 
 ---
 
+### 3.4 新規ツール追加チェックリスト
+
+新規ツールを追加する際は、実装完了前に以下を確認してください。
+
+- [ ] `src/lib/tools/[name].ts` に、DOM や React に依存しない純粋関数としてロジックを実装する。
+- [ ] `src/components/tools/[Name].tsx`、または UI の規模に応じた機能別ディレクトリに React UI を実装する。
+- [ ] `src/pages/[name].astro` を作成し、共通レイアウトとして `ToolLayout` を利用し、React コンポーネントには `client:load` を付与する。
+- [ ] `src/lib/tools/catalog.ts` に `id`、`title`、`description`、`href`、`category`、`icon`、`related` を登録する。
+- [ ] UI文言、エラーメッセージ、プレースホルダーが日本語であることを確認する。
+- [ ] 外部API、トラッキング、ユーザーデータ送信がないことを確認する。
+- [ ] 関連ツールは各ページに手書きせず、`catalog.ts` の `related` と `ToolLayout.astro` に集約する。
+- [ ] `npm run lint` を実行し、必要に応じて `npm run build` と `npm test` も実行する。
+
 ## 4. デザインシステム & スタイリング
 
 ### 4.1 Tailwind CSS v4 の採用
