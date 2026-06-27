@@ -7,15 +7,12 @@ import type {
 	WordFrequency,
 } from './types.ts';
 
-function getScaleFunction(
-	scaleType: WordCloudLayoutOptions['scale'],
-	minCount: number,
-	maxCount: number,
-) {
+function getScaleFunction(scaleType: WordCloudLayoutOptions['scale'], minCount: number, maxCount: number) {
 	const minSize = 14;
 	const maxSize = 72;
 
-	let scaleFn: ReturnType<typeof scaleLinear>;
+	// biome-ignore lint/suspicious/noExplicitAny: d3-scale type flexibility
+	let scaleFn: any;
 	if (scaleType === 'log') {
 		scaleFn = scaleLog().domain([Math.max(1, minCount), Math.max(1, maxCount)]);
 	} else if (scaleType === 'sqrt') {
@@ -25,7 +22,7 @@ function getScaleFunction(
 	}
 	scaleFn.range([minSize, maxSize]);
 
-	return (count: number) => Math.round(scaleFn(count));
+	return (count: number) => Math.round(Number(scaleFn(count)));
 }
 
 function getColorPalette(paletteName: string): readonly string[] {
@@ -39,9 +36,7 @@ function getColorPalette(paletteName: string): readonly string[] {
 	return chromatic.schemeTableau10;
 }
 
-function getRotationAngle(
-	rotationType: WordCloudLayoutOptions['rotation'],
-): number {
+function getRotationAngle(rotationType: WordCloudLayoutOptions['rotation']): number {
 	if (rotationType === 'none') return 0;
 	if (rotationType === 'orthogonal') {
 		return Math.random() < 0.5 ? 0 : 90;
@@ -73,39 +68,26 @@ export function computeLayout(
 			color: palette[idx % palette.length],
 		}));
 
-		const layout = cloud({
-			size: [opts.width, opts.height],
-			words: cloudWords,
-			padding: 4,
-			font: opts.fontFamily || 'Noto Sans JP',
-			fontSize: (d: { size?: number }) => d.size || 14,
-			rotate: () => getRotationAngle(opts.rotation),
-			random: () => 0.5, // 確定的な配置シード（必要に応じて）
-		});
+		const layout = cloud()
+			.size([opts.width, opts.height])
+			.words(cloudWords)
+			.padding(4)
+			.font(opts.fontFamily || 'Noto Sans JP')
+			.fontSize((d: { size?: number }) => d.size || 14)
+			.rotate(() => getRotationAngle(opts.rotation))
+			.random(() => 0.5);
 
-		layout.on(
-			'end',
-			(
-				outputWords: Array<{
-					text?: string;
-					size?: number;
-					x?: number;
-					y?: number;
-					rotate?: number;
-					color?: string;
-				}>,
-			) => {
-				const placed: PlacedWord[] = outputWords.map((w) => ({
-					text: w.text || '',
-					size: w.size || 14,
-					x: w.x || 0,
-					y: w.y || 0,
-					rotate: w.rotate || 0,
-					color: w.color || '#333333',
-				}));
-				resolve(placed);
-			},
-		);
+		layout.on('end', (outputWords: Array<{ text?: string; size?: number; x?: number; y?: number; rotate?: number; color?: string }>) => {
+			const placed: PlacedWord[] = outputWords.map((w) => ({
+				text: w.text || '',
+				size: w.size || 14,
+				x: w.x || 0,
+				y: w.y || 0,
+				rotate: w.rotate || 0,
+				color: w.color || '#333333',
+			}));
+			resolve(placed);
+		});
 
 		layout.start();
 	});

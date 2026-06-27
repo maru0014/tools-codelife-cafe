@@ -57,7 +57,7 @@ describe('Word Cloud Core Logic', () => {
 		assert.ok(csv.startsWith('\uFEFF'));
 		assert.ok(csv.includes('順位,単語,品詞,出現回数'));
 		assert.ok(csv.includes('1,猫,その他,5'));
-		assert.ok(csv.includes('2,"吾輩,""テスト"""', 'その他,3'));
+		assert.ok(csv.includes('2,"吾輩,""テスト""",その他,3'));
 	});
 
 	it('toSvg should generate valid SVG text', async () => {
