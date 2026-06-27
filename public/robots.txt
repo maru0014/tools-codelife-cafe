@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 
+# LLM / AI Reference
+# llms.txt: https://tools.codelife.cafe/llms.txt
+
 Sitemap: https://tools.codelife.cafe/sitemap-index.xml
