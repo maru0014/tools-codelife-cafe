@@ -548,6 +548,25 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		},
 	},
 	{
+		id: 'image-edit',
+		title: '画像のクロップ・回転・反転',
+		description:
+			'アスペクト比固定の切り抜き・任意角度回転・反転・一括ZIP出力に対応。画像はアップロードされません。',
+		href: '/image-edit',
+		icon: '🧭',
+		category: 'AI/画像',
+		categoryColor: 'border-l-chart-5',
+		keywords: ['画像編集', 'クロップ', '回転', '反転', '一括処理', 'ZIP'],
+		related: ['image-crop', 'image-compress', 'image-convert'],
+		llmsFull: {
+			useCase:
+				'画像のアスペクト比指定クロップ、任意角度回転、水平/垂直反転、一括処理',
+			inputs:
+				'imageFiles（画像ファイル群）, cropAspectRatio（切り抜き比率）, rotation（角度）, flip（反転設定）',
+			outputs: '加工済み画像ファイルまたはZIPファイル',
+		},
+	},
+	{
 		id: 'image-convert',
 		title: '画像形式変換',
 		description: 'HEIC・WebP・AVIFをJPEG等へ変換。データは外部送信なし。',
