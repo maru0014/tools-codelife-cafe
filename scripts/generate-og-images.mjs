@@ -6,7 +6,7 @@
 //   scripts/.cache/fonts/ にキャッシュする（.gitignore 済み）
 // - 生成画像はコミットせず、デプロイ成果物（dist/）にのみ含まれる
 
-import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import satori from 'satori';
@@ -37,40 +37,51 @@ const LEGACY_UA =
 	'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30';
 const FONT_CSS_URL =
 	'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap';
-const FALLBACK_FONT_PAIRS = [
-	{
-		name: 'DejaVu Sans',
-		regular: '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
-		bold: '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
-	},
-];
+
+const LOCAL_FONT_CANDIDATES = {
+	regular: [
+		'/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc',
+		'/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc',
+		'/usr/share/fonts/truetype/noto/NotoSansJP-Regular.otf',
+		'/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+	],
+	bold: [
+		'/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc',
+		'/usr/share/fonts/truetype/noto/NotoSansCJK-Bold.ttc',
+		'/usr/share/fonts/truetype/noto/NotoSansJP-Bold.otf',
+		'/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+	],
+};
+
+async function readFirstAvailable(paths) {
+	for (const path of paths) {
+		try {
+			return await readFile(path);
+		} catch {
+			// 次の候補を試す
+		}
+	}
+	return null;
+}
+
+async function loadLocalFallbackFonts() {
+	const [regular, bold] = await Promise.all([
+		readFirstAvailable(LOCAL_FONT_CANDIDATES.regular),
+		readFirstAvailable(LOCAL_FONT_CANDIDATES.bold),
+	]);
+	if (regular && bold) {
+		console.warn(
+			'[generate-og] フォント: Google Fonts 取得に失敗したためローカルフォントを使用します',
+		);
+		return { regular, bold };
+	}
+	return null;
+}
 
 /**
  * Noto Sans JP の TTF を取得する（キャッシュ優先、なければ Google Fonts からダウンロード）
  * @returns {Promise<{regular: Buffer, bold: Buffer}>}
  */
-async function loadFallbackFonts() {
-	for (const pair of FALLBACK_FONT_PAIRS) {
-		try {
-			await Promise.all([access(pair.regular), access(pair.bold)]);
-			const [regular, bold] = await Promise.all([
-				readFile(pair.regular),
-				readFile(pair.bold),
-			]);
-			console.warn(
-				`[generate-og] フォント: Google Fonts を取得できないため ${pair.name} にフォールバックします`,
-			);
-			return { regular, bold };
-		} catch {
-			// 次の候補へ
-		}
-	}
-
-	throw new Error(
-		'[generate-og] 利用可能なフォールバックフォントが見つかりません',
-	);
-}
-
 async function loadFonts() {
 	await mkdir(FONT_CACHE_DIR, { recursive: true });
 	const cachePaths = {
@@ -89,8 +100,10 @@ async function loadFonts() {
 		// キャッシュなし → ダウンロードへ
 	}
 
+	console.log('[generate-og] フォント: Google Fonts からダウンロード中...');
+	let regular;
+	let bold;
 	try {
-		console.log('[generate-og] フォント: Google Fonts からダウンロード中...');
 		const cssRes = await fetch(FONT_CSS_URL, {
 			headers: { 'User-Agent': LEGACY_UA },
 		});
@@ -123,22 +136,21 @@ async function loadFonts() {
 			}
 			return Buffer.from(await res.arrayBuffer());
 		};
-		const [regular, bold] = await Promise.all([
+		[regular, bold] = await Promise.all([
 			download(urls['400']),
 			download(urls['700']),
 		]);
-
-		await Promise.all([
-			writeFile(cachePaths.regular, regular),
-			writeFile(cachePaths.bold, bold),
-		]);
-		return { regular, bold };
 	} catch (error) {
-		console.warn(
-			`[generate-og] フォント: Google Fonts の取得に失敗しました (${error instanceof Error ? error.message : String(error)})`,
-		);
-		return loadFallbackFonts();
+		const fallback = await loadLocalFallbackFonts();
+		if (!fallback) throw error;
+		return fallback;
 	}
+
+	await Promise.all([
+		writeFile(cachePaths.regular, regular),
+		writeFile(cachePaths.bold, bold),
+	]);
+	return { regular, bold };
 }
 
 // satori 用の要素ツリーを生成するヘルパー（JSX なしで構築）

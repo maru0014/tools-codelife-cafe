@@ -70,7 +70,7 @@ export function decodeJwt(input: string, now = Date.now()): JwtDecodeResult {
 	}
 
 	const parts = token.split('.');
-	if (parts.length !== 3 || parts.some((part) => part.length === 0)) {
+	if (parts.length !== 3 || parts[0].length === 0 || parts[1].length === 0) {
 		return {
 			valid: false,
 			header: null,
