@@ -6,7 +6,7 @@
 //   scripts/.cache/fonts/ にキャッシュする（.gitignore 済み）
 // - 生成画像はコミットせず、デプロイ成果物（dist/）にのみ含まれる
 
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import satori from 'satori';
@@ -37,11 +37,40 @@ const LEGACY_UA =
 	'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/534.30 (KHTML, like Gecko) Chrome/12.0.742.112 Safari/534.30';
 const FONT_CSS_URL =
 	'https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap';
+const FALLBACK_FONT_PAIRS = [
+	{
+		name: 'DejaVu Sans',
+		regular: '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',
+		bold: '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf',
+	},
+];
 
 /**
  * Noto Sans JP の TTF を取得する（キャッシュ優先、なければ Google Fonts からダウンロード）
  * @returns {Promise<{regular: Buffer, bold: Buffer}>}
  */
+async function loadFallbackFonts() {
+	for (const pair of FALLBACK_FONT_PAIRS) {
+		try {
+			await Promise.all([access(pair.regular), access(pair.bold)]);
+			const [regular, bold] = await Promise.all([
+				readFile(pair.regular),
+				readFile(pair.bold),
+			]);
+			console.warn(
+				`[generate-og] フォント: Google Fonts を取得できないため ${pair.name} にフォールバックします`,
+			);
+			return { regular, bold };
+		} catch {
+			// 次の候補へ
+		}
+	}
+
+	throw new Error(
+		'[generate-og] 利用可能なフォールバックフォントが見つかりません',
+	);
+}
+
 async function loadFonts() {
 	await mkdir(FONT_CACHE_DIR, { recursive: true });
 	const cachePaths = {
@@ -60,52 +89,66 @@ async function loadFonts() {
 		// キャッシュなし → ダウンロードへ
 	}
 
-	console.log('[generate-og] フォント: Google Fonts からダウンロード中...');
-	const cssRes = await fetch(FONT_CSS_URL, {
-		headers: { 'User-Agent': LEGACY_UA },
-	});
-	if (!cssRes.ok) {
-		throw new Error(`[generate-og] フォントCSSの取得に失敗: HTTP ${cssRes.status}`);
-	}
-	const css = await cssRes.text();
-
-	// @font-face ブロックから weight ごとの TTF URL を抽出
-	const urls = {};
-	for (const block of css.match(/@font-face\s*\{[^}]*\}/g) ?? []) {
-		const weight = block.match(/font-weight:\s*(\d+)/)?.[1];
-		const url = block.match(/src:\s*url\((https:[^)]+)\)/)?.[1];
-		if (weight && url) urls[weight] = url;
-	}
-	if (!urls['400'] || !urls['700']) {
-		throw new Error(
-			'[generate-og] フォントURLの抽出に失敗（Google Fonts のレスポンス形式が変わった可能性）',
-		);
-	}
-
-	const download = async (url) => {
-		const res = await fetch(url);
-		if (!res.ok) {
-			throw new Error(`[generate-og] フォントのダウンロードに失敗: HTTP ${res.status} ${url}`);
+	try {
+		console.log('[generate-og] フォント: Google Fonts からダウンロード中...');
+		const cssRes = await fetch(FONT_CSS_URL, {
+			headers: { 'User-Agent': LEGACY_UA },
+		});
+		if (!cssRes.ok) {
+			throw new Error(
+				`[generate-og] フォントCSSの取得に失敗: HTTP ${cssRes.status}`,
+			);
 		}
-		return Buffer.from(await res.arrayBuffer());
-	};
-	const [regular, bold] = await Promise.all([
-		download(urls['400']),
-		download(urls['700']),
-	]);
+		const css = await cssRes.text();
 
-	await Promise.all([
-		writeFile(cachePaths.regular, regular),
-		writeFile(cachePaths.bold, bold),
-	]);
-	return { regular, bold };
+		// @font-face ブロックから weight ごとの TTF URL を抽出
+		const urls = {};
+		for (const block of css.match(/@font-face\s*\{[^}]*\}/g) ?? []) {
+			const weight = block.match(/font-weight:\s*(\d+)/)?.[1];
+			const url = block.match(/src:\s*url\((https:[^)]+)\)/)?.[1];
+			if (weight && url) urls[weight] = url;
+		}
+		if (!urls['400'] || !urls['700']) {
+			throw new Error(
+				'[generate-og] フォントURLの抽出に失敗（Google Fonts のレスポンス形式が変わった可能性）',
+			);
+		}
+
+		const download = async (url) => {
+			const res = await fetch(url);
+			if (!res.ok) {
+				throw new Error(
+					`[generate-og] フォントのダウンロードに失敗: HTTP ${res.status} ${url}`,
+				);
+			}
+			return Buffer.from(await res.arrayBuffer());
+		};
+		const [regular, bold] = await Promise.all([
+			download(urls['400']),
+			download(urls['700']),
+		]);
+
+		await Promise.all([
+			writeFile(cachePaths.regular, regular),
+			writeFile(cachePaths.bold, bold),
+		]);
+		return { regular, bold };
+	} catch (error) {
+		console.warn(
+			`[generate-og] フォント: Google Fonts の取得に失敗しました (${error instanceof Error ? error.message : String(error)})`,
+		);
+		return loadFallbackFonts();
+	}
 }
 
 // satori 用の要素ツリーを生成するヘルパー（JSX なしで構築）
 function h(type, props, ...children) {
 	return {
 		type,
-		props: { ...props, children: children.length === 1 ? children[0] : children },
+		props: {
+			...props,
+			children: children.length === 1 ? children[0] : children,
+		},
 	};
 }
 
