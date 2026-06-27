@@ -296,6 +296,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		],
 	},
 	{
+
 		id: 'image-metadata',
 		title: '画像メタデータ削除',
 		description:
@@ -312,6 +313,24 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'画像',
 			'プライバシー',
 			'アップロード不要',
+		],
+	},
+	{
+		id: 'image-crop',
+		title: '画像トリミング・回転',
+		description:
+			'画像の切り抜き、90度回転、上下左右反転をブラウザ内で実行。画像はアップロードされません。',
+		href: '/image-crop',
+		icon: '✂️',
+		category: 'AI/画像',
+		categoryColor: 'border-l-chart-5',
+		keywords: [
+			'画像トリミング',
+			'切り抜き',
+			'回転',
+			'反転',
+			'クロップ',
+			'画像',
 		],
 	},
 	{
