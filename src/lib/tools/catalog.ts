@@ -27,6 +27,9 @@ export type ToolCatalogItem = {
 	span?: 2;
 	keywords: readonly string[];
 	published?: boolean;
+	// 関連ツールのidを優先順で指定（回遊カードで使用）。
+	// 省略時・件数不足時は getRelatedTools が同カテゴリで自動補完する。
+	related?: readonly string[];
 	llmsFull?: ToolLlmsFullInfo;
 };
 
@@ -42,6 +45,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		categoryColor: 'border-l-primary',
 		span: 2,
 		keywords: ['全角', '半角', 'カタカナ'],
+		related: ['char-count', 'unicode-converter'],
 		llmsFull: {
 			useCase: 'カタカナ・英数字・記号の全角と半角を相互変換',
 			inputs: 'text（変換対象文字列）',
@@ -59,6 +63,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'テキスト解析',
 		categoryColor: 'border-l-accent',
 		keywords: ['文字数', 'バイト数', '行数', 'Shift-JIS'],
+		related: ['text-diff', 'zenkaku-hankaku'],
 		llmsFull: {
 			useCase:
 				'入力テキストの文字数、バイト数、行数、原稿用紙換算枚数をリアルタイム計測',
@@ -76,6 +81,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '開発ツール',
 		categoryColor: 'border-l-chart-1',
 		keywords: ['JSON', 'フォーマット', 'バリデーション'],
+		related: ['json-csv', 'csv-editor'],
 		llmsFull: {
 			useCase: 'JSON文字列の構文チェック、整形（Pretty Print）、minify（圧縮）',
 			inputs: 'jsonString（JSON文字列）',
@@ -93,6 +99,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '開発ツール',
 		categoryColor: 'border-l-chart-1',
 		keywords: ['JWT', 'JSON Web Token', 'デコード', '認証', 'トークン'],
+		related: ['base64', 'url-encoder'],
 		llmsFull: {
 			useCase:
 				'JSON Web Token (JWT) のHeaderおよびPayloadをブラウザ内でBase64URLデコードし表示',
@@ -111,6 +118,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		categoryColor: 'border-l-accent',
 		span: 2,
 		keywords: ['diff', '比較', '差分'],
+		related: ['char-count', 'json-formatter'],
 		llmsFull: {
 			useCase:
 				'2つのテキスト（比較元・比較先）の差分を計算し視覚的にハイライト表示',
@@ -129,6 +137,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '生成ツール',
 		categoryColor: 'border-l-chart-3',
 		keywords: ['QR', 'コード'],
+		related: ['dummy-data', 'url-encoder'],
 		llmsFull: {
 			useCase: '入力されたURLやテキストからQRコード画像を生成しダウンロード',
 			inputs: 'text（URLまたは文字列）',
@@ -145,6 +154,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'ユーティリティ',
 		categoryColor: 'border-l-chart-2',
 		keywords: ['和暦', '西暦', '元号', '年齢'],
+		related: ['tax', 'cipher'],
 		llmsFull: {
 			useCase:
 				'和暦（明治・大正・昭和・平成・令和）と西暦の相互変換および年齢・干支計算',
@@ -163,6 +173,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'エンコード/デコード',
 		categoryColor: 'border-l-primary',
 		keywords: ['URL', 'encodeURI', 'decodeURI', 'パーセントエンコード'],
+		related: ['base64', 'unicode-converter'],
 		llmsFull: {
 			useCase: '文字列のパーセントエンコード（URLエンコード）およびデコード',
 			inputs: 'text（対象文字列）, mode（encode | decode）',
@@ -180,6 +191,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'ユーティリティ',
 		categoryColor: 'border-l-chart-2',
 		keywords: ['Base64', 'エンコード', 'デコード'],
+		related: ['url-encoder', 'image-base64', 'cipher'],
 		llmsFull: {
 			useCase: 'テキストやバイナリファイルのBase64エンコードおよびデコード',
 			inputs: 'content（テキストまたはファイル）, mode（encode | decode）',
@@ -196,6 +208,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '開発ツール',
 		categoryColor: 'border-l-chart-1',
 		keywords: ['正規表現', 'regex', '置換'],
+		related: ['sql-formatter', 'json-formatter'],
 		llmsFull: {
 			useCase:
 				'JavaScript正規表現のマッチングテスト、キャプチャグループ検証、文字列置換',
@@ -213,6 +226,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '開発ツール',
 		categoryColor: 'border-l-chart-1',
 		keywords: ['SQL', 'MySQL', 'PostgreSQL'],
+		related: ['json-formatter', 'regex-tester'],
 		llmsFull: {
 			useCase: 'SQLクエリの自動インデント整形および1行圧縮（minify）',
 			inputs: 'sqlText（SQLクエリ文字列）',
@@ -230,6 +244,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '生成ツール',
 		categoryColor: 'border-l-chart-3',
 		keywords: ['テストデータ', 'JSON', 'CSV'],
+		related: ['csv-editor', 'json-csv'],
 		llmsFull: {
 			useCase:
 				'テスト開発用の日本語ダミー情報（名前、住所、メール、電話番号等）の一括生成',
@@ -247,6 +262,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'データ処理',
 		categoryColor: 'border-l-chart-4',
 		keywords: ['個人情報', 'マスキング', 'メール', '電話番号'],
+		related: ['image-mosaic', 'dummy-data'],
 		llmsFull: {
 			useCase:
 				'テキスト中の個人情報（メール、電話番号、クレジットカード番号、マイナンバー等）を自動検出・伏字化',
@@ -266,6 +282,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		categoryColor: 'border-l-chart-4',
 		span: 2,
 		keywords: ['CSV', 'TSV', '表', '編集'],
+		related: ['csv-fixer', 'json-csv', 'phone-formatter'],
 		llmsFull: {
 			useCase:
 				'CSV/TSVファイルのテーブル閲覧、行列編集、セル修正、エクスポート',
@@ -283,6 +300,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'テキスト変換',
 		categoryColor: 'border-l-primary',
 		keywords: ['Unicode', 'ユニコード', '\\uXXXX'],
+		related: ['zenkaku-hankaku', 'url-encoder'],
 		llmsFull: {
 			useCase: '文字列とUnicodeエスケープシーケンス（\\uXXXX）の相互変換',
 			inputs: 'text（対象文字列）, mode（encode | decode）',
@@ -299,6 +317,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'データ処理',
 		categoryColor: 'border-l-chart-4',
 		keywords: ['CSV', '文字化け', 'Shift_JIS', 'BOM'],
+		related: ['csv-editor', 'json-csv'],
 		llmsFull: {
 			useCase:
 				'Excel等で文字化けしたShift_JIS CSVの文字コードをUTF-8に変換・修復',
@@ -316,6 +335,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'データ処理',
 		categoryColor: 'border-l-chart-4',
 		keywords: ['電話番号', 'E.164', 'CSV'],
+		related: ['zipcode', 'masking', 'csv-editor'],
 		llmsFull: {
 			useCase:
 				'日本の電話番号文字列を正規化し、ハイフン区切り表記や国際表記（+81）に変換',
@@ -333,6 +353,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'ユーティリティ',
 		categoryColor: 'border-l-chart-2',
 		keywords: ['暗号', '難読化', 'ROT13', 'モールス信号', 'シーザー暗号'],
+		related: ['base64', 'wareki-converter'],
 		llmsFull: {
 			useCase:
 				'古典暗号（シーザー暗号、ROT13、モールス信号等）によるテキストの変形・相互変換',
@@ -351,6 +372,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'データ処理',
 		categoryColor: 'border-l-chart-4',
 		keywords: ['JSON', 'CSV', '変換', 'BOM', 'Excel', 'フラット化'],
+		related: ['csv-editor', 'json-formatter', 'csv-fixer'],
 		llmsFull: {
 			useCase: 'JSONオブジェクト配列とCSVテーブルデータの双方向相互変換',
 			inputs: 'data（JSON文字列またはCSVデータ）, mode（json2csv | csv2json）',
@@ -368,6 +390,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '開発ツール',
 		categoryColor: 'border-l-chart-1',
 		keywords: ['ハッシュ', 'MD5', 'SHA-256', 'チェックサム', 'CRC32', '改ざん'],
+		related: ['color', 'jwt-decoder', 'sql-formatter'],
 		llmsFull: {
 			useCase: '文字列のMD5/SHA-256/SHA-512ハッシュ値をブラウザ内で計算',
 			inputs: 'text（文字列）, algorithm（md5 | sha-256 | sha-512）',
@@ -385,6 +408,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'AI/画像',
 		categoryColor: 'border-l-chart-5',
 		keywords: ['背景削除', '透過', 'AI', '画像', 'アップロード不要'],
+		related: ['image-mosaic', 'image-text', 'image-compress', 'image-convert'],
 		llmsFull: {
 			useCase:
 				'WebWorker上のAIモデル（RMBG等）を用いて画像の被写体を切り抜き背景を透過処理',
@@ -412,6 +436,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'絵文字スタンプ',
 			'画像スタンプ',
 		],
+		related: ['image-text', 'image-metadata', 'image-compress'],
 		llmsFull: {
 			useCase: '画像上の指定領域に対するモザイク・ぼかし処理およびスタンプ付与',
 			inputs: 'imageFile（画像ファイル）, maskRegions（マスク範囲リスト）',
@@ -428,6 +453,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'AI/画像',
 		categoryColor: 'border-l-chart-5',
 		keywords: ['テキスト', '文字入れ', '画像', '注釈', 'キャプション'],
+		related: ['image-mosaic', 'image-crop', 'image-compress'],
 		llmsFull: {
 			useCase: '画像上に任意のフォント・色・縁取りでテキストや注釈を追加合成',
 			inputs: 'imageFile（画像ファイル）, textLayers（テキストレイヤー情報）',
@@ -452,6 +478,15 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'目標サイズ',
 			'JPEG',
 			'PNG',
+		],
+		related: [
+			'image-convert',
+			'exif',
+			'bg-remove',
+			'image-mosaic',
+			'image-text',
+			'favicon',
+			'ogp',
 		],
 		llmsFull: {
 			useCase: '画像ファイルの品質調整圧縮、解像度リサイズ、WebP変換',
@@ -478,6 +513,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'プライバシー',
 			'アップロード不要',
 		],
+		related: ['exif', 'image-compress', 'image-mosaic'],
 		llmsFull: {
 			useCase:
 				'画像ファイルからExifタグやGPS位置情報などの個人情報・メタデータを除去',
@@ -502,6 +538,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'クロップ',
 			'画像',
 		],
+		related: ['image-compress', 'image-convert', 'image-text'],
 		llmsFull: {
 			useCase:
 				'画像の矩形範囲切り抜き（クロップ）、90度単位の回転、上下左右反転',
@@ -529,6 +566,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'一括',
 			'ZIP',
 		],
+		related: ['image-compress', 'image-crop', 'image-base64'],
 		llmsFull: {
 			useCase:
 				'iPhoneのHEIC形式やWebP/AVIF画像を汎用的なJPEG/PNG形式に相互変換',
@@ -554,6 +592,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'CSV',
 			'オフライン',
 		],
+		related: ['phone-formatter', 'csv-editor', 'dummy-data'],
 		llmsFull: {
 			useCase:
 				'7桁の郵便番号から都道府県・市区町村・町域住所の相互検索および一括リスト変換',
@@ -577,6 +616,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'アップロードしない',
 			'安全',
 		],
+		related: ['pdf-split', 'image-convert', 'image-compress'],
 		llmsFull: {
 			useCase: '複数のPDFファイルや画像ファイルを任意の順序で1つのPDFに統合',
 			inputs: 'files（PDF/画像ファイル群）',
@@ -600,6 +640,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'アップロードしない',
 			'安全',
 		],
+		related: ['pdf-merge', 'image-crop'],
 		llmsFull: {
 			useCase:
 				'単一のPDFファイルから指定したページ範囲を別個のPDFとして切り出し分割抽出',
@@ -617,6 +658,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'ユーティリティ',
 		categoryColor: 'border-l-chart-2',
 		keywords: ['消費税', '税込', '税抜', '軽減税率', '端数処理', '計算'],
+		related: ['wareki-converter', 'char-count'],
 		llmsFull: {
 			useCase: '税込⇔税抜の相互変換、複数税率・端数処理対応',
 			inputs:
@@ -635,6 +677,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '開発ツール',
 		categoryColor: 'border-l-chart-1',
 		keywords: ['カラーコード', 'HEX', 'RGB', 'HSL', 'CMYK', '色', '変換'],
+		related: ['hash', 'markdown', 'favicon'],
 		llmsFull: {
 			useCase: 'Webカラー表現（HEX, RGB, HSL, CMYK）の相互計算変換',
 			inputs: 'colorValue（色表現文字列）',
@@ -651,11 +694,38 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'テキスト変換',
 		categoryColor: 'border-l-primary',
 		keywords: ['Markdown', 'マークダウン', 'プレビュー', 'GFM', 'HTML'],
+		related: ['json-csv', 'color'],
 		llmsFull: {
 			useCase:
 				'GitHub Flavored Markdown (GFM) のリアルタイムHTMLレンダリングとHTML出力',
 			inputs: 'markdownText（Markdown文字列）',
 			outputs: 'HTML文字列およびプレビュー表示',
+		},
+	},
+	{
+		id: 'ogp',
+		title: 'OGP画像ジェネレーター',
+		description: 'SNSシェアカードをブラウザで生成。データは外部送信なし',
+		href: '/ogp',
+		icon: '🖼️',
+		category: '生成ツール',
+		categoryColor: 'border-l-chart-3',
+		keywords: [
+			'OGP',
+			'OGP画像',
+			'og:image',
+			'SNS',
+			'シェアカード',
+			'アイキャッチ',
+			'ジェネレーター',
+			'Open Graph',
+		],
+		related: ['favicon', 'image-compress', 'image-text'],
+		llmsFull: {
+			useCase:
+				'SNSシェア用アイキャッチ画像（OGP画像）をブラウザ内で作成・カスタマイズ生成',
+			inputs: 'title（タイトル）, category（カテゴリ）, theme（テーマ）',
+			outputs: 'PNG形式のOGP画像',
 		},
 	},
 	{
@@ -675,11 +745,63 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'apple-touch-icon',
 			'PWAアイコン',
 		],
+		related: ['color', 'image-compress', 'image-text'],
 		llmsFull: {
 			useCase:
 				'単一のロゴ画像からWebサイト用favicon一式（.ico, 192x192, 512x512, apple-touch-icon）を生成',
 			inputs: 'imageFile（ロゴ画像ファイル）',
 			outputs: 'faviconアイコンセット（ZIPアーカイブ）',
+		},
+	},
+	{
+		id: 'image-base64',
+		title: '画像Base64変換',
+		description: '画像をBase64/Data URIへ相互変換。データは外部送信なし。',
+		href: '/image-base64',
+		icon: '🔣',
+		category: '開発ツール',
+		categoryColor: 'border-l-chart-1',
+		keywords: [
+			'Base64',
+			'Data URI',
+			'画像変換',
+			'img',
+			'CSS',
+			'base64',
+			'データURI',
+			'インライン画像',
+		],
+		related: ['base64', 'image-convert'],
+		llmsFull: {
+			useCase: '画像ファイルとBase64/Data URI形式文字列の相互変換',
+			inputs: 'file（画像ファイル）または Base64文字列',
+			outputs: 'Base64文字列または画像ファイル',
+		},
+	},
+	{
+		id: 'exif',
+		title: 'EXIF確認・削除',
+		description: '写真の位置情報・撮影情報を確認して削除。データは外部送信なし',
+		href: '/exif',
+		icon: '🔍',
+		category: 'AI/画像',
+		categoryColor: 'border-l-chart-5',
+		keywords: [
+			'EXIF',
+			'エグジフ',
+			'位置情報',
+			'GPS',
+			'削除',
+			'メタデータ',
+			'写真',
+			'プライバシー',
+		],
+		related: ['image-compress', 'image-convert', 'image-mosaic', 'bg-remove'],
+		llmsFull: {
+			useCase:
+				'写真画像に含まれるEXIFメタデータおよびGPS位置情報の参照・一括除去',
+			inputs: 'file（写真画像ファイル）',
+			outputs: 'EXIF情報一覧およびメタデータ除去済み画像ファイル',
 		},
 	},
 ];
@@ -724,3 +846,40 @@ export function getCategoryId(category: ToolCategory): string {
 }
 
 export const toolSlugs = toolCatalog.map((tool) => tool.id);
+
+/**
+ * 指定ツールの関連ツールを取得する（回遊カード用）。
+ *
+ * 1. `related` に指定された id を優先順に解決（自分自身・存在しない id・重複は除外）
+ * 2. `limit` に満たなければ同カテゴリの他ツールで補完（既出・自分は除外）
+ * 3. それでも 0 件なら空配列を返す（呼び出し側はセクションを描画しない）
+ */
+export function getRelatedTools(toolId: string, limit = 3): ToolCatalogItem[] {
+	const self = toolCatalog.find((t) => t.id === toolId);
+	if (!self) return [];
+
+	const byId = new Map(toolCatalog.map((t) => [t.id, t]));
+	const result: ToolCatalogItem[] = [];
+	const seen = new Set<string>([toolId]);
+
+	const push = (tool: ToolCatalogItem | undefined) => {
+		if (!tool || seen.has(tool.id) || result.length >= limit) return;
+		seen.add(tool.id);
+		result.push(tool);
+	};
+
+	// 1. related を優先順に追加
+	for (const id of self.related ?? []) {
+		push(byId.get(id));
+	}
+
+	// 2. 不足分を同カテゴリで補完（カタログ順）
+	if (result.length < limit) {
+		for (const tool of toolCatalog) {
+			if (tool.category === self.category) push(tool);
+			if (result.length >= limit) break;
+		}
+	}
+
+	return result;
+}
