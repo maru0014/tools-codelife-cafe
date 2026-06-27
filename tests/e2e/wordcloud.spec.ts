@@ -19,13 +19,11 @@ test.describe('ワードクラウド生成 Tool', () => {
 		await toolPage.goto();
 
 		const input = page.getByLabel('解析対象テキスト');
-		await input.fill(
-			'吾輩は猫である。名前はまだ無い。どこで生れたかとんと見当がつかぬ。吾輩はここで始めて人間というものを見た。猫である。',
-		);
+		await input.fill('吾輩は猫である。名前はまだ無い。名前は猫である。');
 
-		// 解析結果が表示されるまで待機（テーブル内の「猫」と「吾輩」が存在すること）
+		// 解析結果が表示されるまで待機（テーブル内の「猫」と「名前」が存在すること）
 		await expect(page.getByRole('table')).toContainText('猫');
-		await expect(page.getByRole('table')).toContainText('吾輩');
+		await expect(page.getByRole('table')).toContainText('名前');
 	});
 
 	test('CSV / SVG / PNG エクスポートボタンが正常に動作すること', async ({
