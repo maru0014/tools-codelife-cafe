@@ -154,7 +154,11 @@ export function dataUriToBlob(input: string): {
 	}
 
 	const ext = MIME_TO_EXT[mime] ?? 'bin';
-	return { blob: new Blob([bytes], { type: mime }), mime, ext };
+	return {
+		blob: new Blob([bytes.buffer as ArrayBuffer], { type: mime }),
+		mime,
+		ext,
+	};
 }
 
 export function estimateSize(dataUri: string): SizeEstimate {
