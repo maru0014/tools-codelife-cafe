@@ -189,7 +189,7 @@ test('tool-factory: createWebMcpTool catches non-Error thrown values', async () 
 	const result = await tool.run({});
 	assert.deepEqual(result, {
 		ok: false,
-		error: 'An unexpected error occurred',
+		error: 'An unexpected error occurred / 予期しないエラーが発生しました',
 	});
 });
 
@@ -543,6 +543,73 @@ test('provideToolsFromFactory: wraps tool results with isError for failures', as
 		};
 		assert.equal(errorResult.isError, true);
 		assert.equal(typeof errorResult.error, 'string');
+	} finally {
+		Object.defineProperty(globalThis, 'document', {
+			value: originalDocument,
+			configurable: true,
+		});
+		Object.defineProperty(globalThis, 'window', {
+			value: originalWindow,
+			configurable: true,
+		});
+		registeredTools = [];
+	}
+});
+
+test('provideToolsFromFactory: forwards outputSchema to registered tool', async () => {
+	const { provideToolsFromFactory } = await import('../../src/lib/webmcp.ts');
+
+	let registeredTools: Array<Record<string, unknown>> = [];
+
+	const originalDocument = globalThis.document;
+	const originalWindow = globalThis.window;
+
+	Object.defineProperty(globalThis, 'window', {
+		value: {},
+		configurable: true,
+	});
+	Object.defineProperty(globalThis, 'document', {
+		value: {
+			modelContext: {
+				registerTool(tool: unknown) {
+					registeredTools.push(tool as Record<string, unknown>);
+					return { unregister() {} };
+				},
+			},
+		},
+		configurable: true,
+	});
+
+	try {
+		const testTool = createWebMcpTool({
+			name: 'test_output_schema',
+			description: 'Test outputSchema forwarding',
+			inputSchema: {
+				type: 'object',
+				properties: { x: { type: 'string' } },
+				required: ['x'],
+			},
+			outputSchema: {
+				type: 'object',
+				properties: { upper: { type: 'string' } },
+				required: ['upper'],
+			},
+			validate: (input) => {
+				if (!isObject(input) || typeof input.x !== 'string')
+					return failure('bad');
+				return success({ x: input.x });
+			},
+			execute: (input: { x: string }) => ({ upper: input.x.toUpperCase() }),
+		});
+
+		provideToolsFromFactory([testTool]);
+
+		assert.equal(registeredTools.length, 1);
+		assert.deepEqual(registeredTools[0].outputSchema, {
+			type: 'object',
+			properties: { upper: { type: 'string' } },
+			required: ['upper'],
+		});
 	} finally {
 		Object.defineProperty(globalThis, 'document', {
 			value: originalDocument,

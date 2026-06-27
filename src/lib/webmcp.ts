@@ -13,7 +13,7 @@ type MaybeDisposable =
 	| (() => void);
 
 function wrapToolForClient(tool: WebMcpToolDefinition): WebMcpTool {
-	return {
+	const wrapped: WebMcpTool = {
 		name: tool.name,
 		description: tool.description,
 		inputSchema: tool.inputSchema,
@@ -25,6 +25,10 @@ function wrapToolForClient(tool: WebMcpToolDefinition): WebMcpTool {
 			return { error: result.error, isError: true };
 		},
 	};
+	if (tool.outputSchema) {
+		(wrapped as Record<string, unknown>).outputSchema = tool.outputSchema;
+	}
+	return wrapped;
 }
 
 export function provideToolsFromFactory(

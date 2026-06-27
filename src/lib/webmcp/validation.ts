@@ -11,7 +11,7 @@ export function requireString(
 ): WebMcpToolResult<string> {
 	const v = obj[key];
 	if (typeof v !== 'string') {
-		return failure(`"${key}" must be a string`);
+		return failure(`"${key}" must be a string / "${key}" は文字列で指定してください`);
 	}
 	return { ok: true, value: v };
 }
@@ -22,7 +22,9 @@ export function requireNumber(
 ): WebMcpToolResult<number> {
 	const v = obj[key];
 	if (typeof v !== 'number' || !Number.isFinite(v)) {
-		return failure(`"${key}" must be a finite number`);
+		return failure(
+			`"${key}" must be a finite number / "${key}" は有限の数値で指定してください`,
+		);
 	}
 	return { ok: true, value: v };
 }
@@ -34,7 +36,9 @@ export function requireEnum<T extends string>(
 ): WebMcpToolResult<T> {
 	const v = obj[key];
 	if (typeof v !== 'string' || !values.includes(v as T)) {
-		return failure(`"${key}" must be one of: ${values.join(', ')}`);
+		return failure(
+			`"${key}" must be one of: ${values.join(', ')} / "${key}" は次のいずれかを指定してください: ${values.join(', ')}`,
+		);
 	}
 	return { ok: true, value: v as T };
 }
@@ -50,7 +54,9 @@ export function optionalEnum<T extends string>(
 		return { ok: true, value: defaultValue };
 	}
 	if (typeof v !== 'string' || !values.includes(v as T)) {
-		return failure(`"${key}" must be one of: ${values.join(', ')}`);
+		return failure(
+			`"${key}" must be one of: ${values.join(', ')} / "${key}" は次のいずれかを指定してください: ${values.join(', ')}`,
+		);
 	}
 	return { ok: true, value: v as T };
 }
@@ -61,7 +67,9 @@ export function checkSizeLimit(
 	label = 'Input',
 ): WebMcpToolResult<string> {
 	if (value.length > maxChars) {
-		return failure(`${label} exceeds the maximum size limit`);
+		return failure(
+			`${label} exceeds the maximum size limit / ${label}のサイズが上限を超えています`,
+		);
 	}
 	return { ok: true, value };
 }

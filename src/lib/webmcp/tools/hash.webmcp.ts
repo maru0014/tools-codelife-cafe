@@ -49,7 +49,8 @@ export const hashTool = createWebMcpTool<HashInput, HashOutput>({
 		required: ['hash'],
 	},
 	validate(input) {
-		if (!isObject(input)) return failure('Input must be an object');
+		if (!isObject(input))
+			return failure('Input must be an object / 入力値が不正です');
 		const text = requireString(input, 'text');
 		if (!text.ok) return text;
 		const algorithm = requireEnum(input, 'algorithm', SUPPORTED_ALGORITHMS);

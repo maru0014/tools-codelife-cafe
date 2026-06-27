@@ -86,7 +86,8 @@ export const taxTool = createWebMcpTool<TaxInput, TaxOutput>({
 		required: ['base', 'tax', 'total', 'result', 'taxAmount'],
 	},
 	validate(input) {
-		if (!isObject(input)) return failure('Input must be an object');
+		if (!isObject(input))
+			return failure('Input must be an object / 入力値が不正です');
 		const amount = requireNumber(input, 'amount');
 		if (!amount.ok) return amount;
 		const taxRate = requireEnum(input, 'taxRate', TAX_RATES);

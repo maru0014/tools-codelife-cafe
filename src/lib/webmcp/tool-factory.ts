@@ -34,7 +34,9 @@ export function createWebMcpTool<TInput, TOutput>(
 				return {
 					ok: false,
 					error:
-						e instanceof Error ? e.message : 'An unexpected error occurred',
+						e instanceof Error
+							? e.message
+							: 'An unexpected error occurred / 予期しないエラーが発生しました',
 				};
 			}
 		},
