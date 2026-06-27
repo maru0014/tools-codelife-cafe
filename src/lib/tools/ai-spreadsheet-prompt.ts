@@ -59,8 +59,12 @@ function detectDelimiter(
 	return tabCount > commaCount ? '\t' : ',';
 }
 
-function parseDelimited(input: string, delimiter: ',' | '\t'): string[][] {
+function parseDelimited(
+	input: string,
+	delimiter: ',' | '\t',
+): { rows: string[][]; warnings: string[] } {
 	const rows: string[][] = [];
+	const warnings: string[] = [];
 	let row: string[] = [];
 	let cell = '';
 	let inQuotes = false;
@@ -102,7 +106,18 @@ function parseDelimited(input: string, delimiter: ',' | '\t'): string[][] {
 		rows.push(row);
 	}
 
-	return rows.filter((cells) => cells.some((value) => value.trim().length > 0));
+	if (inQuotes) {
+		warnings.push(
+			'ダブルクォートが閉じられていない可能性があります。元データのCSV形式を確認してください。',
+		);
+	}
+
+	return {
+		rows: rows.filter((cells) =>
+			cells.some((value) => value.trim().length > 0),
+		),
+		warnings,
+	};
 }
 
 function escapeMarkdownCell(value: string): string {
@@ -146,7 +161,8 @@ export function generateSpreadsheetPrompt({
 	}
 
 	const detectedDelimiter = detectDelimiter(trimmedInput, format);
-	const rows = parseDelimited(trimmedInput, detectedDelimiter);
+	const parsed = parseDelimited(trimmedInput, detectedDelimiter);
+	const rows = parsed.rows;
 	const rowCount = rows.length;
 	const columnCount =
 		rows.length > 0 ? Math.max(...rows.map((row) => row.length)) : 0;
@@ -154,7 +170,7 @@ export function generateSpreadsheetPrompt({
 	const includedRows = Math.min(rowCount, safeMaxRows);
 	const includedRowsData = rows.slice(0, includedRows);
 	const truncated = rowCount > includedRows;
-	const warnings: string[] = [];
+	const warnings: string[] = [...parsed.warnings];
 
 	if (truncated) {
 		warnings.push(
