@@ -94,16 +94,59 @@ Service Worker（`sw.js`）はビルド時に自動生成されます。
 
 ---
 
-## 5. 安全性・セキュリティ設計
+## 5. ビルド・デプロイフロー
 
-### 5.1 安全性の可視化 (`SafetyBadge`)
+本プロジェクトは、ソースコードから静的成果物を生成し、Cloudflare Pages で配信する構成です。アプリケーション実行時のサーバーサイド処理はなく、ビルド済みファイルだけを公開します。
+
+```mermaid
+flowchart TD
+    A[ソースコード] --> B[astro build]
+    B --> C[dist/ に静的HTML・JS・CSS・画像を出力]
+    C --> D[scripts/generate-og-images.mjs で OGP 画像を生成]
+    D --> E[scripts/generate-sw.mjs]
+    E --> F[public/sw.js のプレースホルダーを置換]
+    F --> G[dist/sw.js を生成]
+    G --> H[Cloudflare Pages へデプロイ]
+    H --> I[ブラウザが静的アセットとして取得]
+```
+
+- `npm run build` は `astro build` を起点に、`dist/` へ静的HTML、Astro が生成した `/_astro/` 配下の JS/CSS/画像、各ページの成果物を出力します。
+- 続いて `scripts/generate-og-images.mjs` が `src/lib/tools/catalog.ts` のツール情報をもとに OGP 画像を生成します。
+- 最後に `scripts/generate-sw.mjs` が `dist/` を走査し、ページURLと `dist/_astro/` 配下の静的アセットURLを収集します。
+- `scripts/generate-sw.mjs` は `public/sw.js` をテンプレートとして読み込み、`__HASH__`、`/* __ALL_PAGES__ */`、`/* __ALL_ASSETS__ */` をビルド結果に合わせて置換します。
+- 置換後の Service Worker は `dist/sw.js` として出力され、Cloudflare Pages では他の静的ファイルと同じく配信対象になります。
+- ブラウザ側では `src/layouts/BaseLayout.astro` から Service Worker 登録が行われ、`dist/sw.js` が静的アセット・ページのキャッシュ制御を担当します。
+
+---
+
+## 6. データフローと通信境界
+
+ユーザーが入力・アップロードしたテキスト、CSV/JSON、画像、PDF 等の処理対象データは、React Island、Web Worker、`src/lib/tools/` の純粋関数など、ブラウザ内の実行環境だけで処理します。これらのユーザーデータを外部サーバーへ送信する API 通信は設計上許可しません。
+
+一方で、アプリ本体の表示・オフライン動作・一部ツールの実行に必要な静的ファイル取得は発生します。通信の種類、目的、許可範囲は以下の通りです。
+
+| 通信の種類 | 主なファイル・経路 | 目的 | 許可範囲 |
+| --- | --- | --- | --- |
+| ページ・UIアセット取得 | Cloudflare Pages から配信される HTML、`/_astro/` 配下の JS/CSS/画像、`dist/sw.js` | アプリ本体の表示、Astro Islands のハイドレーション、PWA のキャッシュ制御 | 許可。静的アセット配信のみ。ユーザー入力データは含めない |
+| ツールカタログ参照 | `src/lib/tools/catalog.ts` | トップページ、検索、カテゴリ、関連ツール、OGP 画像生成の単一情報源 | 許可。ビルド成果物またはブラウザ内コードとして参照するだけで、外部送信はしない |
+| ツール共通レイアウト表示 | `src/components/common/ToolLayout.astro` | `SafetyBadge`、パンくず、関連ツール、構造化データ、ツール本文スロットの表示 | 許可。表示制御のみ。処理対象データの送信はしない |
+| Service Worker テンプレート・生成物 | `public/sw.js`、`scripts/generate-sw.mjs`、`dist/sw.js` | プリキャッシュ対象の注入、Cache First / Network First、オフラインフォールバック | 許可。同一オリジンの静的ファイル取得・キャッシュに限定 |
+| 郵便番号チャンク取得 | `/data/zipcode/*.json` などの静的JSON | 郵便番号検索・変換に必要な辞書データを必要分だけ取得 | 例外的に許可。静的データのダウンロードのみで、検索語や入力内容は送信しない |
+| AIモデルファイル取得 | Cloudflare R2 等で配信されるモデル・WASM・関連ファイル | AI背景削除などのブラウザ内推論に必要なモデルを取得 | 例外的に許可。モデルファイル取得のみで、画像などの処理対象データは送信しない |
+| ユーザー入力データ送信 | 入力テキスト、アップロード画像、PDF、CSV/JSON 等 | なし | 禁止。外部API、トラッキング、解析目的の送信を行わない |
+
+この章では通信の境界を整理し、既存の「安全性・セキュリティ設計」ではユーザーに対する安全性の可視化や検証観点を扱います。
+
+## 7. 安全性・セキュリティ設計
+
+### 7.1 安全性の可視化 (`SafetyBadge`)
 完全クライアントサイド処理をユーザーに明示し、安心してデータを入出力してもらうために、すべてのツールの上部には「完全ローカル処理（外部送信なし）」を示す `SafetyBadge` が自動配置されます。
 
-### 5.2 ツールカタログと関連ツール回遊
+### 7.2 ツールカタログと関連ツール回遊
 ツール一覧・検索・個別ページの関連ツールカードは `src/lib/tools/catalog.ts` を単一の情報源として管理します。`ToolLayout.astro` は現在ページの `path` からツールを解決し、`getRelatedTools()` によって `related` 指定を優先しつつ同カテゴリのツールで最大3件まで補完して表示します。これにより、各ページに手書きの関連リンクを分散させず、回遊導線を一元管理します。
 
-### 5.3 ネットワーク遮断の保証
+### 7.3 ネットワーク遮断の保証
 本アプリは意図的にバックエンドAPIを持たず、静的ファイル配信のみで構成されているため、ブラウザの開発者ツールの「ネットワーク」タブ等で検証しても、ユーザーデータの外部送信が発生しないことが確認できます。
 
-### 5.4 CSP (Content Security Policy) 対策
+### 7.4 CSP (Content Security Policy) 対策
 AIモデル推論などの重量処理を Web Worker 内で実行する際、動的なモジュールインポート（スレッド動的インポートなど）によるCSPエラーを完全に防止するため、Web Worker 内の並列スレッド数制限（`numThreads = 1`）やプロキシ停止（`proxy = false`）を明示的に設定しています。
