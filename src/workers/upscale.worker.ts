@@ -10,7 +10,7 @@ import {
 	type QualityMode,
 	type UpscaleOptions,
 	validateResolution,
-} from '@/lib/tools/upscale-core';
+} from '../lib/tools/upscale-core';
 
 // onnxruntime-web の wasm 配信元（package.json の pin と同期させること）。
 // bg-remove と同様 cdn.jsdelivr.net を使用（CSP script-src/connect-src で許可済み）。
