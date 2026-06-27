@@ -428,12 +428,47 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: 'AI/画像',
 		categoryColor: 'border-l-chart-5',
 		keywords: ['背景削除', '透過', 'AI', '画像', 'アップロード不要'],
-		related: ['image-mosaic', 'image-text', 'image-compress', 'image-convert'],
+		related: [
+			'upscale',
+			'image-mosaic',
+			'image-text',
+			'image-compress',
+			'image-convert',
+		],
 		llmsFull: {
 			useCase:
 				'WebWorker上のAIモデル（RMBG等）を用いて画像の被写体を切り抜き背景を透過処理',
 			inputs: 'imageFile（画像ファイル）',
 			outputs: '背景が透過されたPNG画像',
+		},
+	},
+	{
+		id: 'upscale',
+		title: '画像アップスケール',
+		description: 'ブラウザ内AIで高解像度化・ノイズ除去。データは外部送信なし。',
+		href: '/upscale',
+		icon: '✨',
+		category: 'AI/画像',
+		categoryColor: 'border-l-chart-5',
+		keywords: [
+			'アップスケール',
+			'高解像度化',
+			'高画質化',
+			'ノイズ除去',
+			'超解像',
+			'解像度',
+			'Real-ESRGAN',
+			'画像',
+			'2x',
+			'4x',
+			'アップロード不要',
+		],
+		related: ['bg-remove', 'image-compress', 'image-convert'],
+		llmsFull: {
+			useCase:
+				'WebWorker上のAIモデル（Real-ESRGAN）でブラウザ内アップスケール（2x/4x）・ノイズ除去',
+			inputs: 'imageFile（画像ファイル）',
+			outputs: '高解像度化された画像（PNG / WebP）',
 		},
 	},
 	{
@@ -500,6 +535,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'PNG',
 		],
 		related: [
+			'upscale',
 			'image-convert',
 			'exif',
 			'bg-remove',
@@ -605,7 +641,7 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 			'一括',
 			'ZIP',
 		],
-		related: ['image-compress', 'image-crop', 'image-base64'],
+		related: ['upscale', 'image-compress', 'image-crop', 'image-base64'],
 		llmsFull: {
 			useCase:
 				'iPhoneのHEIC形式やWebP/AVIF画像を汎用的なJPEG/PNG形式に相互変換',
