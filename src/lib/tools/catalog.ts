@@ -56,6 +56,17 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		keywords: ['JSON', 'フォーマット', 'バリデーション'],
 	},
 	{
+		id: 'jwt-decoder',
+		title: 'JWTデコーダー',
+		description:
+			'JWTのヘッダー・ペイロードをブラウザ内でデコード。署名検証なしで内容確認に使えます。',
+		href: '/jwt-decoder',
+		icon: '🎫',
+		category: '開発ツール',
+		categoryColor: 'border-l-chart-1',
+		keywords: ['JWT', 'JSON Web Token', 'デコード', '認証', 'トークン'],
+	},
+	{
 		id: 'text-diff',
 		title: 'テキスト差分比較',
 		description:
