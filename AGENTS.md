@@ -21,6 +21,10 @@
   - 命名規約、UI・ロジックの分離（3ファイル構成）、デザインシステム（Tailwind v4）、Biomeの設定、E2Eテスト。
 - **[data-management.md](file:///d:/tools-codelife-cafe/docs/data-management.md) (データ管理とモデル配信設計書)**
   - 郵便番号データのチャンク化および更新方法、AIモデルの Cloudflare R2 配信と Web Worker 推論。
+- **[analytics.md](file:///d:/tools-codelife-cafe/docs/analytics.md) (計測基盤設計)**
+  - Cloudflare Analytics Engine による完全匿名イベント計測方針とAllowlistプロパティ。
+- **[seo.md](file:///d:/tools-codelife-cafe/docs/seo.md) (SEO & 構造化データガイドライン)**
+  - Schema.org 準拠の JSON-LD 構造化データ付与規約と検証手順。
 
 ---
 

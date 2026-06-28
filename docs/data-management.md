@@ -64,15 +64,19 @@
 
 ---
 
-## 2. AIモデルの配信と推論 (背景削除ツール)
+## 2. AIモデルの配信と推論 (背景削除・画像アップスケールツール)
 
-「背景削除」ツールでは、ブラウザ内でONNXモデルを動かして背景を除去する AI 推論技術を採用しています。
+「背景削除」および「画像アップスケール・ノイズ除去」ツールでは、ブラウザ内でONNXモデルを動かすAI推論技術を採用しています。
 
 ### 2.1 推論の構成要素
-- **推論エンジン:** `@huggingface/transformers` (Transformers.js v4)
-- **実行環境:** Web Worker (`src/workers/bg-remove.worker.ts`)
-  - 重い推論処理やモデルのダウンロード処理がメインスレッド（UI描画）をブロックし、画面がフリーズするのを防ぐため、Web Worker 内に完全に処理を分離しています。
-- **対応モデル:**
+- **推論エンジン / ライブラリ:**
+  - 背景削除: `@huggingface/transformers` (Transformers.js v4)
+  - 画像アップスケール: `onnxruntime-web` (Real-ESRGAN ONNX, jsDelivr CDN配信WASM)
+- **実行環境 (Web Worker):**
+  - 背景削除: `src/workers/bg-remove.worker.ts`
+  - 画像アップスケール: `src/workers/upscale.worker.ts`
+  - 重い推論処理、モデルのダウンロード、タイル分割処理がメインスレッド（UI描画）をブロックし画面がフリーズするの完全防止するため、Web Worker 内に処理を隔離し、OffscreenCanvas 等を活用しています。
+- **対応モデル (背景削除):**
   - **高速モード (`fast`):** `onnx-community/modnet-webnn` (FP32版、約25.9MB)
   - **高精度モード (`high`):** `onnx-community/BEN2-ONNX` (FP16版、約219MB)
 
