@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { convert } from '../../src/lib/tools/zenkaku-hankaku';
+import { convert } from '../../src/lib/tools/zenkaku-hankaku.ts';
 
 test('convert: 記号全種（［］｛｝（）．＊＋ 等）の往復変換が正しく、例外を投げない', () => {
 	const zenkakuSymbols =

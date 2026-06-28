@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
 import {
 	decodeBase64,
 	encodeBase64,
@@ -16,6 +17,7 @@ import {
 } from '@/lib/tools/base64';
 
 export default function Base64Converter() {
+	useToolAnalytics('base64');
 	const [tab, setTab] = useState('text');
 
 	// Text Tab State

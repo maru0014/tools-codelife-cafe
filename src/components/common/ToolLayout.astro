@@ -106,11 +106,12 @@ const breadcrumbSchema = {
 
     <!-- Related tools (回遊カード) -->
     {relatedTools.length > 0 && (
-      <section class="mt-8" aria-labelledby="related-tools-heading">
+      <section id="related-tools-section" class="mt-8" aria-labelledby="related-tools-heading">
         <h2 id="related-tools-heading" class="text-lg font-semibold mb-4">関連ツール</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {relatedTools.map((t) => (
             <ToolCard
+              id={t.id}
               title={t.title}
               description={t.description}
               href={t.href}
@@ -142,3 +143,26 @@ const breadcrumbSchema = {
     }
   }
 </script>
+
+<script>
+  import { track } from '../../lib/analytics';
+  import { toolCatalog } from '../../lib/tools/catalog';
+
+  const container = document.querySelector('#related-tools-section');
+  if (container) {
+    const currentPath = window.location.pathname;
+    const currentTool = toolCatalog.find((t) => t.href === currentPath || `${t.href}/` === currentPath);
+    if (currentTool) {
+      container.addEventListener('click', (e) => {
+        const targetAnchor = (e.target as HTMLElement).closest('a[data-tool-id]');
+        if (targetAnchor) {
+          const targetId = targetAnchor.getAttribute('data-tool-id');
+          if (targetId) {
+            track('related_click', { from: currentTool.id, to: targetId });
+          }
+        }
+      });
+    }
+  }
+</script>
+
