@@ -7,6 +7,8 @@
 > - [architecture.md](file:///d:/tools-codelife-cafe/docs/architecture.md) (全体設計、PWA)
 > - [development-guide.md](file:///d:/tools-codelife-cafe/docs/development-guide.md) (ツール追加手順、命名規約、UI・ロジック分離、テスト)
 > - [data-management.md](file:///d:/tools-codelife-cafe/docs/data-management.md) (郵便番号チャンク、モデルのR2配信)
+> - [analytics.md](file:///d:/tools-codelife-cafe/docs/analytics.md) (計測基盤設計)
+> - [seo.md](file:///d:/tools-codelife-cafe/docs/seo.md) (SEO & 構造化データガイドライン)
 
 ---
 
@@ -14,10 +16,12 @@
 
 ```bash
 npm run dev          # 開発サーバー起動 (localhost:4321)
-npm run build        # 本本番ビルド（Astroビルド ＋ sw.js のプレースホルダー置換）
+npm run build        # 本番ビルド（Astroビルド ＋ sw.js のプレースホルダー置換）
 npm run preview      # ビルド成果物のローカルプレビュー
+npm run check        # Astro型チェック ＋ Biome静的解析
 npm run lint         # Biome 静的解析の実行 (src/, tests/)
 npm run lint:fix     # Biome 自動修正の適用
+npm run test:unit    # コアロジックの単体テスト実行 (Node 22 --test)
 npm test             # E2Eテスト全件実行（Playwright）
 ```
 

@@ -6,7 +6,7 @@
 
 🔗 **[https://tools.codelife.cafe](https://tools.codelife.cafe)**
 
-## 📦 収録ツール（41種）
+## 📦 収録ツール（42種）
 
 ### テキスト処理
 
@@ -31,6 +31,7 @@
 | [電話番号フォーマッタ](/phone-formatter) | 日本語の電話番号をE.164・国際表記・国内表記に即変換。CSV一括変換対応。 |
 | [ダミーデータ生成](/dummy-data) | 日本語の氏名・住所・電話番号等の一括生成（JSON/CSV/TSV） |
 | [郵便番号→住所変換](/zipcode) | 郵便番号から住所を検索・一括変換。Excel貼り付け・CSV出力対応（データは外部送信なし） |
+| [AI表データプロンプト生成](/ai-spreadsheet-prompt) | CSV・TSV・Excel貼り付けデータを、AIに渡しやすい分析プロンプトへ変換（データは外部送信なし） |
 
 ### ユーティリティ
 
@@ -98,8 +99,12 @@
 | `npm run dev` | 開発サーバーを起動（`localhost:4321`） |
 | `npm run build` | 本番用に静的ビルド＋SW生成（`dist/`） |
 | `npm run preview` | ビルド結果をローカルプレビュー |
-| `npx playwright test --headed` | E2Eテストを実行（ブラウザ表示あり） |
+| `npm run check` | Astroの型チェックとBiome静的解析を実行 |
+| `npm run lint` | Biomeによるコードの静的解析（チェックのみ） |
+| `npm run lint:fix` | Biomeによるコードの自動フォーマット・修正 |
+| `npm test` | PlaywrightによるE2Eテストを全件実行 |
 | `npm run test:unit` | コアロジックの単体テストを実行（Node 22 の `node --test`、runner追加なし） |
+| `npx playwright test --headed` | ブラウザを表示しながらE2Eテストを実行 |
 
 ## 🚀 Cloudflare R2 モデル配信
 
