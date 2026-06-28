@@ -6,7 +6,7 @@ import UseCases from './UseCases.astro';
 import HowTo from './HowTo.astro';
 import Faq from './Faq.astro';
 import RelatedTools from './RelatedTools.astro';
-import { getCategoryId, toolCatalog } from '../../lib/tools/catalog';
+import { getCategoryId, toolCatalog, type ToolCategory } from '../../lib/tools/catalog';
 
 interface Props {
 	tool: CollectionEntry<'tools'>;
@@ -22,7 +22,7 @@ const SITE_URL = 'https://tools.codelife.cafe';
 const canonicalUrl = canonical || `${SITE_URL}${path}`;
 
 // パンくずリスト用
-const categoryHref = category ? `/?category=${getCategoryId(category)}` : undefined;
+const categoryHref = category ? `/?category=${getCategoryId(category as ToolCategory)}` : undefined;
 
 const catalogTool = toolCatalog.find((t) => t.id === toolId || t.href === path);
 const ogImage = catalogTool ? `/og/${catalogTool.id}.png` : undefined;
