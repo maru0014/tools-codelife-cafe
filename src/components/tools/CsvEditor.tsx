@@ -137,6 +137,11 @@ export default function CsvEditor() {
 		}
 	};
 
+	const resetQueryState = useCallback(() => {
+		setFilterGroup({ combinator: 'and', conditions: [] });
+		setSortKeys([]);
+	}, []);
+
 	// Parse CSV text input
 	const handleParse = () => {
 		if (!inputText.trim()) {
@@ -157,14 +162,16 @@ export default function CsvEditor() {
 			setActiveTab('edit');
 			setCurrentPage(1);
 			setUndoStack([]);
+			resetQueryState();
 		}
 	};
 
 	// File Upload Handler (.csv, .tsv, .xlsx)
 	const processFile = async (file: File) => {
 		setError('');
-		const isXlsx = file.name.endsWith('.xlsx');
-		const isTsv = file.name.endsWith('.tsv');
+		const fileNameLower = file.name.toLowerCase();
+		const isXlsx = fileNameLower.endsWith('.xlsx');
+		const isTsv = fileNameLower.endsWith('.tsv');
 
 		if (isXlsx) {
 			if (!isDecompressionStreamSupported()) {
@@ -190,6 +197,7 @@ export default function CsvEditor() {
 				setActiveTab('edit');
 				setCurrentPage(1);
 				setUndoStack([]);
+				resetQueryState();
 			} catch (err) {
 				setError(err instanceof Error ? err.message : String(err));
 			}
@@ -213,6 +221,7 @@ export default function CsvEditor() {
 					setActiveTab('edit');
 					setCurrentPage(1);
 					setUndoStack([]);
+					resetQueryState();
 				}
 			};
 			reader.readAsText(file);
@@ -228,6 +237,13 @@ export default function CsvEditor() {
 
 	const handleSelectSheet = (idx: number) => {
 		if (!sheets[idx]) return;
+		if (csvData) {
+			setSheets((prev) =>
+				prev.map((s, i) =>
+					i === activeSheetIdx ? { ...s, rows: csvData.rows } : s,
+				),
+			);
+		}
 		setActiveSheetIdx(idx);
 		const targetRows = sheets[idx].rows;
 		const maxCols = Math.max(...targetRows.map((r) => r.length), 1);
@@ -369,6 +385,13 @@ export default function CsvEditor() {
 	// Pagination Math
 	const totalDisplayRows = displayIndices.length;
 	const totalPages = Math.ceil(totalDisplayRows / ROWS_PER_PAGE) || 1;
+
+	useEffect(() => {
+		if (currentPage > totalPages) {
+			setCurrentPage(totalPages);
+		}
+	}, [currentPage, totalPages]);
+
 	const startIndex = (currentPage - 1) * ROWS_PER_PAGE;
 	const endIndex = Math.min(startIndex + ROWS_PER_PAGE, totalDisplayRows);
 	const currentPageIndices = displayIndices.slice(startIndex, endIndex);
@@ -696,12 +719,18 @@ export default function CsvEditor() {
 					<FilterPanel
 						columns={columns}
 						filterGroup={filterGroup}
-						onChangeFilterGroup={setFilterGroup}
+						onChangeFilterGroup={(fg) => {
+							setFilterGroup(fg);
+							setCurrentPage(1);
+						}}
 					/>
 					<SortPanel
 						columns={columns}
 						sortKeys={sortKeys}
-						onChangeSortKeys={setSortKeys}
+						onChangeSortKeys={(sk) => {
+							setSortKeys(sk);
+							setCurrentPage(1);
+						}}
 					/>
 				</TabsContent>
 

@@ -38,6 +38,16 @@ const PALETTE_DARK = [
 	'#22d3ee', // cyan
 ];
 
+export function escapeXml(str: string | number | undefined): string {
+	if (str === undefined || str === null) return '';
+	return String(str)
+		.replace(/&/g, '&amp;')
+		.replace(/</g, '&lt;')
+		.replace(/>/g, '&gt;')
+		.replace(/"/g, '&quot;')
+		.replace(/'/g, '&apos;');
+}
+
 export function validateChartSpec(spec: ChartSpec): string | null {
 	if (spec.type === 'scatter') {
 		if (!spec.xColumn || !spec.yColumn) {
@@ -74,7 +84,7 @@ export function buildChartSvg(
 ): string {
 	const validationErr = validateChartSpec(spec);
 	if (validationErr) {
-		return `<svg xmlns="http://www.w3.org/2000/svg" width="${opts.width}" height="${opts.height}"><text x="20" y="40" fill="red">${validationErr}</text></svg>`;
+		return `<svg xmlns="http://www.w3.org/2000/svg" width="${opts.width}" height="${opts.height}"><text x="20" y="40" fill="red">${escapeXml(validationErr)}</text></svg>`;
 	}
 
 	const palette = opts.dark ? PALETTE_DARK : PALETTE_LIGHT;
@@ -137,13 +147,13 @@ export function buildChartSvg(
 		return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${opts.width} ${opts.height}" width="${opts.width}" height="${opts.height}">
   <style>text { font-family: sans-serif; font-size: 12px; }</style>
-  ${warningMsg ? `<text x="${margin.left}" y="20" fill="${subTextColor}" font-size="11">${warningMsg}</text>` : ''}
+  ${warningMsg ? `<text x="${margin.left}" y="20" fill="${subTextColor}" font-size="11">${escapeXml(warningMsg)}</text>` : ''}
   <!-- Grids -->
   <line x1="${margin.left}" y1="${margin.top + h}" x2="${margin.left + w}" y2="${margin.top + h}" stroke="${gridColor}" stroke-width="1"/>
   <line x1="${margin.left}" y1="${margin.top}" x2="${margin.left}" y2="${margin.top + h}" stroke="${gridColor}" stroke-width="1"/>
   <!-- Axis Labels -->
-  <text x="${margin.left + w / 2}" y="${opts.height - 10}" fill="${textColor}" text-anchor="middle">${xInfo.name}</text>
-  <text x="15" y="${margin.top + h / 2}" fill="${textColor}" text-anchor="middle" transform="rotate(-90 15 ${margin.top + h / 2})">${yInfo.name}</text>
+  <text x="${margin.left + w / 2}" y="${opts.height - 10}" fill="${textColor}" text-anchor="middle">${escapeXml(xInfo.name)}</text>
+  <text x="15" y="${margin.top + h / 2}" fill="${textColor}" text-anchor="middle" transform="rotate(-90 15 ${margin.top + h / 2})">${escapeXml(yInfo.name)}</text>
   <!-- Points -->
   ${circles}
 </svg>`.trim();
@@ -169,29 +179,39 @@ export function buildChartSvg(
 			values: valInfos.map((v) => parseNumber(r[v.idx]) ?? 0),
 		}));
 	} else {
-		const groups = new Map<string, number[][]>();
+		const groups = new Map<
+			string,
+			{ numbers: number[][]; rawCells: string[][] }
+		>();
 		for (const r of rows) {
 			const cat = r[catInfo.idx] ?? '';
-			let arrs = groups.get(cat);
-			if (!arrs) {
-				arrs = valInfos.map(() => []);
-				groups.set(cat, arrs);
+			let g = groups.get(cat);
+			if (!g) {
+				g = {
+					numbers: valInfos.map(() => []),
+					rawCells: valInfos.map(() => []),
+				};
+				groups.set(cat, g);
 			}
 			valInfos.forEach((v, i) => {
-				const num = parseNumber(r[v.idx]);
-				if (num !== null) arrs[i].push(num);
+				const cellVal = r[v.idx] ?? '';
+				if (cellVal.trim() !== '') g.rawCells[i].push(cellVal);
+				const num = parseNumber(cellVal);
+				if (num !== null) g.numbers[i].push(num);
 			});
 		}
 
-		for (const [cat, arrs] of groups.entries()) {
-			const aggValues = arrs.map((arr) => {
-				if (arr.length === 0) return 0;
-				if (spec.aggregation === 'sum') return arr.reduce((a, b) => a + b, 0);
+		for (const [cat, g] of groups.entries()) {
+			const aggValues = valInfos.map((_, i) => {
+				const nums = g.numbers[i];
+				const raw = g.rawCells[i];
+				if (spec.aggregation === 'count') return raw.length;
+				if (nums.length === 0) return 0;
+				if (spec.aggregation === 'sum') return nums.reduce((a, b) => a + b, 0);
 				if (spec.aggregation === 'avg')
-					return arr.reduce((a, b) => a + b, 0) / arr.length;
-				if (spec.aggregation === 'count') return arr.length;
-				if (spec.aggregation === 'min') return Math.min(...arr);
-				if (spec.aggregation === 'max') return Math.max(...arr);
+					return nums.reduce((a, b) => a + b, 0) / nums.length;
+				if (spec.aggregation === 'min') return Math.min(...nums);
+				if (spec.aggregation === 'max') return Math.max(...nums);
 				return 0;
 			});
 			items.push({ category: cat, values: aggValues });
@@ -248,7 +268,7 @@ export function buildChartSvg(
 				);
 			}
 			legends.push(
-				`<g transform="translate(10, ${30 + idx * 18})"><rect width="12" height="12" fill="${color}" rx="2"/><text x="18" y="10" fill="${textColor}" font-size="11">${item.category}: ${val}</text></g>`,
+				`<g transform="translate(10, ${30 + idx * 18})"><rect width="12" height="12" fill="${color}" rx="2"/><text x="18" y="10" fill="${textColor}" font-size="11">${escapeXml(item.category)}: ${val}</text></g>`,
 			);
 			currentAngle = endAngle;
 		});
@@ -256,7 +276,7 @@ export function buildChartSvg(
 		return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${opts.width} ${opts.height}" width="${opts.width}" height="${opts.height}">
   <style>text { font-family: sans-serif; font-size: 12px; }</style>
-  ${warningMsg ? `<text x="${margin.left}" y="20" fill="${subTextColor}" font-size="11">${warningMsg}</text>` : ''}
+  ${warningMsg ? `<text x="${margin.left}" y="20" fill="${subTextColor}" font-size="11">${escapeXml(warningMsg)}</text>` : ''}
   ${slices.join('\n')}
   ${legends.join('\n')}
 </svg>`.trim();
@@ -324,7 +344,7 @@ export function buildChartSvg(
 				item.category.length > 8
 					? `${item.category.slice(0, 7)}…`
 					: item.category;
-			return `<text x="${lx}" y="${ly}" fill="${textColor}" text-anchor="middle">${label}</text>`;
+			return `<text x="${lx}" y="${ly}" fill="${textColor}" text-anchor="middle">${escapeXml(label)}</text>`;
 		})
 		.join('');
 
@@ -334,7 +354,7 @@ export function buildChartSvg(
 			? valInfos
 					.map(
 						(info, idx) =>
-							`<g transform="translate(${margin.left + idx * 100}, 25)"><rect width="12" height="12" fill="${palette[idx % palette.length]}" rx="2"/><text x="18" y="10" fill="${textColor}" font-size="11">${info.name}</text></g>`,
+							`<g transform="translate(${margin.left + idx * 100}, 25)"><rect width="12" height="12" fill="${palette[idx % palette.length]}" rx="2"/><text x="18" y="10" fill="${textColor}" font-size="11">${escapeXml(info.name)}</text></g>`,
 					)
 					.join('')
 			: '';
@@ -342,7 +362,7 @@ export function buildChartSvg(
 	return `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${opts.width} ${opts.height}" width="${opts.width}" height="${opts.height}">
   <style>text { font-family: sans-serif; font-size: 11px; }</style>
-  ${warningMsg ? `<text x="${margin.left}" y="15" fill="${subTextColor}" font-size="11">${warningMsg}</text>` : ''}
+  ${warningMsg ? `<text x="${margin.left}" y="15" fill="${subTextColor}" font-size="11">${escapeXml(warningMsg)}</text>` : ''}
   ${legends}
   <!-- Grids -->
   <line x1="${margin.left}" y1="${margin.top + h}" x2="${margin.left + w}" y2="${margin.top + h}" stroke="${gridColor}" stroke-width="1"/>

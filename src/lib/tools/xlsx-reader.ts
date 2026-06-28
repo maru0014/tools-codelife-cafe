@@ -273,9 +273,10 @@ export async function parseXlsx(
 			const id = rNode.getAttribute('Id');
 			const target = rNode.getAttribute('Target');
 			if (id && target) {
-				const fullPath = target.startsWith('xl/')
-					? target
-					: `xl/${target.replace(/^\//, '')}`;
+				const normalizedTarget = target.replace(/^\//, '');
+				const fullPath = normalizedTarget.startsWith('xl/')
+					? normalizedTarget
+					: `xl/${normalizedTarget}`;
 				relsPathMap.set(id, fullPath);
 			}
 		}
@@ -309,7 +310,8 @@ export async function parseXlsx(
 			}
 		}
 
-		const xfNodes = stylesDoc.querySelectorAll('cellXfs xf, xf');
+		const cellXfsNode = stylesDoc.querySelector('cellXfs');
+		const xfNodes = cellXfsNode ? cellXfsNode.querySelectorAll('xf') : [];
 		let styleIdx = 0;
 		for (const xf of xfNodes) {
 			const numFmtId = Number(xf.getAttribute('numFmtId') ?? 0);
@@ -360,8 +362,8 @@ export async function parseXlsx(
 				const ssIdx = Number(rawVal);
 				cellVal = sharedStrings[ssIdx] ?? '';
 			} else if (type === 'inlineStr') {
-				const tNode = cNode.querySelector('t');
-				cellVal = tNode ? tNode.textContent : '';
+				const tNodes = cNode.querySelectorAll('t');
+				cellVal = tNodes.map((t) => t.textContent).join('');
 			} else if (type === 'b') {
 				cellVal = rawVal === '1' ? 'TRUE' : 'FALSE';
 			} else if (type === 'str' || type === 'e') {
