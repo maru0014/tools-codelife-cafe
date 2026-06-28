@@ -7,6 +7,7 @@ import HowTo from './HowTo.astro';
 import Faq from './Faq.astro';
 import RelatedTools from './RelatedTools.astro';
 import { getCategoryId, toolCatalog, type ToolCategory } from '../../lib/tools/catalog';
+import { generateJsonLd } from '../../lib/jsonld';
 
 interface Props {
 	tool: CollectionEntry<'tools'>;
@@ -17,38 +18,33 @@ const { tool: entry, path: customPath } = Astro.props;
 const { title, description, canonical, category, summary, useCases, howto, faq, related, updated } = entry.data;
 
 const toolId = entry.id;
-const path = customPath || `/tools/${toolId}`;
+const catalogTool = toolCatalog.find((t) => t.id === toolId);
+const path = customPath || catalogTool?.href || `/tools/${toolId}`;
 const SITE_URL = 'https://tools.codelife.cafe';
 const canonicalUrl = canonical || `${SITE_URL}${path}`;
 
 // パンくずリスト用
 const categoryHref = category ? `/?category=${getCategoryId(category as ToolCategory)}` : undefined;
 
-const catalogTool = toolCatalog.find((t) => t.id === toolId || t.href === path);
 const ogImage = catalogTool ? `/og/${catalogTool.id}.png` : undefined;
 
-const breadcrumbItems: { name: string; url?: string }[] = [
-	{ name: 'ホーム', url: `${SITE_URL}/` },
-	...(category && categoryHref ? [{ name: category, url: `${SITE_URL}${categoryHref}` }] : []),
-	{ name: title },
-];
-
-const breadcrumbSchema = {
-	'@context': 'https://schema.org',
-	'@type': 'BreadcrumbList',
-	itemListElement: breadcrumbItems.map((item, index) => ({
-		'@type': 'ListItem',
-		position: index + 1,
-		name: item.name,
-		...(item.url ? { item: item.url } : {}),
-	})),
-};
+const jsonLdData = generateJsonLd(
+	{
+		title,
+		path,
+		summary,
+		category,
+		howto,
+		faq,
+	},
+	categoryHref,
+);
 ---
 
 <BaseLayout title={title} description={description} path={path} ogImage={ogImage}>
 	<Fragment slot="head">
 		{canonical && <link rel="canonical" href={canonicalUrl} />}
-		<script is:inline type="application/ld+json" set:html={JSON.stringify(breadcrumbSchema).replace(/</g, '\\u003c')} />
+		<script is:inline type="application/ld+json" set:html={JSON.stringify(jsonLdData).replace(/</g, '\\u003c')} />
 		<slot name="head" />
 	</Fragment>
 
