@@ -74,16 +74,12 @@ const popularTools = POPULAR_TOOL_IDS.map((id) =>
     function setupNotFoundSearch() {
       const trigger = document.getElementById('not-found-search');
       if (trigger) {
-        // 既存リスナーの重複を防ぐためclone & replace
-        const newTrigger = trigger.cloneNode(true) as Element;
-        trigger.parentNode?.replaceChild(newTrigger, trigger);
-        newTrigger.addEventListener('click', () => {
+        trigger.addEventListener('click', () => {
           window.dispatchEvent(new CustomEvent('open-search'));
         });
       }
     }
 
     setupNotFoundSearch();
-    document.addEventListener('astro:page-load', setupNotFoundSearch);
   </script>
 </BaseLayout>

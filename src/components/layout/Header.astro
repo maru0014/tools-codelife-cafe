@@ -57,7 +57,6 @@ import OfflineBadge from './OfflineBadge.tsx';
     }
   }
 
-  // 初回ロード時とView Transitionsによるページ遷移時の両方で実行
+  // 初回ロード時に実行
   setupSearchTrigger();
-  document.addEventListener('astro:page-load', setupSearchTrigger);
 </script>

@@ -210,7 +210,6 @@ const schema = {
     }
   }
 
-  // 初回ロード時とView Transitionsによるページ遷移時の両方で実行
+  // 初回ロード時に実行
   setupCategoryFilter();
-  document.addEventListener('astro:page-load', setupCategoryFilter);
 </script>
