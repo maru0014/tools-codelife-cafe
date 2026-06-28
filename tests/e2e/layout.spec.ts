@@ -114,7 +114,7 @@ test.describe('Layout & Navigation', () => {
 		expect(current).toMatchObject({
 			'@type': 'ListItem',
 			position: 3,
-			name: 'CSVビューア/エディタ',
+			name: 'CSVビューア/エディタ（Excel取込・フィルタ・グラフ）',
 			item: 'https://tools.codelife.cafe/csv-editor',
 		});
 	});
