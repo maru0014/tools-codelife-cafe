@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
 import { countChars, getTwitterProgress } from '@/lib/tools/char-count';
 
 function formatNumber(n: number): string {
@@ -12,6 +13,7 @@ function formatNumber(n: number): string {
 }
 
 export default function CharCount() {
+	useToolAnalytics('char-count');
 	const [text, setText] = useState('');
 
 	const result = useMemo(() => countChars(text), [text]);

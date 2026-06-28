@@ -12,6 +12,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
 import {
 	formatJson,
 	type IndentType,
@@ -30,9 +31,9 @@ function highlightJson(json: string) {
 			let cls = 'text-green-600 dark:text-green-400'; // number
 			if (/^"/.test(match)) {
 				if (/:$/.test(match)) {
-					cls = 'text-blue-600 dark:text-blue-400'; // key
+					cls = 'text-blue-600 dark:text-blue-400 font-semibold'; // key
 				} else {
-					cls = 'text-orange-600 dark:text-orange-400'; // string
+					cls = 'text-amber-600 dark:text-amber-400'; // string
 				}
 			} else if (/true|false/.test(match)) {
 				cls = 'text-purple-600 dark:text-purple-400'; // boolean
@@ -45,6 +46,7 @@ function highlightJson(json: string) {
 }
 
 export default function JsonFormatter() {
+	const { trackRun } = useToolAnalytics('json-formatter');
 	const [input, setInput] = useState('');
 	const [output, setOutput] = useState('');
 	const [indent, setIndent] = useState<IndentType>('2');
@@ -82,6 +84,7 @@ export default function JsonFormatter() {
 	}, [currentErrorLine]);
 
 	const handleFormat = useCallback(() => {
+		trackRun();
 		const result = formatJson(input, indent);
 		if (result.success) {
 			setOutput(result.output);
@@ -92,9 +95,10 @@ export default function JsonFormatter() {
 			setError(result.error ?? 'エラーが発生しました');
 			setErrorPosition(result.errorPosition ?? null);
 		}
-	}, [input, indent]);
+	}, [input, indent, trackRun]);
 
 	const handleMinify = useCallback(() => {
+		trackRun();
 		const result = minifyJson(input);
 		if (result.success) {
 			setOutput(result.output);
@@ -104,7 +108,7 @@ export default function JsonFormatter() {
 			setOutput('');
 			setError(result.error ?? 'エラーが発生しました');
 		}
-	}, [input]);
+	}, [input, trackRun]);
 
 	const handleDownload = useCallback(() => {
 		if (!output) return;

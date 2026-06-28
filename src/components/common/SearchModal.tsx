@@ -1,7 +1,7 @@
 import { Search } from 'lucide-react';
 import type React from 'react';
 import { useEffect, useRef, useState } from 'react';
-
+import { getSearchQueryMetadata, track } from '@/lib/analytics';
 import { toolCatalog } from '@/lib/tools/catalog';
 import { searchTools } from '@/lib/tools/search';
 
@@ -12,6 +12,22 @@ export default function SearchModal() {
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const filteredTools = query ? searchTools(query) : toolCatalog;
+
+	// Track search_empty when query results in 0 tools
+	const trackedQueryRef = useRef<string>('');
+	useEffect(() => {
+		if (!query.trim() || filteredTools.length > 0) return;
+		if (trackedQueryRef.current === query) return;
+
+		const timer = setTimeout(() => {
+			if (trackedQueryRef.current !== query && filteredTools.length === 0) {
+				trackedQueryRef.current = query;
+				track('search_empty', getSearchQueryMetadata(query));
+			}
+		}, 500);
+
+		return () => clearTimeout(timer);
+	}, [query, filteredTools.length]);
 
 	// Search trigger & Keyboard shortcuts
 	useEffect(() => {

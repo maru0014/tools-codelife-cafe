@@ -1,0 +1,11 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "tools-codelife-cafe",
+	"pages_build_output_dir": "dist",
+	"analytics_engine_datasets": [
+		{
+			"binding": "EVENTS",
+			"dataset": "tools_codelife_cafe_events"
+		}
+	]
+}

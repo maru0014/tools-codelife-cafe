@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
 import {
 	type ConversionOptions,
 	convert,
@@ -13,6 +14,7 @@ import {
 } from '@/lib/tools/zenkaku-hankaku';
 
 export default function ZenkakuHankaku() {
+	useToolAnalytics('zenkaku-hankaku');
 	const [input, setInput] = useState('');
 	const [direction, setDirection] = useState<Direction>('toHankaku');
 	const [options, setOptions] = useState<ConversionOptions>({
