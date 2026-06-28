@@ -76,23 +76,6 @@ const jsonLdData = generateJsonLd(
 			<slot />
 		</section>
 
-		<!-- E2E互換 / 追加 使い方スロット & アコーディオン -->
-		<div class="mt-8 mb-8">
-			{Astro.slots.has('usage') ? (
-				<slot name="usage" />
-			) : (
-				<details class="group rounded-xl border border-border p-4" open>
-					<summary class="cursor-pointer text-sm font-semibold flex items-center gap-2">
-						📖 使い方・ユースケース
-						<span class="ml-auto text-muted-foreground group-open:rotate-180 transition-transform">▼</span>
-					</summary>
-					<div class="mt-4 space-y-3 text-sm text-muted-foreground">
-						<p>このツールの主な使い方、手順、注意点は下の各セクションに整理しています。</p>
-					</div>
-				</details>
-			)}
-		</div>
-
 		<!-- 2. UseCases セクション -->
 		<UseCases useCases={useCases} />
 
@@ -107,20 +90,3 @@ const jsonLdData = generateJsonLd(
 	</div>
 </BaseLayout>
 
-<script is:inline define:vars={{ path }} data-astro-rerun>
-	{
-		const details = document.querySelector('#tool-layout-container details.group');
-		if (details) {
-			const key = `usage-open:${path}`;
-			const stored = localStorage.getItem(key);
-			if (stored === 'closed') {
-				details.removeAttribute('open');
-			} else if (stored === 'open') {
-				details.setAttribute('open', '');
-			}
-			details.addEventListener('toggle', () => {
-				localStorage.setItem(key, details.open ? 'open' : 'closed');
-			});
-		}
-	}
-</script>
