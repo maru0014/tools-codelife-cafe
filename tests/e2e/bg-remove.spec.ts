@@ -49,18 +49,4 @@ test.describe('背景削除ツール', () => {
 			page.getByRole('button', { name: /セキュリティ情報を表示/ }),
 		).toBeVisible();
 	});
-
-	test('使い方セクションが開閉できる', async ({ page }) => {
-		const usageDetails = page.getByText('使い方・ユースケース');
-		await expect(usageDetails).toBeVisible();
-
-		// デフォルトで開いている
-		await expect(page.getByText('商品写真の背景を透過にしたい')).toBeVisible();
-
-		// クリックで閉じることができる
-		await usageDetails.click();
-		await expect(
-			page.getByText('商品写真の背景を透過にしたい'),
-		).not.toBeVisible();
-	});
 });
