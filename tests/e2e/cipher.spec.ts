@@ -149,7 +149,7 @@ test.describe('Cipher Tool', () => {
 		await page
 			.locator('button')
 			.filter({ hasText: 'シフト 5:' })
-			.filter({ hasText: 'fgh' })
+			.filter({ hasText: 'vwx' })
 			.click();
 
 		// The shift slider input should now be 5
