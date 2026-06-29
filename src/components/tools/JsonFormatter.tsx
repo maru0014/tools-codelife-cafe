@@ -1,5 +1,5 @@
-import { AlertCircle, Download, Minimize2, Wand2 } from 'lucide-react';
-import { type UIEvent, useCallback, useMemo, useState } from 'react';
+import { AlertCircle, Download, Minimize2, Share2, Wand2 } from 'lucide-react';
+import { type UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import CodeBlock from '@/components/common/CodeBlock';
 import CopyButton from '@/components/common/CopyButton';
 import { Button } from '@/components/ui/button';
@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
+import { useToolSettings } from '@/lib/hooks/useToolSettings';
 import {
 	formatJson,
 	type IndentType,
@@ -46,12 +47,30 @@ function highlightJson(json: string) {
 }
 
 export default function JsonFormatter() {
-	const { trackRun } = useToolAnalytics('json-formatter');
+	const { trackRun, trackSharedUrlOpen } = useToolAnalytics('json-formatter');
+
+	// 設定をuseToolSettingsフックで管理
+	const [settings, updateSettings, generateShareUrl] = useToolSettings(
+		'json-formatter',
+		{
+			indent: '2' as IndentType,
+		},
+	);
+
+	const indent = settings.indent;
 	const [input, setInput] = useState('');
 	const [output, setOutput] = useState('');
-	const [indent, setIndent] = useState<IndentType>('2');
 	const [error, setError] = useState<string | null>(null);
 	const [errorPosition, setErrorPosition] = useState<number | null>(null);
+	const [shareCopied, setShareCopied] = useState(false);
+
+	// 共有URLからアクセスされた場合の計測
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('settings')) {
+			trackSharedUrlOpen();
+		}
+	}, [trackSharedUrlOpen]);
 
 	const currentErrorLine =
 		errorPosition !== null && input
@@ -149,6 +168,13 @@ export default function JsonFormatter() {
 		[indent],
 	);
 
+	const handleShare = useCallback(() => {
+		const shareUrl = generateShareUrl();
+		navigator.clipboard.writeText(shareUrl);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
+	}, [generateShareUrl]);
+
 	return (
 		<div className="space-y-6">
 			{/* Error Banner */}
@@ -165,34 +191,46 @@ export default function JsonFormatter() {
 			)}
 
 			{/* Controls */}
-			<div className="flex flex-wrap items-center gap-3">
-				<div className="flex items-center gap-2">
-					<Label className="text-sm whitespace-nowrap">インデント:</Label>
-					<Select
-						value={indent}
-						onValueChange={(v) => setIndent(v as IndentType)}
-					>
-						<SelectTrigger className="w-[140px]">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="2">2スペース</SelectItem>
-							<SelectItem value="4">4スペース</SelectItem>
-							<SelectItem value="tab">タブ</SelectItem>
-						</SelectContent>
-					</Select>
+			<div className="flex flex-wrap items-center justify-between gap-3">
+				<div className="flex flex-wrap items-center gap-3">
+					<div className="flex items-center gap-2">
+						<Label className="text-sm whitespace-nowrap">インデント:</Label>
+						<Select
+							value={indent}
+							onValueChange={(v) => updateSettings({ indent: v as IndentType })}
+						>
+							<SelectTrigger className="w-[140px]">
+								<SelectValue />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="2">2スペース</SelectItem>
+								<SelectItem value="4">4スペース</SelectItem>
+								<SelectItem value="tab">タブ</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+
+					<div className="flex gap-2">
+						<Button onClick={handleFormat} size="sm">
+							<Wand2 className="h-4 w-4 mr-1" />
+							整形
+						</Button>
+						<Button onClick={handleMinify} variant="outline" size="sm">
+							<Minimize2 className="h-4 w-4 mr-1" />
+							圧縮
+						</Button>
+					</div>
 				</div>
 
-				<div className="flex gap-2">
-					<Button onClick={handleFormat} size="sm">
-						<Wand2 className="h-4 w-4 mr-1" />
-						整形
-					</Button>
-					<Button onClick={handleMinify} variant="outline" size="sm">
-						<Minimize2 className="h-4 w-4 mr-1" />
-						圧縮
-					</Button>
-				</div>
+				<Button
+					onClick={handleShare}
+					variant="outline"
+					size="sm"
+					className="ml-auto flex items-center gap-1.5"
+				>
+					<Share2 className="h-4 w-4" />
+					<span>{shareCopied ? 'コピー完了！' : '設定を共有'}</span>
+				</Button>
 			</div>
 
 			{/* Input */}

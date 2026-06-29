@@ -34,11 +34,15 @@ export default function SafetyBadge() {
 						このツールの処理対象となるテキストやファイルは、ブラウザ内のJavaScriptで処理されます。
 						入力内容や選択したファイルを当サイトのサーバーへ送信・保存する処理はありません。
 					</p>
+					<p className="text-xs text-muted-foreground leading-relaxed italic border-l-2 border-primary/20 pl-2">
+						※
+						サービスの改善を目的として、Cookieを使用しない匿名の利用統計情報（ページビュー数など）のみを取得しています。入力されたデータ本体が送信されることは絶対にありません。
+					</p>
 					<div className="rounded-md bg-muted p-3 text-xs text-muted-foreground space-y-1">
 						<p>✅ 入力データは端末内で処理</p>
 						<p>✅ ページを閉じると処理中データは消去</p>
 						<p>✅ 広告スクリプトは不使用</p>
-						<p>✅ アクセス解析はCookieなし・個人追跡なし</p>
+						<p>✅ 閲覧統計は匿名集計のみ（Cookie・追跡なし）</p>
 						<p>ℹ️ AI機能ではモデル取得のための通信が発生する場合があります</p>
 						<p>✅ ソースコードはGitHubで公開中</p>
 					</div>

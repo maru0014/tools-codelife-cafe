@@ -4,6 +4,47 @@ import ToolCard from '../components/common/ToolCard.astro';
 import JsonLd from '../components/common/JsonLd.astro';
 import { ShieldCheck } from 'lucide-react';
 import { getCategoryId, toolCatalog, toolCategories } from '../lib/tools/catalog';
+import { getPopularTools } from '../lib/tools/popularity';
+
+const popularTools = getPopularTools(toolCatalog);
+
+const purposeCategories = [
+  {
+    title: "データ整形で使う",
+    icon: "📊",
+    tools: [
+      { name: "JSON整形", href: "/json-formatter" },
+      { name: "CSVエディター", href: "/csv-editor" },
+      { name: "SQL整形", href: "/sql-formatter" }
+    ]
+  },
+  {
+    title: "画像加工で使う",
+    icon: "🖼️",
+    tools: [
+      { name: "画像圧縮・リサイズ", href: "/image-compress" },
+      { name: "画像切り抜き", href: "/image-crop" },
+      { name: "背景透過・削除", href: "/bg-remove" }
+    ]
+  },
+  {
+    title: "日本語入力の困りごと",
+    icon: "🇯🇵",
+    tools: [
+      { name: "全角半角変換", href: "/zenkaku-hankaku" },
+      { name: "和暦西暦変換", href: "/wareki-converter" },
+      { name: "郵便番号検索", href: "/zipcode" }
+    ]
+  },
+  {
+    title: "PDFを扱う",
+    icon: "📄",
+    tools: [
+      { name: "PDF結合", href: "/pdf-merge" },
+      { name: "PDF分割", href: "/pdf-split" }
+    ]
+  }
+];
 
 const schema = {
   "@context": "https://schema.org",
@@ -61,62 +102,128 @@ const schema = {
       </div>
     </div>
 
-    <!-- Category filter chips -->
-    <div
-      id="category-filter"
-      class="mb-8 flex flex-wrap justify-center gap-2"
-      role="group"
-      aria-label="カテゴリで絞り込み"
-    >
-      <button
-        type="button"
-        data-filter-chip=""
-        aria-pressed="true"
-        class="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
-      >
-        すべて
-      </button>
-      {toolCategories.map((category) => (
-        <button
-          type="button"
-          data-filter-chip={category.id}
-          aria-pressed="false"
-          class="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
-        >
-          {category.name}
-        </button>
-      ))}
+    <!-- 1. 目的別ブロック -->
+    <div class="mb-12 border-b border-border/50 pb-12">
+      <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <span class="text-2xl">🎯</span> 目的から探す
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {purposeCategories.map((purpose) => (
+          <div class="rounded-xl border border-border bg-card p-5 shadow-xs">
+            <h3 class="font-bold text-sm text-muted-foreground mb-4 flex items-center gap-1.5 border-b border-border/50 pb-2">
+              <span class="text-base">{purpose.icon}</span> {purpose.title}
+            </h3>
+            <div class="flex flex-col gap-2">
+              {purpose.tools.map((t) => (
+                <a
+                  href={t.href}
+                  class="text-sm font-medium hover:text-primary transition-colors flex items-center justify-between p-2 rounded-lg hover:bg-muted/50 border border-transparent hover:border-border/30"
+                >
+                  <span>{t.name}</span>
+                  <span class="text-xs text-muted-foreground opacity-50">→</span>
+                </a>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
 
-    <!-- Bento Grid -->
-    <div id="tool-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      {toolCatalog.map((tool) => (
-        <ToolCard
-          title={tool.title}
-          description={tool.description}
-          href={tool.href}
-          icon={tool.icon}
-          category={tool.category}
-          categoryId={getCategoryId(tool.category)}
-          categoryColor={tool.categoryColor}
-          span={tool.span}
-        />
-      ))}
+    <!-- 2. 最近使ったツール -->
+    <div id="recent-tools-section" class="mb-12 border-b border-border/50 pb-12 hidden">
+      <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <span class="text-2xl">🔁</span> 最近使ったツール
+      </h2>
+      <div id="recent-tools-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- JSで動的にクローンが挿入されます -->
+      </div>
+    </div>
 
-      <!-- Category summary card -->
-      <div class="flex flex-col justify-center items-center rounded-xl border border-border bg-card p-5 text-center">
-        <p class="text-3xl font-bold text-primary mb-1">{toolCatalog.length}</p>
-        <p class="text-sm text-muted-foreground mb-3">ツールを公開中</p>
-        <div class="flex flex-wrap justify-center gap-1.5">
-          {toolCategories.map((category) => (
-            <button
-              type="button"
-              data-category-badge={category.id}
-              class={`text-xs rounded-full px-2 py-0.5 cursor-pointer transition-opacity hover:opacity-75 ${category.color}`}
-            >
-              {category.name}
-            </button>
-          ))}
+    <!-- 3. よく使われるツール（人気順） -->
+    <div class="mb-12 border-b border-border/50 pb-12">
+      <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <span class="text-2xl">⭐</span> よく使われるツール
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {popularTools.map((tool) => (
+          <ToolCard
+            id={tool.id}
+            title={tool.title}
+            description={tool.description}
+            href={tool.href}
+            icon={tool.icon}
+            category={tool.category}
+            categoryId={getCategoryId(tool.category)}
+            categoryColor={tool.categoryColor}
+          />
+        ))}
+      </div>
+    </div>
+
+    <!-- 4. すべてのツール（カテゴリ絞り込み） -->
+    <div class="mb-12">
+      <h2 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <span class="text-2xl">🗂️</span> すべてのツール
+      </h2>
+
+      <!-- Category filter chips -->
+      <div
+        id="category-filter"
+        class="mb-8 flex flex-wrap gap-2"
+        role="group"
+        aria-label="カテゴリで絞り込み"
+      >
+        <button
+          type="button"
+          data-filter-chip=""
+          aria-pressed="true"
+          class="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+        >
+          すべて
+        </button>
+        {toolCategories.map((category) => (
+          <button
+            type="button"
+            data-filter-chip={category.id}
+            aria-pressed="false"
+            class="rounded-full border border-border bg-card px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
+
+      <!-- Bento Grid -->
+      <div id="tool-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {toolCatalog.map((tool) => (
+          <ToolCard
+            id={tool.id}
+            title={tool.title}
+            description={tool.description}
+            href={tool.href}
+            icon={tool.icon}
+            category={tool.category}
+            categoryId={getCategoryId(tool.category)}
+            categoryColor={tool.categoryColor}
+            span={tool.span}
+          />
+        ))}
+
+        <!-- Category summary card -->
+        <div class="flex flex-col justify-center items-center rounded-xl border border-border bg-card p-5 text-center">
+          <p class="text-3xl font-bold text-primary mb-1">{toolCatalog.length}</p>
+          <p class="text-sm text-muted-foreground mb-3">ツールを公開中</p>
+          <div class="flex flex-wrap justify-center gap-1.5">
+            {toolCategories.map((category) => (
+              <button
+                type="button"
+                data-category-badge={category.id}
+                class={`text-xs rounded-full px-2 py-0.5 cursor-pointer transition-opacity hover:opacity-75 ${category.color}`}
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
@@ -210,6 +317,51 @@ const schema = {
     }
   }
 
+  function setupRecentTools() {
+    const recentSection = document.getElementById('recent-tools-section');
+    const recentGrid = document.getElementById('recent-tools-grid');
+    const toolGrid = document.getElementById('tool-grid');
+    if (!recentSection || !recentGrid || !toolGrid) return;
+
+    try {
+      const recentIds = JSON.parse(localStorage.getItem('recent_tools') || '[]');
+      if (recentIds.length === 0) {
+        recentSection.classList.add('hidden');
+        return;
+      }
+
+      recentGrid.innerHTML = '';
+
+      let hasItems = false;
+      for (const id of recentIds) {
+        const originCard = toolGrid.querySelector(`[data-tool-id="${id}"]`);
+        if (originCard) {
+          const clone = originCard.cloneNode(true) as HTMLElement;
+          clone.classList.remove('hidden');
+          // クローンしたカードはスパン指定を無視して1マス表示にする
+          clone.className = clone.className.replace(/sm:col-span-\d/g, '').trim();
+          recentGrid.appendChild(clone);
+          hasItems = true;
+        }
+      }
+
+      if (hasItems) {
+        recentSection.classList.remove('hidden');
+      } else {
+        recentSection.classList.add('hidden');
+      }
+    } catch (e) {
+      console.error('Failed to setup recent tools:', e);
+    }
+  }
+
   // 初回ロード時に実行
   setupCategoryFilter();
+  setupRecentTools();
+
+  // AstroのView Transitionsに対応するための再バインド処理
+  document.addEventListener('astro:after-swap', () => {
+    setupCategoryFilter();
+    setupRecentTools();
+  });
 </script>

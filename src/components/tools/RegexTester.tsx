@@ -1,5 +1,5 @@
-import { Trash2, XCircle } from 'lucide-react';
-import { type UIEvent, useEffect, useMemo, useState } from 'react';
+import { Share2, Trash2, XCircle } from 'lucide-react';
+import { type UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
 import {
 	Accordion,
@@ -22,22 +22,44 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
+import { useToolSettings } from '@/lib/hooks/useToolSettings';
 import type { RegexResult } from '@/lib/tools/regex-tester';
 import { COMMON_PATTERNS, testRegex } from '@/lib/tools/regex-tester';
 
 export default function RegexTester() {
-	const [pattern, setPattern] = useState('\\d{3}-\\d{4}');
-	const [flags, setFlags] = useState('g');
-	const [text, setText] = useState('郵便番号: 100-0001 と 530-0001');
+	const { trackRun, trackSharedUrlOpen } = useToolAnalytics('regex-tester');
 
-	const [showReplace, setShowReplace] = useState(false);
-	const [replacement, setReplacement] = useState('');
+	const [settings, updateSettings, generateShareUrl] = useToolSettings(
+		'regex-tester',
+		{
+			pattern: '\\d{3}-\\d{4}',
+			flags: 'g',
+			showReplace: false,
+			replacement: '',
+		},
+	);
+
+	const { pattern, flags, showReplace, replacement } = settings;
+	const [text, setText] = useState('郵便番号: 100-0001 と 530-0001');
+	const [shareCopied, setShareCopied] = useState(false);
+
+	// 共有URLからアクセスされた場合の計測
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('settings')) {
+			trackSharedUrlOpen();
+		}
+	}, [trackSharedUrlOpen]);
 
 	// Auto-sync flags
 	const toggleFlag = (flag: string) => {
-		setFlags((prev) =>
-			prev.includes(flag) ? prev.replace(flag, '') : prev + flag,
-		);
+		updateSettings((prev) => {
+			const nextFlags = prev.flags.includes(flag)
+				? prev.flags.replace(flag, '')
+				: prev.flags + flag;
+			return { ...prev, flags: nextFlags };
+		});
 	};
 
 	const [result, setResult] = useState<RegexResult>({ matches: [] });
@@ -46,13 +68,17 @@ export default function RegexTester() {
 		let cancelled = false;
 		testRegex(pattern, flags, text, showReplace ? replacement : undefined).then(
 			(r) => {
-				if (!cancelled) setResult(r);
+				if (!cancelled) {
+					setResult(r);
+					// テスト実行の分析計測
+					trackRun();
+				}
 			},
 		);
 		return () => {
 			cancelled = true;
 		};
-	}, [pattern, flags, text, showReplace, replacement]);
+	}, [pattern, flags, text, showReplace, replacement, trackRun]);
 
 	// Handle synchronized scrolling for highlight overlay
 	const handleScroll = (e: UIEvent<HTMLTextAreaElement>) => {
@@ -103,40 +129,60 @@ export default function RegexTester() {
 		return nodes;
 	}, [text, result.matches, result.error, pattern]);
 
+	const handleShare = useCallback(() => {
+		const shareUrl = generateShareUrl();
+		navigator.clipboard.writeText(shareUrl);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
+	}, [generateShareUrl]);
+
 	return (
 		<div className="space-y-8">
 			{/* Pattern Input Area */}
 			<div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 				<div className="lg:col-span-3 space-y-4">
 					<div>
-						<div className="flex justify-between mb-2">
+						<div className="flex flex-wrap items-center justify-between gap-2 mb-2">
 							<Label className="text-sm font-medium">正規表現パターン</Label>
-							<Select
-								onValueChange={(val) => {
-									const pat = COMMON_PATTERNS.find((p) => p.label === val);
-									if (pat) {
-										setPattern(pat.pattern);
-										setFlags(pat.flags);
-									}
-								}}
-							>
-								<SelectTrigger className="w-[200px] h-8 text-xs rounded-xl">
-									<SelectValue placeholder="よく使うパターン" />
-								</SelectTrigger>
-								<SelectContent>
-									{COMMON_PATTERNS.map((p) => (
-										<SelectItem key={p.label} value={p.label}>
-											{p.label}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
+							<div className="flex items-center gap-2">
+								<Button
+									onClick={handleShare}
+									variant="outline"
+									size="sm"
+									className="h-8 text-xs rounded-xl flex items-center gap-1.5"
+								>
+									<Share2 className="h-3 w-3" />
+									<span>{shareCopied ? 'コピー完了！' : '設定を共有'}</span>
+								</Button>
+								<Select
+									onValueChange={(val) => {
+										const pat = COMMON_PATTERNS.find((p) => p.label === val);
+										if (pat) {
+											updateSettings({
+												pattern: pat.pattern,
+												flags: pat.flags,
+											});
+										}
+									}}
+								>
+									<SelectTrigger className="w-[180px] h-8 text-xs rounded-xl">
+										<SelectValue placeholder="よく使うパターン" />
+									</SelectTrigger>
+									<SelectContent>
+										{COMMON_PATTERNS.map((p) => (
+											<SelectItem key={p.label} value={p.label}>
+												{p.label}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
 						</div>
 						<div className="flex items-center gap-2">
 							<div className="text-xl font-mono text-muted-foreground">/</div>
 							<Input
 								value={pattern}
-								onChange={(e) => setPattern(e.target.value)}
+								onChange={(e) => updateSettings({ pattern: e.target.value })}
 								className={`font-mono-tool text-base rounded-xl focus:ring-2 focus:ring-primary ${
 									result.error
 										? 'border-red-500 ring-red-500 focus:ring-red-500'
@@ -147,7 +193,7 @@ export default function RegexTester() {
 							<div className="text-xl font-mono text-muted-foreground">/</div>
 							<Input
 								value={flags}
-								onChange={(e) => setFlags(e.target.value)}
+								onChange={(e) => updateSettings({ flags: e.target.value })}
 								className="w-24 font-mono-tool text-base rounded-xl focus:ring-2 focus:ring-primary"
 								placeholder="gim"
 							/>
@@ -257,7 +303,7 @@ export default function RegexTester() {
 				<Switch
 					id="replace-mode-switch"
 					checked={showReplace}
-					onCheckedChange={setShowReplace}
+					onCheckedChange={(val) => updateSettings({ showReplace: val })}
 				/>
 				<Label
 					htmlFor="replace-mode-switch"
@@ -275,7 +321,7 @@ export default function RegexTester() {
 						<Label className="text-sm font-medium mb-2 block">置換文字列</Label>
 						<Input
 							value={replacement}
-							onChange={(e) => setReplacement(e.target.value)}
+							onChange={(e) => updateSettings({ replacement: e.target.value })}
 							placeholder="***-**** または $1 など"
 							className="font-mono-tool rounded-xl bg-background"
 							disabled={!showReplace}
@@ -301,7 +347,7 @@ export default function RegexTester() {
 					<button
 						type="button"
 						className="absolute inset-0 z-10 cursor-pointer rounded-xl flex items-center justify-center hover:bg-muted/5 transition-colors group"
-						onClick={() => setShowReplace(true)}
+						onClick={() => updateSettings({ showReplace: true })}
 						title="クリックして置換モードを有効化"
 					>
 						<div className="opacity-0 group-hover:opacity-100 transition-opacity bg-background/80 px-4 py-2 rounded-lg font-medium shadow-sm border border-border text-sm">

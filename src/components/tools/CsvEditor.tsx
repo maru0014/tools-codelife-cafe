@@ -7,6 +7,7 @@ import {
 	PieChart,
 	Plus,
 	RotateCcw,
+	Share2,
 	Table,
 	Trash2,
 	Upload,
@@ -28,6 +29,8 @@ import {
 } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
+import { useToolSettings } from '@/lib/hooks/useToolSettings';
 import {
 	type CsvData,
 	exportCsv,
@@ -50,10 +53,28 @@ import {
 const ROWS_PER_PAGE = 50;
 
 export default function CsvEditor() {
+	const { trackRun, trackSharedUrlOpen } = useToolAnalytics('csv-editor');
+
+	const [settings, updateSettings, generateShareUrl] = useToolSettings(
+		'csv-editor',
+		{
+			delimiter: ',',
+			hasHeader: true,
+		},
+	);
+
+	const { delimiter, hasHeader } = settings;
 	const [activeTab, setActiveTab] = useState('input');
 	const [inputText, setInputText] = useState('');
-	const [delimiter, setDelimiter] = useState(',');
-	const [hasHeader, setHasHeader] = useState(true);
+	const [shareCopied, setShareCopied] = useState(false);
+
+	// 共有URLからアクセスされた場合の計測
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('settings')) {
+			trackSharedUrlOpen();
+		}
+	}, [trackSharedUrlOpen]);
 
 	// Multi-sheet XLSX support
 	const [sheets, setSheets] = useState<SheetData[]>([]);
@@ -142,6 +163,13 @@ export default function CsvEditor() {
 		setSortKeys([]);
 	}, []);
 
+	const handleShare = useCallback(() => {
+		const shareUrl = generateShareUrl();
+		navigator.clipboard.writeText(shareUrl);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
+	}, [generateShareUrl]);
+
 	// Parse CSV text input
 	const handleParse = () => {
 		if (!inputText.trim()) {
@@ -163,6 +191,7 @@ export default function CsvEditor() {
 			setCurrentPage(1);
 			setUndoStack([]);
 			resetQueryState();
+			trackRun(); // 解析成功を計測
 		}
 	};
 
@@ -198,13 +227,14 @@ export default function CsvEditor() {
 				setCurrentPage(1);
 				setUndoStack([]);
 				resetQueryState();
+				trackRun(); // XLSX解析成功を計測
 			} catch (err) {
 				setError(err instanceof Error ? err.message : String(err));
 			}
 		} else {
 			// CSV / TSV
 			const mappedDelim = isTsv ? '\t' : delimiter;
-			if (isTsv) setDelimiter('\t');
+			if (isTsv) updateSettings({ delimiter: '\t' });
 
 			const reader = new FileReader();
 			reader.onload = (evt) => {
@@ -222,6 +252,7 @@ export default function CsvEditor() {
 					setCurrentPage(1);
 					setUndoStack([]);
 					resetQueryState();
+					trackRun(); // CSV/TSV解析成功を計測
 				}
 			};
 			reader.readAsText(file);
@@ -410,7 +441,10 @@ export default function CsvEditor() {
 						<Label className="text-xs mb-1 block text-muted-foreground">
 							区切り文字
 						</Label>
-						<Select value={delimiter} onValueChange={setDelimiter}>
+						<Select
+							value={delimiter}
+							onValueChange={(v) => updateSettings({ delimiter: v })}
+						>
 							<SelectTrigger className="w-[140px] h-8 rounded-lg bg-background">
 								<SelectValue />
 							</SelectTrigger>
@@ -427,7 +461,7 @@ export default function CsvEditor() {
 						<Checkbox
 							id="has-header"
 							checked={hasHeader}
-							onCheckedChange={(v) => setHasHeader(!!v)}
+							onCheckedChange={(v) => updateSettings({ hasHeader: !!v })}
 						/>
 						<Label
 							htmlFor="has-header"
@@ -437,7 +471,7 @@ export default function CsvEditor() {
 						</Label>
 					</div>
 
-					<div className="pt-5">
+					<div className="pt-5 flex items-center gap-2">
 						<input
 							type="file"
 							accept=".csv,.tsv,.xlsx,.txt"
@@ -455,6 +489,15 @@ export default function CsvEditor() {
 							<span className="hidden sm:inline">
 								ファイル読込 (.csv / .tsv / .xlsx)
 							</span>
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={handleShare}
+							className="h-8 flex items-center gap-1.5"
+						>
+							<Share2 className="h-4 w-4" />
+							<span>{shareCopied ? 'コピー完了！' : '設定を共有'}</span>
 						</Button>
 					</div>
 				</div>

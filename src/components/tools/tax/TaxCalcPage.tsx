@@ -1,4 +1,4 @@
-import { ChevronDown, Info, Plus, Trash2 } from 'lucide-react';
+import { ChevronDown, Info, Plus, Share2, Trash2 } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
 import { Button } from '@/components/ui/button';
@@ -27,6 +27,8 @@ import {
 	TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
+import { useToolSettings } from '@/lib/hooks/useToolSettings';
 import {
 	calculateInvoiceTax,
 	calculateTax,
@@ -89,17 +91,37 @@ function formatYen(value: number): string {
 }
 
 export function TaxCalcPage() {
-	const [mode, setMode] = useState<CalcMode>('single');
+	const { trackRun, trackSharedUrlOpen } = useToolAnalytics('tax');
+
+	const [settings, updateSettings, generateShareUrl] = useToolSettings('tax', {
+		mode: 'single' as CalcMode,
+		direction: 'exclusive-to-inclusive' as Direction,
+		rateSelection: '10',
+		rounding: 'floor' as RoundingMode,
+	});
+
+	const { mode, direction, rateSelection, rounding } = settings;
 	const [rawAmount, setRawAmount] = useState('');
-	const [direction, setDirection] = useState<Direction>(
-		'exclusive-to-inclusive',
-	);
-	const [rateSelection, setRateSelection] = useState('10');
-	const [rounding, setRounding] = useState<RoundingMode>('floor');
 	const [invoiceLines, setInvoiceLines] = useState<InvoiceLineForm[]>([
 		createInvoiceLine(1),
 		createInvoiceLine(2),
 	]);
+	const [shareCopied, setShareCopied] = useState(false);
+
+	// 共有URLからアクセスされた場合の計測
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('settings')) {
+			trackSharedUrlOpen();
+		}
+	}, [trackSharedUrlOpen]);
+
+	const handleShare = useCallback(() => {
+		const shareUrl = generateShareUrl();
+		navigator.clipboard.writeText(shareUrl);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
+	}, [generateShareUrl]);
 
 	// --- WebMCP Tool Registration ---
 	useEffect(() => {
@@ -169,6 +191,15 @@ export function TaxCalcPage() {
 		});
 	}, [invoiceValidation, direction, rounding]);
 
+	// 計算実行の分析計測
+	useEffect(() => {
+		if (mode === 'single' && result !== null) {
+			trackRun();
+		} else if (mode === 'invoice' && invoiceResult !== null) {
+			trackRun();
+		}
+	}, [mode, result, invoiceResult, trackRun]);
+
 	const handleAmountChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
 			setRawAmount(e.target.value);
@@ -202,17 +233,34 @@ export function TaxCalcPage() {
 
 	return (
 		<div className="space-y-6">
-			<Tabs value={mode} onValueChange={(value) => setMode(value as CalcMode)}>
-				<TabsList className="w-full grid grid-cols-2">
-					<TabsTrigger value="single">単一金額</TabsTrigger>
-					<TabsTrigger value="invoice">複数明細（インボイス）</TabsTrigger>
-				</TabsList>
-			</Tabs>
+			<div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+				<Tabs
+					value={mode}
+					onValueChange={(value) => updateSettings({ mode: value as CalcMode })}
+					className="flex-1"
+				>
+					<TabsList className="w-full grid grid-cols-2">
+						<TabsTrigger value="single">単一金額</TabsTrigger>
+						<TabsTrigger value="invoice">複数明細（インボイス）</TabsTrigger>
+					</TabsList>
+				</Tabs>
+				<Button
+					onClick={handleShare}
+					variant="outline"
+					size="sm"
+					className="h-9 flex items-center gap-1.5 shrink-0"
+				>
+					<Share2 className="h-4 w-4" />
+					<span>{shareCopied ? 'コピー完了！' : '設定を共有'}</span>
+				</Button>
+			</div>
 
 			{/* 方向切替 */}
 			<Tabs
 				value={direction}
-				onValueChange={(value) => setDirection(value as Direction)}
+				onValueChange={(value) =>
+					updateSettings({ direction: value as Direction })
+				}
 			>
 				<TabsList className="w-full grid grid-cols-2">
 					<TabsTrigger value="exclusive-to-inclusive">税抜 → 税込</TabsTrigger>
@@ -230,8 +278,8 @@ export function TaxCalcPage() {
 					showError={showError}
 					errorMessage={!validation.ok ? validation.message : ''}
 					onAmountChange={handleAmountChange}
-					onRateChange={setRateSelection}
-					onRoundingChange={setRounding}
+					onRateChange={(v) => updateSettings({ rateSelection: v })}
+					onRoundingChange={(v) => updateSettings({ rounding: v })}
 				/>
 			) : (
 				<InvoicePanel
@@ -243,7 +291,7 @@ export function TaxCalcPage() {
 					onLineChange={updateInvoiceLine}
 					onAddLine={addInvoiceLine}
 					onRemoveLine={removeInvoiceLine}
-					onRoundingChange={setRounding}
+					onRoundingChange={(v) => updateSettings({ rounding: v })}
 				/>
 			)}
 

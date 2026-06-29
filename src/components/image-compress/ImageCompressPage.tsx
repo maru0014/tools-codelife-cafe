@@ -1,16 +1,16 @@
-// ImageCompressPage — 画像圧縮ツールのオーケストレーター
-// 逐次処理 + 進捗表示。すべてブラウザ内で処理し、画像はサーバーに送信されない。
-
 import {
 	CheckCircle2,
 	Loader2,
 	Package,
 	RefreshCw,
+	Share2,
 	Trash2,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FileDropzone } from '@/components/common/FileDropzone';
 import { Button } from '@/components/ui/button';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
+import { useToolSettings } from '@/lib/hooks/useToolSettings';
 import { createId, downloadBlob } from '@/lib/tools/image-common';
 import {
 	type CompressOptions,
@@ -63,8 +63,15 @@ function toCoreOptions(o: CompressUiOptions): CompressOptions {
 }
 
 export function ImageCompressPage() {
+	const { trackRun, trackSharedUrlOpen } = useToolAnalytics('image-compress');
+
+	const [options, updateOptions, generateShareUrl] = useToolSettings(
+		'image-compress',
+		DEFAULT_UI_OPTIONS,
+	);
+	const [shareCopied, setShareCopied] = useState(false);
+
 	const [items, setItems] = useState<CompressItem[]>([]);
-	const [options, setOptions] = useState<CompressUiOptions>(DEFAULT_UI_OPTIONS);
 	const [processing, setProcessing] = useState(false);
 	const [progress, setProgress] = useState({ done: 0, total: 0 });
 	const [completion, setCompletion] = useState<CompletionNotice | null>(null);
@@ -73,6 +80,14 @@ export function ImageCompressPage() {
 	const cancelRef = useRef(false);
 	const itemsRef = useRef<CompressItem[]>([]);
 	itemsRef.current = items;
+
+	// 共有URLからアクセスされた場合の計測
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('settings')) {
+			trackSharedUrlOpen();
+		}
+	}, [trackSharedUrlOpen]);
 
 	// アンマウント時に全 object URL を解放する
 	useEffect(() => {
@@ -133,10 +148,18 @@ export function ImageCompressPage() {
 			if (runIdRef.current === runId) {
 				setProcessing(false);
 				setCompletion({ done, failed, total: target.length });
+				trackRun(); // 圧縮実行の分析計測
 			}
 		},
-		[updateItem],
+		[updateItem, trackRun],
 	);
+
+	const handleShare = useCallback(() => {
+		const shareUrl = generateShareUrl();
+		navigator.clipboard.writeText(shareUrl);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
+	}, [generateShareUrl]);
 
 	const handleFilesSelect = useCallback(
 		(files: File[]) => {
@@ -268,13 +291,23 @@ export function ImageCompressPage() {
 					<CompressOptionsPanel
 						options={options}
 						disabled={processing}
-						onChange={setOptions}
+						onChange={updateOptions}
 					/>
 
 					<div className="flex flex-wrap items-center gap-2">
 						<Button onClick={handleRecompress} disabled={processing}>
 							<RefreshCw className="h-4 w-4" />
 							<span className="ml-1">この設定で再圧縮</span>
+						</Button>
+						<Button
+							variant="outline"
+							onClick={handleShare}
+							disabled={processing}
+						>
+							<Share2 className="h-4 w-4" />
+							<span className="ml-1">
+								{shareCopied ? 'コピー完了！' : '設定を共有'}
+							</span>
 						</Button>
 						{doneCount >= 2 && (
 							<Button

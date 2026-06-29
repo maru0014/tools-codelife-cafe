@@ -94,5 +94,17 @@ const jsonLdData = generateJsonLd(
 		<!-- 7. Related Tools セクション -->
 		<RelatedTools toolId={toolId} relatedSlugs={related} excludeIds={workflowExcludeIds} />
 	</div>
+
+	<script define:vars={{ toolId }}>
+		try {
+			const MAX_HISTORY = 4;
+			const historyKey = 'recent_tools';
+			const recent = JSON.parse(localStorage.getItem(historyKey) || '[]');
+			const updated = [toolId, ...recent.filter((id) => id !== toolId)].slice(0, MAX_HISTORY);
+			localStorage.setItem(historyKey, JSON.stringify(updated));
+		} catch (e) {
+			console.error('Failed to save recent tool in history:', e);
+		}
+	</script>
 </BaseLayout>
 
