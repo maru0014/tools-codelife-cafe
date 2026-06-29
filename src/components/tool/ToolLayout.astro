@@ -95,7 +95,7 @@ const jsonLdData = generateJsonLd(
 		<RelatedTools toolId={toolId} relatedSlugs={related} excludeIds={workflowExcludeIds} />
 	</div>
 
-	<script define:vars={{ toolId }}>
+	<script is:inline define:vars={{ toolId }}>
 		try {
 			const MAX_HISTORY = 4;
 			const historyKey = 'recent_tools';

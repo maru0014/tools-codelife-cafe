@@ -17,7 +17,9 @@ const POPULAR_TOOL_SLUGS = [
  * 将来的には Cloudflare Analytics Engine やDB等の計測データから
  * `tool_run` 集計結果を取得して並べ替えるように抽象化されている。
  */
-export function getPopularTools(catalog: ToolCatalogItem[]): ToolCatalogItem[] {
+export function getPopularTools(
+	catalog: readonly ToolCatalogItem[],
+): ToolCatalogItem[] {
 	// POPULAR_TOOL_SLUGS に定義された順にソートして返す
 	// 定義されていないツールは除外、または後方に配置する
 	const popularMap = new Map(
