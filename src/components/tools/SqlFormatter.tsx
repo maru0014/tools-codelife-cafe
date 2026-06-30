@@ -1,4 +1,11 @@
-import { Code2, Download, Maximize2, Minimize2, Trash2 } from 'lucide-react';
+import {
+	Code2,
+	Download,
+	Maximize2,
+	Minimize2,
+	Share2,
+	Trash2,
+} from 'lucide-react';
 import { type UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import CodeBlock from '@/components/common/CodeBlock';
 import CopyButton from '@/components/common/CopyButton';
@@ -13,6 +20,8 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
+import { useToolSettings } from '@/lib/hooks/useToolSettings';
 import {
 	formatSql,
 	type IndentStyle,
@@ -65,13 +74,20 @@ const SQL_KEYWORDS = [
 ];
 
 export default function SqlFormatter() {
+	const { trackSharedUrlOpen } = useToolAnalytics('sql-formatter');
 	const [input, setInput] = useState('');
-	const [autoFormat, setAutoFormat] = useState(true);
-
-	const [dialect, setDialect] = useState<SqlDialect>('sql');
-	const [indent, setIndent] = useState<IndentStyle>('2spaces');
-	const [uppercase, setUppercase] = useState(true);
-	const [compress, setCompress] = useState(false);
+	const [settings, updateSettings, generateShareUrl] = useToolSettings(
+		'sql-formatter',
+		{
+			autoFormat: true,
+			dialect: 'sql' as SqlDialect,
+			indent: '2spaces' as IndentStyle,
+			uppercase: true,
+			compress: false,
+		},
+	);
+	const { autoFormat, dialect, indent, uppercase, compress } = settings;
+	const [shareCopied, setShareCopied] = useState(false);
 	const [isExpanded, setIsExpanded] = useState(false);
 
 	const [manualOutput, setManualOutput] = useState('');
@@ -100,11 +116,25 @@ export default function SqlFormatter() {
 	}, [input, dialect, indent, uppercase, compress]);
 
 	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('settings')) {
+			trackSharedUrlOpen();
+		}
+	}, [trackSharedUrlOpen]);
+
+	useEffect(() => {
 		if (autoFormat) {
 			setManualOutput('');
 			setManualError(null);
 		}
 	}, [autoFormat]);
+
+	const handleShare = useCallback(() => {
+		const shareUrl = generateShareUrl();
+		navigator.clipboard.writeText(shareUrl);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
+	}, [generateShareUrl]);
 
 	const toggleExpand = () => {
 		const newExpanded = !isExpanded;
@@ -225,7 +255,7 @@ export default function SqlFormatter() {
 					</Label>
 					<Select
 						value={dialect}
-						onValueChange={(v) => setDialect(v as SqlDialect)}
+						onValueChange={(v) => updateSettings({ dialect: v as SqlDialect })}
 					>
 						<SelectTrigger className="w-[140px] h-8 rounded-lg bg-background">
 							<SelectValue />
@@ -247,7 +277,9 @@ export default function SqlFormatter() {
 						</Label>
 						<Select
 							value={indent}
-							onValueChange={(v) => setIndent(v as IndentStyle)}
+							onValueChange={(v) =>
+								updateSettings({ indent: v as IndentStyle })
+							}
 						>
 							<SelectTrigger className="w-[120px] h-8 rounded-lg bg-background">
 								<SelectValue />
@@ -266,7 +298,7 @@ export default function SqlFormatter() {
 						<Switch
 							id="auto-format"
 							checked={autoFormat}
-							onCheckedChange={setAutoFormat}
+							onCheckedChange={(value) => updateSettings({ autoFormat: value })}
 						/>
 						<Label
 							htmlFor="auto-format"
@@ -280,7 +312,7 @@ export default function SqlFormatter() {
 						<Switch
 							id="opt-uppercase"
 							checked={uppercase}
-							onCheckedChange={setUppercase}
+							onCheckedChange={(value) => updateSettings({ uppercase: value })}
 						/>
 						<Label
 							htmlFor="opt-uppercase"
@@ -294,7 +326,7 @@ export default function SqlFormatter() {
 						<Switch
 							id="opt-compress"
 							checked={compress}
-							onCheckedChange={setCompress}
+							onCheckedChange={(value) => updateSettings({ compress: value })}
 						/>
 						<Label
 							htmlFor="opt-compress"
@@ -305,6 +337,16 @@ export default function SqlFormatter() {
 					</div>
 
 					<div className="w-px h-6 bg-border mx-2 hidden sm:block"></div>
+
+					<Button
+						variant="outline"
+						size="sm"
+						onClick={handleShare}
+						className="hidden sm:flex"
+					>
+						<Share2 className="h-4 w-4 mr-2" />
+						{shareCopied ? 'コピー完了！' : '設定を共有'}
+					</Button>
 
 					<Button
 						variant="outline"
@@ -324,6 +366,18 @@ export default function SqlFormatter() {
 			</div>
 
 			{/* スマホレイアウト用フルサイズボタン (小さい画面では非表示でもよいが、一応用意しておきたい場合は配置。現状は sm:hidden で出さない or ここで出す) */}
+			<div className="sm:hidden flex justify-end">
+				<Button
+					variant="outline"
+					size="sm"
+					onClick={handleShare}
+					className="w-full"
+				>
+					<Share2 className="h-4 w-4 mr-2" />
+					{shareCopied ? 'コピー完了！' : '設定を共有'}
+				</Button>
+			</div>
+
 			<div className="sm:hidden flex justify-end">
 				<Button
 					variant="outline"

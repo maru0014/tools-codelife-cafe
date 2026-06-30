@@ -6,11 +6,14 @@ import {
 	Loader2,
 	Package,
 	RefreshCw,
+	Share2,
 	Trash2,
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FileDropzone } from '@/components/common/FileDropzone';
 import { Button } from '@/components/ui/button';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
+import { useToolSettings } from '@/lib/hooks/useToolSettings';
 import { createId, downloadBlob } from '@/lib/tools/image-common';
 import {
 	convertOne,
@@ -38,8 +41,13 @@ type CompletionNotice = {
 };
 
 export function ImageConvertPage() {
+	const { trackRun, trackSharedUrlOpen } = useToolAnalytics('image-convert');
 	const [items, setItems] = useState<ConvertItem[]>([]);
-	const [options, setOptions] = useState<ConvertUiOptions>(DEFAULT_UI_OPTIONS);
+	const [options, updateOptions, generateShareUrl] = useToolSettings(
+		'image-convert',
+		DEFAULT_UI_OPTIONS,
+	);
+	const [shareCopied, setShareCopied] = useState(false);
 	const [processedTarget, setProcessedTarget] = useState<TargetFormat>(
 		DEFAULT_UI_OPTIONS.target,
 	);
@@ -51,6 +59,13 @@ export function ImageConvertPage() {
 	const cancelRef = useRef(false);
 	const itemsRef = useRef<ConvertItem[]>([]);
 	itemsRef.current = items;
+
+	useEffect(() => {
+		const params = new URLSearchParams(window.location.search);
+		if (params.has('settings')) {
+			trackSharedUrlOpen();
+		}
+	}, [trackSharedUrlOpen]);
 
 	// アンマウント時に全 object URL を解放する
 	useEffect(() => {
@@ -116,9 +131,10 @@ export function ImageConvertPage() {
 			if (runIdRef.current === runId) {
 				setProcessing(false);
 				setCompletion({ done, failed, total: target.length });
+				trackRun();
 			}
 		},
-		[updateItem],
+		[updateItem, trackRun],
 	);
 
 	const handleFilesSelect = useCallback(
@@ -160,10 +176,20 @@ export function ImageConvertPage() {
 	);
 
 	// オプション変更時は古い完了メッセージを消す（再変換するまで結果は前回のまま）
-	const handleOptionsChange = useCallback((next: ConvertUiOptions) => {
-		setOptions(next);
-		setCompletion(null);
-	}, []);
+	const handleOptionsChange = useCallback(
+		(next: ConvertUiOptions) => {
+			updateOptions(next);
+			setCompletion(null);
+		},
+		[updateOptions],
+	);
+
+	const handleShare = useCallback(() => {
+		const shareUrl = generateShareUrl();
+		navigator.clipboard.writeText(shareUrl);
+		setShareCopied(true);
+		setTimeout(() => setShareCopied(false), 2000);
+	}, [generateShareUrl]);
 
 	const handleReconvert = useCallback(() => {
 		const reset = itemsRef.current.map((it) => {
@@ -271,6 +297,16 @@ export function ImageConvertPage() {
 						<Button onClick={handleReconvert} disabled={processing}>
 							<RefreshCw className="h-4 w-4" />
 							<span className="ml-1">この設定で再変換</span>
+						</Button>
+						<Button
+							variant="outline"
+							onClick={handleShare}
+							disabled={processing}
+						>
+							<Share2 className="h-4 w-4" />
+							<span className="ml-1">
+								{shareCopied ? 'コピー完了！' : '設定を共有'}
+							</span>
 						</Button>
 						{doneCount >= 2 && (
 							<Button
