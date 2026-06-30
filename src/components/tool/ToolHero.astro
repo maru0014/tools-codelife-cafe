@@ -1,5 +1,6 @@
 ---
 import SafetyBadge from '../layout/SafetyBadge.tsx';
+import TrustBadges from '../common/TrustBadges.astro';
 
 interface Props {
 	title: string;
@@ -40,4 +41,8 @@ const formattedDate = updated
 			ソースコード
 		</a>
 	</div>
+	<div class="border-t border-border/50 pt-4 mt-6">
+		<TrustBadges size="md" />
+	</div>
 </header>
+
