@@ -55,3 +55,31 @@
   - 作業完了前に `npm run lint`（Biome）を実行し、静的解析エラーがないことを確認すること。
 - **動作検証とウォークスルー**
   - 単体テスト（`npm run test:unit`）および E2Eテスト（`npm test`）を実行するか、検証内容をまとめた `walkthrough.md` を作成して報告すること。
+---
+
+## 5. 直近の運用メモ
+
+### Notionタスク起点の実装
+
+- Notionタスク名やIDが指定された場合は、まずNotionで対象タスクを検索・取得し、親タスク、現状、対象ツール、受け入れ条件を確認してから実装すること。
+- 実装後はNotionタスクに実装メモ、検証結果、未解決の環境課題を追記し、完了できる場合はステータスを更新すること。
+- このリポジトリの実体パスは `D:\tools-codelife-cafe` として扱う。Codexの一時worktreeパスが存在しない場合は、このパスを確認して作業すること。
+
+### ツール設定保持の共通パターン
+
+- ツールの「前回設定」や「設定共有URL」は `src/lib/hooks/useToolSettings.ts` を使って実装すること。
+- localStorage / URLに保存してよいのは、インデント、形式、税率、リサイズ値、トグル状態などの設定値だけ。入力本文、ファイル内容、画像データ、個人情報を保存してはいけない。
+- 共有URL対応を追加したツールでは、`settings` クエリパラメータを検出して `useToolAnalytics(...).trackSharedUrlOpen()` を呼ぶ既存パターンに合わせること。
+- 共有ボタンの文言は既存ツールに合わせて `設定を共有` / `コピー完了！` を使う。
+
+### 混在worktreeでのPR作成
+
+- `git status --short --branch` と対象差分を必ず確認し、既存の未コミット変更が混在している場合は今回スコープのファイルだけを明示的に `git add` すること。
+- PR作成時は `gh auth status`、既存PR有無、`main` との差分概要を確認すること。
+- ユーザーが明示しない限りdraft PRで作成し、PR本文には「今回の最新コミット」「検証結果」「意図的に含めなかった未ステージ変更」を書くこと。
+
+### 既知の検証メモ
+
+- `npm run lint` はexit code 0でも警告が出る場合がある。既存の `tests/e2e/webmcp.spec.ts` の non-null assertion 警告は、今回作業と無関係ならその旨を報告すること。
+- TypeScript単体確認は、現状 `tsconfig.json` の `baseUrl` 非推奨で止まる場合があるため、差分確認では `npx tsc --noEmit --pretty false --ignoreDeprecations 6.0` を使う。
+- `npx astro check` / `npm run build` が `astro sync` の `require is not defined`（`node_modules/picomatch/index.js`）で失敗する場合がある。これはコンポーネント確認前の環境/依存解決段階の失敗として、差分由来か切り分けて報告すること。
