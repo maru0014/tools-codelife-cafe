@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { track } from '@/lib/analytics';
 
 /**
  * ツール固有の設定値を localStorage および URL クエリパラメータと同期するためのカスタムフック。
@@ -25,6 +26,7 @@ export function useToolSettings<T extends Record<string, any>>(
 				// Base64 デコード (Unicode対応)
 				const decoded = decodeURIComponent(escape(atob(settingsParam)));
 				const parsed = JSON.parse(decoded);
+				track('settings_restore', { tool: slug, source: 'url' });
 				// デフォルト値をマージして不足プロパティを補完
 				return { ...defaultSettings, ...parsed };
 			} catch (e) {
@@ -37,6 +39,7 @@ export function useToolSettings<T extends Record<string, any>>(
 			const stored = localStorage.getItem(`tool_settings_${slug}`);
 			if (stored) {
 				const parsed = JSON.parse(stored);
+				track('settings_restore', { tool: slug, source: 'localStorage' });
 				return { ...defaultSettings, ...parsed };
 			}
 		} catch (e) {

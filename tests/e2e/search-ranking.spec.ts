@@ -11,6 +11,8 @@ test.describe('Search result ranking', () => {
 		page,
 	}) => {
 		await page.goto('/');
+		// React Island のハイドレーション完了を待ってから検索を開く
+		await expect(page.locator('#search-trigger')).toBeVisible();
 		await page.keyboard.press('Control+k');
 
 		const searchInput = page.getByPlaceholder(/ツールを検索/i);
@@ -43,6 +45,8 @@ test.describe('Search result ranking', () => {
 		page,
 	}) => {
 		await page.goto('/');
+		// React Island のハイドレーション完了を待ってから検索を開く
+		await expect(page.locator('#search-trigger')).toBeVisible();
 		await page.keyboard.press('Control+k');
 
 		const searchInput = page.getByPlaceholder(/ツールを検索/i);
@@ -122,6 +126,8 @@ test.describe('Search result ranking', () => {
 
 	test('一致しないクエリでは結果が空になる', async ({ page }) => {
 		await page.goto('/');
+		// React Island のハイドレーション完了を待ってから検索を開く
+		await expect(page.locator('#search-trigger')).toBeVisible();
 		await page.keyboard.press('Control+k');
 
 		const searchInput = page.getByPlaceholder(/ツールを検索/i);

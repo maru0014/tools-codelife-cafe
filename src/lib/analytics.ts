@@ -9,6 +9,7 @@ export type AnalyticsEvents = {
 	};
 	related_click: { from: string; to: string };
 	shared_url_open: { tool: string };
+	settings_restore: { tool: string; source: 'localStorage' | 'url' };
 };
 
 export type EventName = keyof AnalyticsEvents;
