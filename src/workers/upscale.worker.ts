@@ -14,7 +14,7 @@ import {
 
 // onnxruntime-web の wasm 配信元（package.json の pin と同期させること）。
 // bg-remove と同様 cdn.jsdelivr.net を使用（CSP script-src/connect-src で許可済み）。
-const ORT_VERSION = '1.26.0-dev.20260416-b7804b056c';
+const ORT_VERSION = '1.27.0';
 const ORT_WASM_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
 
 // --- メッセージ型 ---
@@ -56,19 +56,28 @@ self.addEventListener('unhandledrejection', (event) => {
 // --- onnxruntime-web 遅延ロード ---
 // biome-ignore lint/suspicious/noExplicitAny: onnxruntime-web has no bundled types entry here
 type Ort = any;
-let ortPromise: Promise<Ort> | null = null;
+type OrtRuntime = 'wasm' | 'webgpu';
+const ortPromises = new Map<OrtRuntime, Promise<Ort>>();
 
-function loadOrt(): Promise<Ort> {
-	if (!ortPromise) {
-		ortPromise = import('onnxruntime-web').then((ort: Ort) => {
-			ort.env.wasm.wasmPaths = ORT_WASM_BASE;
-			ort.env.wasm.numThreads = 1; // SharedArrayBuffer 不要（COOP/COEP 変更なし）
-			ort.env.wasm.simd = true;
-			ort.env.wasm.proxy = false;
-			return ort;
-		});
-	}
-	return ortPromise;
+function configureOrt(ort: Ort): Ort {
+	ort.env.wasm.wasmPaths = ORT_WASM_BASE;
+	ort.env.wasm.numThreads = 1; // SharedArrayBuffer 不要（COOP/COEP 変更なし）
+	ort.env.wasm.simd = true;
+	ort.env.wasm.proxy = false;
+	return ort;
+}
+
+function loadOrt(runtime: OrtRuntime): Promise<Ort> {
+	const cached = ortPromises.get(runtime);
+	if (cached) return cached;
+
+	const promise = (
+		runtime === 'webgpu'
+			? import('onnxruntime-web/webgpu')
+			: import('onnxruntime-web/wasm')
+	).then(configureOrt);
+	ortPromises.set(runtime, promise);
+	return promise;
 }
 
 // --- セッションキャッシュ ---
@@ -115,8 +124,8 @@ async function getSession(
 	const cached = sessions.get(quality);
 	if (cached) return cached;
 
-	const ort = await loadOrt();
 	const spec = MODELS[quality];
+	const ort = await loadOrt(spec.device);
 	onProgress({ status: 'loading', progress: 0 });
 	const modelBuf = await fetchModel(spec.url, (p) =>
 		onProgress({ status: 'loading', progress: p }),
