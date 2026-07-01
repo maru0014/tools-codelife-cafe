@@ -20,8 +20,17 @@ export function useToolAnalytics(toolSlug: string) {
 		track('shared_url_open', { tool: toolSlug });
 	}, [toolSlug]);
 
+	const trackSettingsRestore = useCallback(
+		(source: 'localStorage' | 'url') => {
+			if (!toolSlug) return;
+			track('settings_restore', { tool: toolSlug, source });
+		},
+		[toolSlug],
+	);
+
 	return {
 		trackRun,
 		trackSharedUrlOpen,
+		trackSettingsRestore,
 	};
 }
