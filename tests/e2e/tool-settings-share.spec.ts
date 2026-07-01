@@ -58,16 +58,27 @@ async function fillSensitiveInput(page: Page, slug: string, secret: string) {
 			break;
 		case 'regex-tester':
 			await page.getByText('テスト文字列').scrollIntoViewIfNeeded();
-			await page.locator('textarea').fill(secret);
+			await page.locator('textarea').first().fill(secret);
 			break;
 		case 'csv-editor':
-			await page.locator('textarea').fill(secret);
+			await page.locator('textarea').first().fill(secret);
 			break;
 		case 'tax':
 			await page.getByLabel('金額').fill(secret);
 			break;
 		case 'image-compress':
-			// ファイル名・画像データは共有URL生成対象ではないため、入力操作なしで検証する。
+			// 画像ファイルを選択しないと共有ボタンが表示されないため、ダミー画像をアップロードする
+			await page
+				.locator('input[type="file"]')
+				.first()
+				.setInputFiles({
+					name: `${secret}.png`,
+					mimeType: 'image/png',
+					buffer: Buffer.from(
+						'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+						'base64',
+					),
+				});
 			break;
 	}
 }
@@ -93,11 +104,14 @@ test.describe('ツール設定共有URL', () => {
 				`https://tools.codelife.cafe/${tool.slug}`,
 			);
 
-			const restored = await page.evaluate((slug) => {
-				const value = localStorage.getItem(`tool_settings_${slug}`);
-				return value ? JSON.parse(value) : null;
-			}, tool.slug);
-			expect(restored).toMatchObject(tool.settings);
+			await expect
+				.poll(async () => {
+					return await page.evaluate((slug) => {
+						const value = localStorage.getItem(`tool_settings_${slug}`);
+						return value ? JSON.parse(value) : null;
+					}, tool.slug);
+				})
+				.toMatchObject(tool.settings);
 		});
 	}
 
