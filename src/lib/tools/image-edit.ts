@@ -2,8 +2,9 @@
 // 処理はすべてブラウザ内（Canvas API）で完結し、サーバーへの送信は行わない。
 // loadBitmap で EXIF Orientation を反映するため、出力には Orientation タグを残さない。
 
-import { downloadBlob } from '@/lib/tools/image-common';
-import { buildZip, dedupeZipNames } from '@/lib/tools/zip';
+// node --test から直接読み込めるよう、相対パス + 拡張子付きで import する（zip.ts と同じ規約）
+import { downloadBlob } from './image-common.ts';
+import { buildZip, dedupeZipNames } from './zip.ts';
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -135,9 +136,13 @@ export function computeRotatedSize(
 	const rad = Math.abs(degToRad(deg % 360));
 	const cos = Math.abs(Math.cos(rad));
 	const sin = Math.abs(Math.sin(rad));
+	// 90°単位の回転では cos/sin に ~1e-16 の浮動小数点誤差が残り、
+	// そのまま ceil すると 180°/270° で出力が1px膨らむ（背景色の縁が出る）。
+	// 誤差分を差し引いてから切り上げる。
+	const EPS = 1e-9;
 	return {
-		width: Math.ceil(w * cos + h * sin),
-		height: Math.ceil(w * sin + h * cos),
+		width: Math.ceil(w * cos + h * sin - EPS),
+		height: Math.ceil(w * sin + h * cos - EPS),
 	};
 }
 
