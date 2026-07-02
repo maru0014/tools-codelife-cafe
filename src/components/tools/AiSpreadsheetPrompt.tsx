@@ -25,20 +25,20 @@ export function AiSpreadsheetPrompt() {
 	const [customInstruction, setCustomInstruction] = useState(
 		'売上が高い順に特徴を整理し、次に取るべき施策を3つ提案してください。',
 	);
-	const [maxRows, setMaxRows] = useState(30);
+	const [maxRows, setMaxRows] = useState<number | ''>(30);
 	const [copied, setCopied] = useState(false);
 
-	const result = useMemo(
-		() =>
-			generateSpreadsheetPrompt({
-				input,
-				format,
-				task,
-				customInstruction,
-				maxRows,
-			}),
-		[input, format, task, customInstruction, maxRows],
-	);
+	const result = useMemo(() => {
+		const finalMaxRows =
+			maxRows === '' || Number.isNaN(maxRows) || maxRows <= 0 ? 30 : maxRows;
+		return generateSpreadsheetPrompt({
+			input,
+			format,
+			task,
+			customInstruction,
+			maxRows: finalMaxRows,
+		});
+	}, [input, format, task, customInstruction, maxRows]);
 
 	const copyPrompt = async () => {
 		if (!result.prompt) return;
@@ -102,7 +102,10 @@ export function AiSpreadsheetPrompt() {
 							min="2"
 							max="200"
 							value={maxRows}
-							onChange={(event) => setMaxRows(Number(event.target.value))}
+							onChange={(event) => {
+								const val = event.target.value;
+								setMaxRows(val === '' ? '' : Number(val));
+							}}
 							className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]"
 						/>
 					</div>

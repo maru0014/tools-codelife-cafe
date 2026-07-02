@@ -63,3 +63,42 @@ test('自由指示と未クローズクォートの警告を扱う', () => {
 	assert.match(result.prompt, /^改善案だけを出してください。/);
 	assert.match(result.warnings.join('\n'), /ダブルクォート/);
 });
+
+test('空セルを含む行が列構造を保って保持され、完全な空行（改行のみ等）のみが除外される', () => {
+	const result = generateSpreadsheetPrompt({
+		input: '名前,値\nA,100\n,\nB,200\n\nC,300',
+		format: 'csv',
+		task: 'analyze',
+		maxRows: 10,
+	});
+
+	assert.equal(result.rowCount, 5);
+	assert.match(result.prompt, /\| 名前 \| 値 \|/);
+	assert.match(result.prompt, /\| {2}\| {2}\|/);
+	assert.match(result.prompt, /\| B \| 200 \|/);
+});
+
+test('maxRows が NaN や 0 の場合でもデフォルト値（30行）にフォールバックされる', () => {
+	const inputLines = Array.from({ length: 40 }, (_, i) => `A${i},${i}`).join(
+		'\n',
+	);
+	const resultNaN = generateSpreadsheetPrompt({
+		input: `名前,値\n${inputLines}`,
+		format: 'csv',
+		task: 'analyze',
+		maxRows: NaN,
+	});
+
+	assert.equal(resultNaN.includedRows, 30);
+	assert.equal(resultNaN.truncated, true);
+
+	const resultZero = generateSpreadsheetPrompt({
+		input: `名前,値\n${inputLines}`,
+		format: 'csv',
+		task: 'analyze',
+		maxRows: 0,
+	});
+
+	assert.equal(resultZero.includedRows, 30);
+	assert.equal(resultZero.truncated, true);
+});
