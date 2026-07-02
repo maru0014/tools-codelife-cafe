@@ -113,8 +113,9 @@ function parseDelimited(
 	}
 
 	return {
-		rows: rows.filter((cells) =>
-			cells.some((value) => value.trim().length > 0),
+		rows: rows.filter(
+			(cells) =>
+				cells.length > 1 || cells.some((value) => value.trim().length > 0),
 		),
 		warnings,
 	};
@@ -166,7 +167,8 @@ export function generateSpreadsheetPrompt({
 	const rowCount = rows.length;
 	const columnCount =
 		rows.length > 0 ? Math.max(...rows.map((row) => row.length)) : 0;
-	const safeMaxRows = Math.max(2, Math.min(maxRows, 200));
+	const parsedMaxRows = Number.isNaN(maxRows) || maxRows <= 0 ? 30 : maxRows;
+	const safeMaxRows = Math.max(2, Math.min(parsedMaxRows, 200));
 	const includedRows = Math.min(rowCount, safeMaxRows);
 	const includedRowsData = rows.slice(0, includedRows);
 	const truncated = rowCount > includedRows;
