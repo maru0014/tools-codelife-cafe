@@ -25,7 +25,9 @@ jobs:
         run: npm run lint
       - name: Type check (astro check)
         run: npx astro check
-      - name: Unit tests
-        run: npm run test:unit
       - name: Build check
         run: npm run build
+      # links.test.ts は dist/ の内部リンク・sitemap・canonical を点検するため、
+      # 必ずビルド後に実行する（dist が無いとスキップされる）
+      - name: Unit tests
+        run: npm run test:unit
