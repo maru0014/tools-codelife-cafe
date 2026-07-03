@@ -2,8 +2,9 @@
 // 処理はすべてブラウザ内（Canvas API）で完結し、サーバーへの送信は行わない。
 // loadBitmap で EXIF Orientation を反映するため、出力には Orientation タグを残さない。
 
-import { downloadBlob } from '@/lib/tools/image-common';
-import { buildZip, dedupeZipNames } from '@/lib/tools/zip';
+// node --test から直接読み込めるよう、相対パス + 拡張子付きで import する（zip.ts と同じ規約）
+import { downloadBlob } from './image-common.ts';
+import { buildZip, dedupeZipNames } from './zip.ts';
 
 // ---------------------------------------------------------------------------
 // 型定義
@@ -126,6 +127,19 @@ export function degToRad(deg: number): number {
 	return (deg * Math.PI) / 180;
 }
 
+/**
+ * cos/sin の 0 / 1 近傍の浮動小数点誤差を吸収する。
+ * 90°単位の回転で ~1e-16 の誤差が残ると ceil で出力が1px膨らむ
+ * （180°/270°で背景色の縁が出る）ため、右角近傍のみ厳密値へスナップする。
+ * 任意角度では値を変えない（減算方式だと外接矩形が1px不足し画像が欠けうる）。
+ */
+function snapTrig(v: number): number {
+	const EPS = 1e-12;
+	if (v < EPS) return 0;
+	if (v > 1 - EPS) return 1;
+	return v;
+}
+
 /** 任意角度回転後の外接矩形サイズを算出する */
 export function computeRotatedSize(
 	w: number,
@@ -133,8 +147,8 @@ export function computeRotatedSize(
 	deg: number,
 ): { width: number; height: number } {
 	const rad = Math.abs(degToRad(deg % 360));
-	const cos = Math.abs(Math.cos(rad));
-	const sin = Math.abs(Math.sin(rad));
+	const cos = snapTrig(Math.abs(Math.cos(rad)));
+	const sin = snapTrig(Math.abs(Math.sin(rad)));
 	return {
 		width: Math.ceil(w * cos + h * sin),
 		height: Math.ceil(w * sin + h * cos),
