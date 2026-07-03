@@ -39,6 +39,10 @@ try {
 } catch {
 	// _astro/ が存在しない場合は空配列のまま続行
 }
+// zxing-wasm（QRコード読み取り、/qr-reader 専用）の WASM チャンクも、AVIF/HEICと同様に
+// precache 対象に含める。OfflineBadge の「全ツールをオフラインで利用可能にする」という
+// 前提に合わせ、オフライン化前に一度も /qr-reader を開いていなくても初回デコードが
+// WASM取得失敗で落ちないようにする。
 const assetURLs = assetFiles.map((f) => `/_astro/${f}`);
 
 // ページHTML内容 + アセットURLからキャッシュバージョンハッシュを計算（内容変更時に自動失効）
