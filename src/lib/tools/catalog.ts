@@ -151,12 +151,32 @@ export const toolCatalog: readonly ToolCatalogItem[] = [
 		category: '生成ツール',
 		categoryColor: 'border-l-chart-3',
 		keywords: ['QR', 'コード'],
-		related: ['dummy-data', 'url-encoder'],
+		related: ['qr-reader', 'dummy-data', 'url-encoder'],
 		llmsFull: {
 			useCase: '入力されたURLやテキストからQRコード画像を生成しダウンロード',
 			inputs: 'text（URLまたは文字列）',
 			outputs: 'PNG/SVG形式のQRコード画像',
 			options: '画像サイズ、前景色/背景色、誤り訂正レベル指定',
+		},
+	},
+	{
+		id: 'qr-reader',
+		title: 'QRコード読み取り',
+		description:
+			'カメラや画像ファイルからQRコードを読み取り。URL・Wi-Fi・連絡先も判定。',
+		href: '/qr-reader',
+		icon: 'ScanLine',
+		category: 'ユーティリティ',
+		categoryColor: 'border-l-chart-2',
+		keywords: ['QR', 'コード', '読み取り', 'スキャン', 'カメラ'],
+		related: ['qr-generator', 'url-encoder'],
+		llmsFull: {
+			useCase:
+				'カメラ映像または画像ファイルからQRコードを読み取り、内容を一覧表示',
+			inputs: 'カメラ映像、または画像ファイル（PNG/JPG/WEBP/GIF）',
+			outputs:
+				'読み取ったテキスト一覧（URL/Wi-Fi/連絡先/テキスト判定付き）、CSVエクスポート',
+			options: '自動保存のON/OFF、CSVエクスポート',
 		},
 	},
 	{
