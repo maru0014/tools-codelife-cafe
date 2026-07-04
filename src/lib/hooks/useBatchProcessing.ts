@@ -2,10 +2,11 @@
 // 進捗表示・キャンセル・中断検知（runId）・ObjectURL 等のリソース解放という
 // バッチ処理ページ共通の状態機械を一元管理する。
 // ランのライフサイクル管理は useProcessingLifecycle に委譲している。
-// 使用例: ImageCompressPage / ImageConvertPage
+// 使用例: ImageCompressPage / ImageConvertPage（即時開始）、
+//         ImageEditPage / ImageMetadataPage / ExifToolPage（選択と処理開始を分離する2段階フロー）
 
 import { useCallback, useRef, useState } from 'react';
-import { useProcessingLifecycle } from './useProcessingLifecycle';
+import { useProcessingLifecycle } from './useProcessingLifecycle.ts';
 
 /** バッチ処理対象アイテムに最低限必要なフィールド */
 export type BatchItemBase = {
@@ -18,6 +19,77 @@ export type BatchProgress = { done: number; total: number };
 
 export type BatchCompletion = { done: number; failed: number; total: number };
 
+/** runBatch が要求するラン管理の最小インターフェース（React非依存） */
+export type BatchRunner = {
+	beginRun: () => number;
+	isCurrent: (runId: number) => boolean;
+};
+
+export type BatchRunHandlers<TItem extends BatchItemBase> = {
+	onRunStart: (total: number) => void;
+	/** 成功したアイテムに適用する差分パッチ */
+	onItemSuccess: (item: TItem, patch: Partial<TItem>) => void;
+	/** ラン中断後に届いた成功パッチ（アイテムには反映しない。リソース解放のために渡される） */
+	onStalePatch: (patch: Partial<TItem>) => void;
+	onItemError: (item: TItem, message: string) => void;
+	onProgress: (progress: BatchProgress) => void;
+	/** ラン継続中に最後まで完了した場合のみ呼ばれる（キャンセル・中断時は呼ばれない） */
+	onRunComplete: (completion: BatchCompletion) => void;
+};
+
+/** 1アイテムを処理して成功時の差分を返す。失敗時は throw する */
+export type BatchItemProcessor<TItem extends BatchItemBase> = (
+	item: TItem,
+) => Promise<Partial<TItem>>;
+
+/**
+ * target を先頭から逐次処理する（React非依存）。
+ * runner.isCurrent が false になった時点（キャンセル・新しいランの開始）で中断し、
+ * 中断後に届いた成功パッチは onStalePatch でリソース解放できるよう渡す。
+ */
+export async function runBatch<TItem extends BatchItemBase>(
+	runner: BatchRunner,
+	target: TItem[],
+	processItem: BatchItemProcessor<TItem>,
+	handlers: BatchRunHandlers<TItem>,
+	fallbackErrorMessage: string,
+): Promise<void> {
+	const runId = runner.beginRun();
+	handlers.onRunStart(target.length);
+	let done = 0;
+	let failed = 0;
+
+	for (let i = 0; i < target.length; i++) {
+		if (!runner.isCurrent(runId)) return;
+		const item = target[i];
+		try {
+			const patch = await processItem(item);
+			if (!runner.isCurrent(runId)) {
+				// 中断後に届いた結果はアイテムへ反映せず、リソースだけ解放する
+				handlers.onStalePatch(patch);
+				return;
+			}
+			handlers.onItemSuccess(item, patch);
+			done++;
+		} catch (err) {
+			handlers.onItemError(
+				item,
+				err instanceof Error ? err.message : fallbackErrorMessage,
+			);
+			failed++;
+		}
+		if (runner.isCurrent(runId)) {
+			handlers.onProgress({ done: i + 1, total: target.length });
+		}
+		// イベントループへ yield して UI フリーズを防ぐ
+		await new Promise((resolve) => setTimeout(resolve, 0));
+	}
+
+	if (runner.isCurrent(runId)) {
+		handlers.onRunComplete({ done, failed, total: target.length });
+	}
+}
+
 export type UseBatchProcessingOptions<TItem extends BatchItemBase> = {
 	/** 処理失敗時にアイテムへ設定する既定エラーメッセージ */
 	fallbackErrorMessage: string;
@@ -28,11 +100,6 @@ export type UseBatchProcessingOptions<TItem extends BatchItemBase> = {
 	/** 1ラン正常完了時に呼ばれる（キャンセル・中断時は呼ばれない）。計測などに使用 */
 	onRunComplete?: (completion: BatchCompletion) => void;
 };
-
-/** 1アイテムを処理して成功時の差分を返す。失敗時は throw する */
-export type BatchItemProcessor<TItem extends BatchItemBase> = (
-	item: TItem,
-) => Promise<Partial<TItem>>;
 
 export function useBatchProcessing<TItem extends BatchItemBase>(
 	options: UseBatchProcessingOptions<TItem>,
@@ -67,47 +134,34 @@ export function useBatchProcessing<TItem extends BatchItemBase>(
 
 	/** target を先頭から逐次処理する（キャンセル・差し替えで中断） */
 	const run = useCallback(
-		async (target: TItem[], processItem: BatchItemProcessor<TItem>) => {
-			const runId = lifecycle.beginRun();
-			setProcessing(true);
-			setCompletion(null);
-			setProgress({ done: 0, total: target.length });
-			let done = 0;
-			let failed = 0;
-
-			for (let i = 0; i < target.length; i++) {
-				if (!lifecycle.isCurrent(runId)) break;
-				const item = target[i];
-				try {
-					const patch = await processItem(item);
-					if (!lifecycle.isCurrent(runId)) {
-						// 中断後に届いた結果はアイテムへ反映せず、リソースだけ解放する
-						releasePatch?.(patch);
-						break;
-					}
-					updateItem(item.id, { ...patch, status: 'done' } as Partial<TItem>);
-					done++;
-				} catch (err) {
-					updateItem(item.id, {
-						status: 'error',
-						error: err instanceof Error ? err.message : fallbackErrorMessage,
-					} as Partial<TItem>);
-					failed++;
-				}
-				if (lifecycle.isCurrent(runId)) {
-					setProgress({ done: i + 1, total: target.length });
-				}
-				// イベントループへ yield して UI フリーズを防ぐ
-				await new Promise((resolve) => setTimeout(resolve, 0));
-			}
-
-			if (lifecycle.isCurrent(runId)) {
-				setProcessing(false);
-				const result = { done, failed, total: target.length };
-				setCompletion(result);
-				onRunCompleteRef.current?.(result);
-			}
-		},
+		(target: TItem[], processItem: BatchItemProcessor<TItem>) =>
+			runBatch(
+				lifecycle,
+				target,
+				processItem,
+				{
+					onRunStart: (total) => {
+						setProcessing(true);
+						setCompletion(null);
+						setProgress({ done: 0, total });
+					},
+					onItemSuccess: (item, patch) =>
+						updateItem(item.id, { ...patch, status: 'done' } as Partial<TItem>),
+					onStalePatch: (patch) => releasePatch?.(patch),
+					onItemError: (item, message) =>
+						updateItem(item.id, {
+							status: 'error',
+							error: message,
+						} as Partial<TItem>),
+					onProgress: setProgress,
+					onRunComplete: (result) => {
+						setProcessing(false);
+						setCompletion(result);
+						onRunCompleteRef.current?.(result);
+					},
+				},
+				fallbackErrorMessage,
+			),
 		[fallbackErrorMessage, releasePatch, updateItem, lifecycle],
 	);
 
@@ -119,6 +173,25 @@ export function useBatchProcessing<TItem extends BatchItemBase>(
 			void run(target, processItem);
 		},
 		[run, lifecycle],
+	);
+
+	/**
+	 * 前回の items のリソースを解放してから target に差し替えるが、処理は開始しない。
+	 * ファイル選択と処理開始のタイミングを分離したい2段階フロー（クロップ調整後に実行 等）で使う。
+	 */
+	const hold = useCallback(
+		(target: TItem[]) => {
+			lifecycle.releaseAll();
+			setItems(target);
+		},
+		[lifecycle],
+	);
+
+	/** hold() で保持済みの現在の items を対象に処理を開始する */
+	const startHeld = useCallback(
+		(processItem: BatchItemProcessor<TItem>) =>
+			void run(itemsRef.current, processItem),
+		[run, itemsRef],
 	);
 
 	/** 現在の items を resetItem で初期化し直して再処理する（再圧縮・再変換） */
@@ -167,6 +240,8 @@ export function useBatchProcessing<TItem extends BatchItemBase>(
 		setError,
 		clearCompletion,
 		start,
+		hold,
+		startHeld,
 		reprocess,
 		cancel,
 		clear,
