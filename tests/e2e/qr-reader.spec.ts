@@ -261,7 +261,9 @@ test.describe('QRコード読み取りツール', () => {
 		await expect(beepSwitch).toBeChecked();
 
 		await page.reload();
-		await expect(page.getByRole('switch', { name: '読み取り音' })).toBeChecked();
+		await expect(
+			page.getByRole('switch', { name: '読み取り音' }),
+		).toBeChecked();
 	});
 
 	test('キーボード操作でタブ・トグル・ボタンを操作できる', async ({
