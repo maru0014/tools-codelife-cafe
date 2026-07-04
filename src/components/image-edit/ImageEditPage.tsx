@@ -2,9 +2,10 @@
 // FileDropzone で受け取り → CropOverlay + EditToolbar で操作 → EditPreview で確認 → DL/ZIP
 
 import { CheckCircle2, Download, Loader2, Trash2 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { FileDropzone } from '@/components/common/FileDropzone';
 import { Button } from '@/components/ui/button';
+import { useBatchProcessing } from '@/lib/hooks/useBatchProcessing';
 import { createId } from '@/lib/tools/image-common';
 import {
 	applyEdit,
@@ -32,41 +33,52 @@ const ACCEPT = 'image/jpeg,image/png,image/webp';
 
 type EditItem = {
 	id: string;
+	status: 'pending' | 'done' | 'error';
+	error?: string;
 	file: File;
 	previewUrl: string;
 	bitmap: ImageBitmap | null;
 };
 
-type CompletionNotice = {
-	done: number;
-	failed: number;
-	total: number;
-};
+function releaseEditItem(item: EditItem): void {
+	URL.revokeObjectURL(item.previewUrl);
+	item.bitmap?.close();
+}
 
 export default function ImageEditPage() {
-	const [items, setItems] = useState<EditItem[]>([]);
 	const [editOps, setEditOps] = useState<EditOps>(DEFAULT_EDIT_OPS);
 	const [aspectPreset, setAspectPreset] = useState<AspectPreset>('free');
 	const [crop, setCrop] = useState<CropRect | null>(null);
-	const [processing, setProcessing] = useState(false);
-	const [progress, setProgress] = useState({ done: 0, total: 0 });
-	const [completion, setCompletion] = useState<CompletionNotice | null>(null);
-	const [error, setError] = useState<string | null>(null);
-	const itemsRef = useRef<EditItem[]>([]);
-	itemsRef.current = items;
+	// 実行中に生成された結果を直接蓄積する（itemsのstate反映を待たずに完了時点でダウンロードするため）
+	const resultsRef = useRef<EditResult[]>([]);
+
+	const {
+		items,
+		processing,
+		progress,
+		completion,
+		error,
+		setError,
+		hold,
+		startHeld,
+		clear: clearBatch,
+	} = useBatchProcessing<EditItem>({
+		fallbackErrorMessage: '処理に失敗しました',
+		releaseItem: releaseEditItem,
+		onRunComplete: () => {
+			const results = resultsRef.current;
+			resultsRef.current = [];
+			if (results.length === 1) {
+				downloadEditedFile(results[0]);
+			} else if (results.length > 1) {
+				void downloadEditedZip(results);
+			}
+		},
+	});
 
 	const isBatch = items.length > 1;
 	const singleItem = items.length === 1 ? items[0] : null;
 	const singleBitmap = singleItem?.bitmap ?? null;
-
-	useEffect(() => {
-		return () => {
-			for (const it of itemsRef.current) {
-				URL.revokeObjectURL(it.previewUrl);
-				it.bitmap?.close();
-			}
-		};
-	}, []);
 
 	const initCrop = useCallback((bitmap: ImageBitmap, preset: AspectPreset) => {
 		const ratio = aspectPresetToRatio(preset);
@@ -99,13 +111,7 @@ export default function ImageEditPage() {
 				else errors.push(`${file.name}: ${v.message}`);
 			}
 			setError(errors.length > 0 ? errors.join('\n') : null);
-			setCompletion(null);
 			if (valid.length === 0) return;
-
-			for (const it of itemsRef.current) {
-				URL.revokeObjectURL(it.previewUrl);
-				it.bitmap?.close();
-			}
 
 			const next: EditItem[] = [];
 			for (const file of valid) {
@@ -117,6 +123,7 @@ export default function ImageEditPage() {
 				}
 				next.push({
 					id: createId(),
+					status: 'pending',
 					file,
 					previewUrl: URL.createObjectURL(file),
 					bitmap,
@@ -125,7 +132,8 @@ export default function ImageEditPage() {
 			if (errors.length > 0) {
 				setError(errors.join('\n'));
 			}
-			setItems(next);
+			// ここでは保持のみ行い、処理（applyEdit）は「ダウンロード」ボタン押下まで開始しない
+			hold(next);
 
 			if (next.length === 1 && next[0].bitmap) {
 				initCrop(next[0].bitmap, aspectPreset);
@@ -133,7 +141,7 @@ export default function ImageEditPage() {
 				setCrop(null);
 			}
 		},
-		[aspectPreset, initCrop],
+		[aspectPreset, initCrop, hold, setError],
 	);
 
 	const handleAspectChange = useCallback(
@@ -176,78 +184,44 @@ export default function ImageEditPage() {
 		return editOps;
 	}, [editOps, crop, singleBitmap]);
 
-	const handleProcess = useCallback(async () => {
-		setProcessing(true);
-		setCompletion(null);
-		setProgress({ done: 0, total: items.length });
-
-		const results: EditResult[] = [];
-		let failed = 0;
-
-		for (let i = 0; i < items.length; i++) {
-			const item = items[i];
+	const handleProcess = useCallback(() => {
+		resultsRef.current = [];
+		startHeld(async (item) => {
 			if (!item.bitmap) {
-				failed++;
-				setProgress({ done: i + 1, total: items.length });
-				continue;
+				throw new Error('画像の読み込みに失敗しました');
 			}
 
-			try {
-				const ops = { ...editOps };
+			const ops = { ...editOps };
 
-				if (isBatch) {
-					const ratio = aspectPresetToRatio(aspectPreset);
-					if (ratio !== null) {
-						ops.crop =
-							computeCenterCrop(item.bitmap.width, item.bitmap.height, ratio) ??
-							undefined;
-					}
-				} else if (crop) {
-					const isFullImage =
-						crop.x === 0 &&
-						crop.y === 0 &&
-						crop.width === item.bitmap.width &&
-						crop.height === item.bitmap.height;
-					ops.crop = isFullImage ? undefined : crop;
+			if (isBatch) {
+				const ratio = aspectPresetToRatio(aspectPreset);
+				if (ratio !== null) {
+					ops.crop =
+						computeCenterCrop(item.bitmap.width, item.bitmap.height, ratio) ??
+						undefined;
 				}
-
-				const result = await applyEdit(item.bitmap, ops, item.file.name);
-				results.push(result);
-			} catch {
-				failed++;
+			} else if (crop) {
+				const isFullImage =
+					crop.x === 0 &&
+					crop.y === 0 &&
+					crop.width === item.bitmap.width &&
+					crop.height === item.bitmap.height;
+				ops.crop = isFullImage ? undefined : crop;
 			}
 
-			setProgress({ done: i + 1, total: items.length });
-			await new Promise((r) => setTimeout(r, 0));
-		}
-
-		setProcessing(false);
-		setCompletion({
-			done: results.length,
-			failed,
-			total: items.length,
+			const result = await applyEdit(item.bitmap, ops, item.file.name);
+			resultsRef.current.push(result);
+			return {};
 		});
-
-		if (results.length === 1) {
-			downloadEditedFile(results[0]);
-		} else if (results.length > 1) {
-			await downloadEditedZip(results);
-		}
-	}, [items, editOps, crop, isBatch, aspectPreset]);
+	}, [startHeld, editOps, crop, isBatch, aspectPreset]);
 
 	const handleClear = useCallback(() => {
-		for (const it of itemsRef.current) {
-			URL.revokeObjectURL(it.previewUrl);
-			it.bitmap?.close();
-		}
-		setItems([]);
+		clearBatch();
+		resultsRef.current = [];
 		setCrop(null);
-		setError(null);
-		setProcessing(false);
-		setCompletion(null);
 		setEditOps(DEFAULT_EDIT_OPS);
 		setAspectPreset('free');
-	}, []);
+	}, [clearBatch]);
 
 	const completionText = completion
 		? completion.failed > 0

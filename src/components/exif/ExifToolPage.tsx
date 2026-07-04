@@ -13,11 +13,12 @@ import {
 	ShieldAlert,
 	Trash2,
 } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { FileDropzone } from '@/components/common/FileDropzone';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
+import { useBatchProcessing } from '@/lib/hooks/useBatchProcessing';
 import {
 	bakeOrientation,
 	type ExifData,
@@ -35,16 +36,25 @@ const MAX_DISPLAY_FILES = 30;
 
 type ExifItem = {
 	id: string;
+	status: 'pending' | 'done' | 'error';
+	error?: string;
 	file: File;
 	previewUrl: string;
 	format: 'jpeg' | 'tiff' | 'webp';
 	exif: ExifData;
-	status: 'ready' | 'stripping' | 'done' | 'error';
 	strippedBlob?: Blob;
 	strippedFileName?: string;
 	warnings?: string[];
-	error?: string;
 };
+
+type StrippedResult = {
+	blob: Blob;
+	fileName: string;
+};
+
+function releaseExifItem(item: ExifItem): void {
+	URL.revokeObjectURL(item.previewUrl);
+}
 
 function groupTags(tags: ExifTag[]): Record<ExifTag['group'], ExifTag[]> {
 	const groups: Record<ExifTag['group'], ExifTag[]> = {
@@ -74,153 +84,127 @@ function buildCleanedFileName(original: string): string {
 	return `${original.slice(0, dot)}_cleaned${original.slice(dot)}`;
 }
 
-export function ExifToolPage() {
-	const [items, setItems] = useState<ExifItem[]>([]);
-	const [processing, setProcessing] = useState(false);
-	const [progress, setProgress] = useState({ done: 0, total: 0 });
-	const [error, setError] = useState<string | null>(null);
-	const [bakeOri, setBakeOri] = useState(false);
-	const itemsRef = useRef<ExifItem[]>([]);
-	itemsRef.current = items;
+async function downloadResults(results: StrippedResult[]): Promise<void> {
+	if (results.length === 1) {
+		downloadBlob(results[0].blob, results[0].fileName);
+	} else if (results.length >= 2) {
+		const names = dedupeZipNames(results.map((r) => r.fileName));
+		const zip = await buildZip(
+			results.map((r, i) => ({ name: names[i], data: r.blob })),
+		);
+		downloadBlob(zip, 'cleaned.zip');
+	}
+}
 
-	useEffect(() => {
-		return () => {
-			for (const it of itemsRef.current) {
-				URL.revokeObjectURL(it.previewUrl);
-			}
-		};
-	}, []);
+export function ExifToolPage() {
+	const [bakeOri, setBakeOri] = useState(false);
+	// 実行中に生成された結果を直接蓄積する（itemsのstate反映を待たずに完了時点でダウンロードするため）
+	const resultsRef = useRef<StrippedResult[]>([]);
+
+	const {
+		items,
+		processing,
+		progress,
+		error,
+		setError,
+		hold,
+		startHeld,
+		clear: clearBatch,
+	} = useBatchProcessing<ExifItem>({
+		fallbackErrorMessage: 'メタデータの削除に失敗しました。',
+		releaseItem: releaseExifItem,
+		onRunComplete: () => {
+			const results = resultsRef.current;
+			resultsRef.current = [];
+			void downloadResults(results);
+		},
+	});
 
 	const hasNonTrivialOrientation = items.some(
 		(it) => it.exif.orientation != null && it.exif.orientation !== 1,
 	);
 	const hasAnyGps = items.some((it) => it.exif.hasGps);
 
-	const handleFilesSelect = useCallback(async (files: File[]) => {
-		const batch = validateBatch(files);
-		if (!batch.ok) {
-			setError(batch.message);
-			return;
-		}
-		const checks = await Promise.all(
-			files.map(async (file) => ({
-				file,
-				v: await validateImageFile(file),
-			})),
-		);
-		const valid: { file: File; format: ExifItem['format'] }[] = [];
-		const errors: string[] = [];
-		for (const { file, v } of checks) {
-			if (v.ok) valid.push({ file, format: v.format });
-			else errors.push(v.message);
-		}
-		setError(errors.length > 0 ? errors.join('\n') : null);
-		if (valid.length === 0) return;
-
-		for (const it of itemsRef.current) {
-			URL.revokeObjectURL(it.previewUrl);
-		}
-
-		const next: ExifItem[] = await Promise.all(
-			valid.map(async ({ file, format }) => {
-				const bytes = new Uint8Array(await file.arrayBuffer());
-				const exif = parseExif(bytes);
-				return {
-					id: createId(),
-					file,
-					previewUrl: URL.createObjectURL(file),
-					format,
-					exif,
-					status: 'ready' as const,
-				};
-			}),
-		);
-		setItems(next);
-	}, []);
-
-	const handleStripAll = useCallback(async () => {
-		setProcessing(true);
-		setProgress({ done: 0, total: items.length });
-		const updated = [...items];
-
-		for (let i = 0; i < updated.length; i++) {
-			const item = updated[i];
-			try {
-				updated[i] = { ...item, status: 'stripping' };
-				setItems([...updated]);
-
-				let bytes = new Uint8Array(await item.file.arrayBuffer());
-
-				if (
-					bakeOri &&
-					item.exif.orientation != null &&
-					item.exif.orientation !== 1
-				) {
-					bytes = await bakeOrientation(bytes, item.exif.orientation);
-				}
-
-				const result = stripMetadata(bytes, item.format);
-				const blob = new Blob([result.data.slice()], {
-					type: `image/${item.format}`,
-				});
-
-				updated[i] = {
-					...item,
-					status: 'done',
-					strippedBlob: blob,
-					strippedFileName: buildCleanedFileName(item.file.name),
-					warnings: result.warnings,
-				};
-			} catch (err) {
-				updated[i] = {
-					...item,
-					status: 'error',
-					error:
-						err instanceof Error
-							? err.message
-							: 'メタデータの削除に失敗しました。',
-				};
+	const handleFilesSelect = useCallback(
+		async (files: File[]) => {
+			const batch = validateBatch(files);
+			if (!batch.ok) {
+				setError(batch.message);
+				return;
 			}
-			setItems([...updated]);
-			setProgress({ done: i + 1, total: updated.length });
-			await new Promise((resolve) => setTimeout(resolve, 0));
-		}
-
-		setProcessing(false);
-
-		const doneItems = updated.filter(
-			(it) => it.status === 'done' && it.strippedBlob,
-		);
-		if (doneItems.length === 1 && doneItems[0].strippedBlob) {
-			downloadBlob(
-				doneItems[0].strippedBlob,
-				doneItems[0].strippedFileName ?? 'cleaned.jpg',
-			);
-		} else if (doneItems.length >= 2) {
-			const names = dedupeZipNames(
-				doneItems.map((it) => it.strippedFileName ?? 'cleaned.jpg'),
-			);
-			const zip = await buildZip(
-				doneItems.map((it, i) => ({
-					name: names[i],
-					data: it.strippedBlob as Blob,
+			const checks = await Promise.all(
+				files.map(async (file) => ({
+					file,
+					v: await validateImageFile(file),
 				})),
 			);
-			downloadBlob(zip, 'cleaned.zip');
-		}
-	}, [items, bakeOri]);
+			const valid: { file: File; format: ExifItem['format'] }[] = [];
+			const errors: string[] = [];
+			for (const { file, v } of checks) {
+				if (v.ok) valid.push({ file, format: v.format });
+				else errors.push(v.message);
+			}
+			setError(errors.length > 0 ? errors.join('\n') : null);
+			if (valid.length === 0) return;
+
+			const next: ExifItem[] = await Promise.all(
+				valid.map(async ({ file, format }) => {
+					const bytes = new Uint8Array(await file.arrayBuffer());
+					const exif = parseExif(bytes);
+					return {
+						id: createId(),
+						status: 'pending' as const,
+						file,
+						previewUrl: URL.createObjectURL(file),
+						format,
+						exif,
+					};
+				}),
+			);
+			// ここでは保持のみ行い、実処理（メタデータ削除）は「メタデータを削除」ボタン押下まで開始しない
+			hold(next);
+		},
+		[hold, setError],
+	);
+
+	const handleStripAll = useCallback(() => {
+		resultsRef.current = [];
+		startHeld(async (item) => {
+			let bytes = new Uint8Array(await item.file.arrayBuffer());
+
+			if (
+				bakeOri &&
+				item.exif.orientation != null &&
+				item.exif.orientation !== 1
+			) {
+				bytes = await bakeOrientation(bytes, item.exif.orientation);
+			}
+
+			const result = stripMetadata(bytes, item.format);
+			const blob = new Blob([result.data.slice()], {
+				type: `image/${item.format}`,
+			});
+			const strippedFileName = buildCleanedFileName(item.file.name);
+
+			resultsRef.current.push({ blob, fileName: strippedFileName });
+
+			return {
+				strippedBlob: blob,
+				strippedFileName,
+				warnings: result.warnings,
+			};
+		});
+	}, [startHeld, bakeOri]);
 
 	const handleClear = useCallback(() => {
-		for (const it of itemsRef.current) {
-			URL.revokeObjectURL(it.previewUrl);
-		}
-		setItems([]);
-		setError(null);
-		setProcessing(false);
-		setProgress({ done: 0, total: 0 });
-	}, []);
+		clearBatch();
+		resultsRef.current = [];
+		setBakeOri(false);
+	}, [clearBatch]);
 
 	const doneCount = items.filter((it) => it.status === 'done').length;
+	// 逐次処理は items の並び順どおりに進むため、進捗インデックスの位置にあるアイテムが処理中とみなせる
+	const strippingId = processing ? items[progress.done]?.id : undefined;
 
 	return (
 		<div className="space-y-6">
@@ -301,7 +285,7 @@ export function ExifToolPage() {
 							<Button
 								variant="outline"
 								onClick={async () => {
-									const done = itemsRef.current.filter(
+									const done = items.filter(
 										(it) => it.status === 'done' && it.strippedBlob,
 									);
 									const names = dedupeZipNames(
@@ -385,6 +369,7 @@ export function ExifToolPage() {
 							<ExifCard
 								key={item.id}
 								item={item}
+								isStripping={item.id === strippingId}
 								onDownload={() => {
 									if (item.strippedBlob) {
 										downloadBlob(
@@ -408,9 +393,11 @@ export function ExifToolPage() {
 
 function ExifCard({
 	item,
+	isStripping,
 	onDownload,
 }: {
 	item: ExifItem;
+	isStripping: boolean;
 	onDownload: () => void;
 }) {
 	const { exif } = item;
@@ -465,6 +452,10 @@ function ExifCard({
 							</Badge>
 						)}
 					</div>
+
+					{isStripping && (
+						<p className="mt-2 text-xs text-primary">処理中...</p>
+					)}
 
 					{/* 処理完了時のDLボタン */}
 					{item.status === 'done' && item.strippedBlob && (
