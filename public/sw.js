@@ -5,6 +5,7 @@ const MIN_ASSETS = [
 	'/',
 	'/offline/',
 	'/site.webmanifest',
+	'/manifest.webmanifest',
 	'/favicon.ico',
 	'/favicon-16x16.png',
 	'/favicon-32x32.png',
