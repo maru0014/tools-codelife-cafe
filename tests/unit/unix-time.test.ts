@@ -5,6 +5,7 @@ import {
 	convertBatch,
 	detectTimestampCandidates,
 	formatTimestamp,
+	instantFromExplicitFormat,
 	parseDateTimeString,
 } from '../../src/lib/tools/unix-time.ts';
 
@@ -214,4 +215,46 @@ test('相対時刻: nowMsを基準に算出される', () => {
 	const nowMs = 1783385779000 + 3 * 60 * 60 * 1000; // 3時間後を基準
 	const outputs = formatTimestamp(candidates[0].instantNanos, 'UTC', nowMs);
 	assert.match(outputs.relative, /時間前/);
+});
+
+test('ミリ秒端数がISO 8601表示で保持される', () => {
+	const candidates = detectTimestampCandidates('1783385779123');
+	const top = candidates.find((c) => c.format === 'unix-ms');
+	assert.ok(top);
+	const outputs = formatTimestamp(top.instantNanos, 'UTC');
+	assert.equal(outputs.isoUtc, '2026-07-07T00:56:19.123Z');
+	assert.equal(outputs.unixMilliseconds, '1783385779123');
+});
+
+test('巨大すぎる数値（Date/Intlで表示不能）は候補が空になる', () => {
+	const candidates = detectTimestampCandidates('1'.repeat(35));
+	assert.deepEqual(candidates, []);
+});
+
+test('WebMCP明示形式: 小数はUNIX秒/Slack TS以外では拒否される', () => {
+	assert.equal(instantFromExplicitFormat('1783385779123.5', 'unix-ms'), null);
+	assert.notEqual(instantFromExplicitFormat('1783385779.5', 'unix-s'), null);
+});
+
+test('負の小数秒がunixSecondsで正しい符号・値になる', () => {
+	const negativeHalfSecond = -500_000_000n;
+	const outputs = formatTimestamp(negativeHalfSecond, 'UTC');
+	assert.equal(outputs.unixSeconds, '-0.500');
+
+	const negativeOneAndHalf = -1_500_000_000n;
+	const outputsB = formatTimestamp(negativeOneAndHalf, 'UTC');
+	assert.equal(outputsB.unixSeconds, '-1.500');
+});
+
+test('Discordタグは四捨五入せず切り捨てた秒を使う', () => {
+	const nearlyNextSecond = 1_783_385_779_900_000_000n; // 1783385779.9秒
+	const outputs = formatTimestamp(nearlyNextSecond, 'UTC');
+	assert.equal(outputs.unixSeconds, '1783385779.900');
+	assert.equal(outputs.discord.F, '<t:1783385779:F>');
+});
+
+test('逆変換: 存在しない日時コンポーネントは拒否される', () => {
+	assert.equal(parseDateTimeString('2026-02-31T00:00:00Z', 'UTC'), null);
+	assert.equal(parseDateTimeString('2026-07-07T25:61:61Z', 'UTC'), null);
+	assert.equal(parseDateTimeString('2026/13/01 00:00:00', 'UTC'), null);
 });

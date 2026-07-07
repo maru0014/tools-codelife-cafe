@@ -151,19 +151,28 @@ function detectFromInteger(sign: -1 | 1, digits: string): TimestampCandidate[] {
 	if (candidates.length === 0) {
 		// どの単位でも妥当な年代に収まらない場合は、桁数が最も近い形式を
 		// フォールバックとして1件だけ提示する（候補ゼロを避ける）。
-		let closest = FORMAT_REGISTRY[0];
-		let bestDist = Number.POSITIVE_INFINITY;
-		for (const def of FORMAT_REGISTRY) {
-			const dist = Math.abs(digits.length - def.canonicalDigits);
+		// ただし Date/Intl で表示不能な（year 1〜9999 の範囲外になる）
+		// 巨大な値はフォールバック対象から除外し、解釈不能として空配列を返す。
+		const formattable = FORMAT_REGISTRY.map((def) => ({
+			def,
+			instantNanos: magnitude * def.nanosPerUnit,
+		})).filter(({ instantNanos }) => instantToYear(instantNanos) !== null);
+
+		if (formattable.length === 0) return [];
+
+		let closest = formattable[0];
+		let bestDist = Math.abs(digits.length - closest.def.canonicalDigits);
+		for (const candidate of formattable) {
+			const dist = Math.abs(digits.length - candidate.def.canonicalDigits);
 			if (dist < bestDist) {
 				bestDist = dist;
-				closest = def;
+				closest = candidate;
 			}
 		}
 		candidates.push({
-			format: closest.id,
-			label: closest.label,
-			instantNanos: magnitude * closest.nanosPerUnit,
+			format: closest.def.id,
+			label: closest.def.label,
+			instantNanos: closest.instantNanos,
 			confidence: 'low',
 		});
 	}
@@ -214,6 +223,9 @@ export function instantFromExplicitFormat(
 
 	const decimalMatch = normalized.match(DECIMAL_PATTERN);
 	if (decimalMatch) {
+		// 小数入力は「秒.端数」表現（UNIX秒 / Slack TS）としてのみ受け付ける。
+		// ミリ秒以上の単位を明示指定した小数は解釈が曖昧なため非対応とする。
+		if (format !== 'unix-s' && format !== 'slack-ts') return null;
 		const [, signPart, intDigits, fracDigits] = decimalMatch;
 		const fracNanos = fracDigits.slice(0, 9).padEnd(9, '0');
 		const seconds = BigInt(intDigits);
@@ -276,6 +288,36 @@ function parseOffsetToMinutes(offset: string): number {
 	if (!m) return 0;
 	const sign = m[1] === '-' ? -1 : 1;
 	return sign * (Number(m[2]) * 60 + Number(m[3]));
+}
+
+/**
+ * 年月日時分秒の各コンポーネントが実在する値かどうかを検証する。
+ * `Date.UTC` は範囲外の値（例: 2月31日、25時）を暗黙的に繰り上げてしまうため、
+ * 構築した日付を再分解して入力値と一致するかをラウンドトリップ検証する。
+ */
+function isValidDateTimeComponents(
+	year: number,
+	month: number,
+	day: number,
+	hour: number,
+	minute: number,
+	second: number,
+): boolean {
+	if (month < 1 || month > 12) return false;
+	if (hour < 0 || hour > 23) return false;
+	if (minute < 0 || minute > 59) return false;
+	if (second < 0 || second > 59) return false;
+
+	const epochMs = Date.UTC(year, month - 1, day, hour, minute, second);
+	const date = new Date(epochMs);
+	return (
+		date.getUTCFullYear() === year &&
+		date.getUTCMonth() === month - 1 &&
+		date.getUTCDate() === day &&
+		date.getUTCHours() === hour &&
+		date.getUTCMinutes() === minute &&
+		date.getUTCSeconds() === second
+	);
 }
 
 /** 指定タイムゾーンにおける、あるUTC時刻でのオフセット(分)を求める */
@@ -348,6 +390,10 @@ export function parseDateTimeString(
 		const fracDigits = (frac ?? '').slice(0, 9).padEnd(9, '0');
 		const fracNanos = BigInt(fracDigits || '0');
 
+		if (!isValidDateTimeComponents(year, month, day, hour, minute, second)) {
+			return null;
+		}
+
 		let epochMs: number;
 		if (offset) {
 			const offsetMin = parseOffsetToMinutes(offset);
@@ -380,6 +426,11 @@ export function parseDateTimeString(
 		const hour = h ? Number(h) : 0;
 		const minute = mi ? Number(mi) : 0;
 		const second = s ? Number(s) : 0;
+
+		if (!isValidDateTimeComponents(year, month, day, hour, minute, second)) {
+			return null;
+		}
+
 		const epochMs = zonedWallTimeToEpochMs(
 			year,
 			month,
@@ -427,14 +478,17 @@ export interface TimestampOutputs {
 
 function splitInstant(instantNanos: bigint): {
 	epochMs: number;
-	remainderNanos: bigint;
+	subSecondNanos: bigint;
 } {
 	const epochMsBig = floorDivBigInt(instantNanos, 1_000_000n);
-	const remainderNanos = instantNanos - epochMsBig * 1_000_000n;
-	return { epochMs: Number(epochMsBig), remainderNanos };
+	const epochSecondsBig = floorDivBigInt(instantNanos, 1_000_000_000n);
+	// 秒未満の端数はミリ秒成分も含めて丸ごと保持する（日付フォーマットは秒までしか
+	// 含まないため、ミリ秒はここで fractional 文字列側に乗せる必要がある）。
+	const subSecondNanos = instantNanos - epochSecondsBig * 1_000_000_000n;
+	return { epochMs: Number(epochMsBig), subSecondNanos };
 }
 
-/** サブミリ秒の端数を、意味のある最小桁数（ms/us/ns）で ".NNN" 形式にする */
+/** サブ秒の端数を、意味のある最小桁数（ms/us/ns）で ".NNN" 形式にする */
 function formatFractional(remainderNanos: bigint): string {
 	if (remainderNanos === 0n) return '';
 	const padded = remainderNanos.toString().padStart(9, '0');
@@ -530,8 +584,8 @@ export function formatTimestamp(
 	timeZone: string,
 	nowMs: number = Date.now(),
 ): TimestampOutputs {
-	const { epochMs, remainderNanos } = splitInstant(instantNanos);
-	const fractional = formatFractional(remainderNanos);
+	const { epochMs, subSecondNanos } = splitInstant(instantNanos);
+	const fractional = formatFractional(subSecondNanos);
 
 	const isoUtc = formatInTimeZone(epochMs, 'UTC', fractional);
 	const isoLocal = formatInTimeZone(epochMs, timeZone, fractional);
@@ -540,16 +594,21 @@ export function formatTimestamp(
 		'+00:00',
 	);
 
-	const unixSecondsBig = floorDivBigInt(instantNanos, 1_000_000_000n);
-	const secRemainderNanos = instantNanos - unixSecondsBig * 1_000_000_000n;
+	// 符号を1度だけ適用し、絶対値側で秒・端数を求める（floor演算だと
+	// 例えば -0.5 秒が「-1」+「.500」= -1.5 秒相当に化けてしまうため）。
+	const isNegative = instantNanos < 0n;
+	const absInstantNanos = isNegative ? -instantNanos : instantNanos;
+	const absSeconds = absInstantNanos / 1_000_000_000n;
+	const absSubSecondNanos = absInstantNanos % 1_000_000_000n;
+	const unixSecondsSign = isNegative ? '-' : '';
 	const unixSeconds =
-		secRemainderNanos === 0n
-			? unixSecondsBig.toString()
-			: `${unixSecondsBig.toString()}${formatFractional(secRemainderNanos)}`;
+		absSubSecondNanos === 0n
+			? `${unixSecondsSign}${absSeconds.toString()}`
+			: `${unixSecondsSign}${absSeconds.toString()}${formatFractional(absSubSecondNanos)}`;
 
-	const discordSeconds = Number(
-		floorDivBigInt(instantNanos + 500_000_000n, 1_000_000_000n),
-	);
+	// Discordタグは端数を四捨五入せず切り捨てた整数秒を使う
+	// （実際の表示値である unixSeconds の整数部と一致させるため）。
+	const discordSeconds = Number(floorDivBigInt(instantNanos, 1_000_000_000n));
 
 	return {
 		isoUtc,
