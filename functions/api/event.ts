@@ -12,7 +12,12 @@ interface EventPayload {
 	event: string;
 	props: Record<string, unknown>;
 	timestamp?: number;
+	// タブ生存中のみ有効な匿名セッションID（sessionStorage 由来・個人追跡なし）
+	sessionId?: string;
 }
+
+// 匿名セッションIDの許容最大長（crypto.randomUUID は 36 文字。異常値・肥大化を防ぐ上限）
+const MAX_SESSION_ID_LENGTH = 64;
 
 const ALLOWED_EVENTS = new Set([
 	'tool_run',
@@ -63,6 +68,13 @@ export const onRequestPost = async (context: {
 		const eventName = body.event;
 		const props =
 			body.props && typeof body.props === 'object' ? body.props : {};
+
+		// 匿名セッションID（sessionStorage 由来）を検証。異常値は空文字として無視する。
+		const sessionId =
+			typeof body.sessionId === 'string' &&
+			body.sessionId.length <= MAX_SESSION_ID_LENGTH
+				? body.sessionId
+				: '';
 
 		let toolSlug = '';
 		let extra1 = '';
@@ -117,7 +129,9 @@ export const onRequestPost = async (context: {
 				doubles?: number[];
 				indexes?: string[];
 			} = {
-				blobs: [eventName, toolSlug, extra1, extra2],
+				// Analytics Engine のインデックスは 1 データポイントにつき 1 つのみ許容されるため、
+				// セッションIDはインデックスではなく blob5 に格納する。
+				blobs: [eventName, toolSlug, extra1, extra2, sessionId],
 				indexes: [eventName],
 			};
 			if (double1 !== undefined) {
