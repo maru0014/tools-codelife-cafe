@@ -1,5 +1,5 @@
 import { Copy, Sparkles } from 'lucide-react';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import {
@@ -42,7 +42,14 @@ export function AiSpreadsheetPrompt() {
 		});
 	}, [input, format, task, customInstruction, maxRows]);
 
+	// マウント直後はサンプルデータが初期表示されているだけで実行とみなさない。
+	// ユーザーが入力・設定を変更して結果が再生成された時点でのみ計測する。
+	const didMountRef = useRef(false);
 	useEffect(() => {
+		if (!didMountRef.current) {
+			didMountRef.current = true;
+			return;
+		}
 		if (input.trim() && result.prompt) {
 			trackRun();
 		}

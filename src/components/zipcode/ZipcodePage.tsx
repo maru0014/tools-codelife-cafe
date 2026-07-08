@@ -17,8 +17,7 @@ import { fetchZipChunk } from './fetchChunk';
 
 type SearchStatus = 'idle' | 'searching' | 'found' | 'not-found' | 'error';
 
-function SingleSearch() {
-	const { trackRun } = useToolAnalytics('zipcode');
+function SingleSearch({ onRun }: { onRun: () => void }) {
 	const [query, setQuery] = useState('');
 	const [records, setRecords] = useState<ZipRecord[]>([]);
 	const [status, setStatus] = useState<SearchStatus>('idle');
@@ -36,7 +35,7 @@ function SingleSearch() {
 					setRecords(recs);
 					setStatus(recs.length > 0 ? 'found' : 'not-found');
 					// 住所が見つかった検索のみ計測する
-					if (recs.length > 0) trackRun();
+					if (recs.length > 0) onRun();
 				})
 				.catch(() => {
 					if (runIdRef.current !== runId) return;
@@ -44,7 +43,7 @@ function SingleSearch() {
 					setStatus('error');
 				});
 		},
-		[trackRun],
+		[onRun],
 	);
 
 	// 7桁が揃った時点で自動検索する
@@ -151,6 +150,7 @@ function SingleSearch() {
 }
 
 export function ZipcodePage() {
+	const { trackRun } = useToolAnalytics('zipcode');
 	return (
 		<Tabs defaultValue="single" className="space-y-4">
 			<TabsList className="grid w-full grid-cols-2">
@@ -158,10 +158,10 @@ export function ZipcodePage() {
 				<TabsTrigger value="bulk">一括変換</TabsTrigger>
 			</TabsList>
 			<TabsContent value="single">
-				<SingleSearch />
+				<SingleSearch onRun={trackRun} />
 			</TabsContent>
 			<TabsContent value="bulk">
-				<BulkConvertPanel />
+				<BulkConvertPanel onRun={trackRun} />
 			</TabsContent>
 
 			<p className="flex items-center gap-1 pt-2 text-xs text-muted-foreground">

@@ -99,16 +99,20 @@ export function JsonCsvPage() {
 			try {
 				const text = await file.text();
 				setInput(text);
-				setResult(
+				const converted =
 					direction === 'json-to-csv'
 						? jsonToCsv(text, jsonOpts)
-						: csvToJson(text, csvOpts),
-				);
+						: csvToJson(text, csvOpts);
+				setResult(converted);
+				// 1MB以上は自動変換(debounce)が走らないため、直接変換の成功時にここで計測する
+				if (text.length >= MANUAL_MODE_THRESHOLD && converted.ok) {
+					trackRun();
+				}
 			} catch (_error) {
 				setResult({ ok: false, error: 'ファイルの読み込みに失敗しました。' });
 			}
 		},
-		[direction, jsonOpts, csvOpts],
+		[direction, jsonOpts, csvOpts, trackRun],
 	);
 
 	const handleSample = useCallback(() => {

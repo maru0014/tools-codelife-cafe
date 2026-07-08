@@ -126,6 +126,14 @@ export default function SqlFormatter() {
 		}
 	}, [trackSharedUrlOpen]);
 
+	// 自動整形（デフォルト有効）は入力のたびにライブ整形されるため、
+	// 手動ボタンとは別にこちらでも成功時の実行を計測する
+	useEffect(() => {
+		if (autoFormat && output && !error) {
+			trackRun();
+		}
+	}, [autoFormat, output, error, trackRun]);
+
 	useEffect(() => {
 		if (autoFormat) {
 			setManualOutput('');
