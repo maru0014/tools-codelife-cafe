@@ -44,7 +44,7 @@ function toCsvRow(r: BulkResult): string[] {
 	];
 }
 
-export function BulkConvertPanel() {
+export function BulkConvertPanel({ onRun }: { onRun: () => void }) {
 	const [text, setText] = useState('');
 	const [results, setResults] = useState<BulkResult[] | null>(null);
 	const [converting, setConverting] = useState(false);
@@ -71,10 +71,12 @@ export function BulkConvertPanel() {
 				},
 			);
 			setResults(out);
+			// 1件以上変換に成功した場合のみ計測する
+			if (out.some((r) => r.zip && !r.error)) onRun();
 		} finally {
 			setConverting(false);
 		}
-	}, [text]);
+	}, [text, onRun]);
 
 	const handleDownloadCsv = useCallback(() => {
 		if (!results) return;

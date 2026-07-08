@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
 import {
 	createZipLookup,
 	formatAddress,
@@ -16,29 +17,34 @@ import { fetchZipChunk } from './fetchChunk';
 
 type SearchStatus = 'idle' | 'searching' | 'found' | 'not-found' | 'error';
 
-function SingleSearch() {
+function SingleSearch({ onRun }: { onRun: () => void }) {
 	const [query, setQuery] = useState('');
 	const [records, setRecords] = useState<ZipRecord[]>([]);
 	const [status, setStatus] = useState<SearchStatus>('idle');
 	const lookupRef = useRef(createZipLookup(fetchZipChunk));
 	const runIdRef = useRef(0);
 
-	const runSearch = useCallback((zip7: string) => {
-		const runId = ++runIdRef.current;
-		setStatus('searching');
-		lookupRef.current
-			.lookup(zip7)
-			.then((recs) => {
-				if (runIdRef.current !== runId) return;
-				setRecords(recs);
-				setStatus(recs.length > 0 ? 'found' : 'not-found');
-			})
-			.catch(() => {
-				if (runIdRef.current !== runId) return;
-				setRecords([]);
-				setStatus('error');
-			});
-	}, []);
+	const runSearch = useCallback(
+		(zip7: string) => {
+			const runId = ++runIdRef.current;
+			setStatus('searching');
+			lookupRef.current
+				.lookup(zip7)
+				.then((recs) => {
+					if (runIdRef.current !== runId) return;
+					setRecords(recs);
+					setStatus(recs.length > 0 ? 'found' : 'not-found');
+					// 住所が見つかった検索のみ計測する
+					if (recs.length > 0) onRun();
+				})
+				.catch(() => {
+					if (runIdRef.current !== runId) return;
+					setRecords([]);
+					setStatus('error');
+				});
+		},
+		[onRun],
+	);
 
 	// 7桁が揃った時点で自動検索する
 	const normalized = useMemo(() => normalizeZip(query), [query]);
@@ -144,6 +150,7 @@ function SingleSearch() {
 }
 
 export function ZipcodePage() {
+	const { trackRun } = useToolAnalytics('zipcode');
 	return (
 		<Tabs defaultValue="single" className="space-y-4">
 			<TabsList className="grid w-full grid-cols-2">
@@ -151,10 +158,10 @@ export function ZipcodePage() {
 				<TabsTrigger value="bulk">一括変換</TabsTrigger>
 			</TabsList>
 			<TabsContent value="single">
-				<SingleSearch />
+				<SingleSearch onRun={trackRun} />
 			</TabsContent>
 			<TabsContent value="bulk">
-				<BulkConvertPanel />
+				<BulkConvertPanel onRun={trackRun} />
 			</TabsContent>
 
 			<p className="flex items-center gap-1 pt-2 text-xs text-muted-foreground">

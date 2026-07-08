@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Textarea } from '@/components/ui/textarea';
 import { downloadBlob } from '@/lib/download';
+import { useToolAnalytics } from '@/lib/hooks/useToolAnalytics';
 import {
 	buildCsvBlob,
 	type ConvertResult,
@@ -48,6 +49,7 @@ const SAMPLE_CSV = [
 ].join('\r\n');
 
 export function JsonCsvPage() {
+	const { trackRun } = useToolAnalytics('json-csv');
 	const [direction, setDirection] = useState<Direction>('json-to-csv');
 	const [input, setInput] = useState('');
 	const [result, setResult] = useState<ConvertResult | null>(null);
@@ -77,7 +79,8 @@ export function JsonCsvPage() {
 				? jsonToCsv(input, jsonOpts)
 				: csvToJson(input, csvOpts),
 		);
-	}, [input, direction, jsonOpts, csvOpts]);
+		trackRun();
+	}, [input, direction, jsonOpts, csvOpts, trackRun]);
 
 	// 自動変換（300ms debounce）。1MB以上は手動実行に切り替え
 	useEffect(() => {
@@ -96,16 +99,20 @@ export function JsonCsvPage() {
 			try {
 				const text = await file.text();
 				setInput(text);
-				setResult(
+				const converted =
 					direction === 'json-to-csv'
 						? jsonToCsv(text, jsonOpts)
-						: csvToJson(text, csvOpts),
-				);
+						: csvToJson(text, csvOpts);
+				setResult(converted);
+				// 1MB以上は自動変換(debounce)が走らないため、直接変換の成功時にここで計測する
+				if (text.length >= MANUAL_MODE_THRESHOLD && converted.ok) {
+					trackRun();
+				}
 			} catch (_error) {
 				setResult({ ok: false, error: 'ファイルの読み込みに失敗しました。' });
 			}
 		},
-		[direction, jsonOpts, csvOpts],
+		[direction, jsonOpts, csvOpts, trackRun],
 	);
 
 	const handleSample = useCallback(() => {

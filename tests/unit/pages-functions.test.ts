@@ -46,8 +46,68 @@ test('settings_restoreイベントをAnalytics Engineへ書き込む', async () 
 	assert.strictEqual(response.status, 204);
 	assert.deepStrictEqual(writes, [
 		{
-			blobs: ['settings_restore', 'json-formatter', 'url', ''],
+			blobs: ['settings_restore', 'json-formatter', 'url', '', ''],
 			indexes: ['settings_restore'],
 		},
+	]);
+});
+
+test('匿名セッションIDをblob5に格納する', async () => {
+	const writes: Array<{ blobs?: string[]; indexes?: string[] }> = [];
+	const response = await onRequestPost({
+		request: new Request('https://tools.codelife.cafe/api/event', {
+			method: 'POST',
+			body: JSON.stringify({
+				event: 'tool_run',
+				props: { tool: 'json-formatter' },
+				sessionId: 'abc-123',
+			}),
+			headers: { origin: 'https://tools.codelife.cafe' },
+		}),
+		env: {
+			EVENTS: {
+				writeDataPoint(data) {
+					writes.push(data);
+				},
+			},
+		},
+	});
+
+	assert.strictEqual(response.status, 204);
+	assert.deepStrictEqual(writes, [
+		{
+			blobs: ['tool_run', 'json-formatter', '', '', 'abc-123'],
+			indexes: ['tool_run'],
+		},
+	]);
+});
+
+test('過長な匿名セッションIDは無視して空文字にする', async () => {
+	const writes: Array<{ blobs?: string[]; indexes?: string[] }> = [];
+	await onRequestPost({
+		request: new Request('https://tools.codelife.cafe/api/event', {
+			method: 'POST',
+			body: JSON.stringify({
+				event: 'tool_run',
+				props: { tool: 'json-formatter' },
+				sessionId: 'x'.repeat(200),
+			}),
+			headers: { origin: 'https://tools.codelife.cafe' },
+		}),
+		env: {
+			EVENTS: {
+				writeDataPoint(data) {
+					writes.push(data);
+				},
+			},
+		},
+	});
+
+	assert.deepStrictEqual(writes[0].blobs, [
+		'tool_run',
+		'json-formatter',
+		'',
+		'',
+		'',
 	]);
 });

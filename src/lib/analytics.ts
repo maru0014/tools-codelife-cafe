@@ -17,6 +17,43 @@ export type EventName = keyof AnalyticsEvents;
 // モジュールスコープで一度発火したエンゲージメントツールを記憶（タブ単位で保持）
 const engagedTools = new Set<string>();
 
+// 匿名セッションID用のストレージキー
+const SESSION_ID_KEY = 'clc_analytics_session_id';
+
+/**
+ * 匿名セッションIDを取得する。
+ *
+ * - `sessionStorage` を使用するため、ブラウザタブが閉じられると破棄される揮発的なID（localStorage・Cookie は不使用）。
+ * - `crypto.randomUUID()` による完全ランダム値であり、個人・端末を横断して追跡しない。
+ * - 「セッションあたり利用ツール数」「トップ→個別ツール遷移率」等の集計を可能にするためだけに用いる。
+ *
+ * ストレージが利用不可（プライベートモード等）な場合はメモリ上のフォールバックIDを返す。
+ */
+let memorySessionId: string | null = null;
+
+function generateId(): string {
+	if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) {
+		return crypto.randomUUID();
+	}
+	// randomUUID 非対応環境向けの簡易フォールバック
+	return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+export function getSessionId(): string {
+	if (typeof window === 'undefined') return '';
+	try {
+		const existing = window.sessionStorage.getItem(SESSION_ID_KEY);
+		if (existing) return existing;
+		const id = generateId();
+		window.sessionStorage.setItem(SESSION_ID_KEY, id);
+		return id;
+	} catch {
+		// sessionStorage が使えない場合はタブ寿命に近いメモリ上のIDで代替する
+		if (!memorySessionId) memorySessionId = generateId();
+		return memorySessionId;
+	}
+}
+
 /**
  * 検索語句からメタ情報を抽出する（生テキストは送信しない）
  */
@@ -84,6 +121,7 @@ export function track<K extends EventName>(
 			event: eventName,
 			props,
 			timestamp: Date.now(),
+			sessionId: getSessionId(),
 		};
 
 		const blob = new Blob([JSON.stringify(payload)], {
