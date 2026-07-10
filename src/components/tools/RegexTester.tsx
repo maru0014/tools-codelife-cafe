@@ -294,7 +294,7 @@ export default function RegexTester() {
 							onChange={(e) => setText(e.target.value)}
 							onScroll={handleScroll}
 							resize="vertical"
-							className="w-full min-h-[240px] max-h-[80dvh] bg-transparent text-foreground font-mono-tool border-none ring-0 shadow-none focus-visible:ring-0 rounded-none"
+							className="w-full h-[240px] min-h-[240px] max-h-[80dvh] bg-transparent text-foreground font-mono-tool border-none ring-0 shadow-none focus-visible:ring-0 rounded-none"
 							spellCheck={false}
 						/>
 					</div>

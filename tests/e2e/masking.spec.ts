@@ -70,4 +70,23 @@ test.describe('Personal Info Masking Tool', () => {
 			expect(resize).toBe('none');
 		}
 	});
+
+	test('input textarea keeps a fixed height on mobile even with long content', async ({
+		page,
+		createToolPage,
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		const toolPage = createToolPage('masking');
+		await toolPage.goto();
+
+		const textarea = page.locator('#masking-input-textarea');
+		const heightBefore = await textarea.evaluate((el) => el.clientHeight);
+
+		await textarea.fill(
+			Array.from({ length: 60 }, (_, i) => `line ${i}`).join('\n'),
+		);
+
+		const heightAfter = await textarea.evaluate((el) => el.clientHeight);
+		expect(heightAfter).toBe(heightBefore);
+	});
 });

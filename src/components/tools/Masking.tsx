@@ -230,7 +230,7 @@ export default function Masking() {
 							onScroll={handleScroll}
 							placeholder="山田太郎 (yamada@example.com) 090-1234-5678"
 							resize="vertical"
-							className="flex-1 min-h-[240px] max-h-[80dvh] bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 border-none ring-0 shadow-none focus-visible:ring-0 rounded-none relative z-10"
+							className="flex-1 h-[300px] min-h-[240px] max-h-[80dvh] bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 border-none ring-0 shadow-none focus-visible:ring-0 rounded-none relative z-10"
 							spellCheck={false}
 						/>
 					</div>

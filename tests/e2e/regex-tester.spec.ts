@@ -74,4 +74,23 @@ test.describe('Regex Tester Tool', () => {
 			expect(resize).toBe('none');
 		}
 	});
+
+	test('test string textarea keeps a fixed height on mobile even with long content', async ({
+		page,
+		createToolPage,
+	}) => {
+		await page.setViewportSize({ width: 390, height: 844 });
+		const toolPage = createToolPage('regex-tester');
+		await toolPage.goto();
+
+		const textarea = page.locator('#regex-test-string-textarea');
+		const heightBefore = await textarea.evaluate((el) => el.clientHeight);
+
+		await textarea.fill(
+			Array.from({ length: 60 }, (_, i) => `line ${i}`).join('\n'),
+		);
+
+		const heightAfter = await textarea.evaluate((el) => el.clientHeight);
+		expect(heightAfter).toBe(heightBefore);
+	});
 });
