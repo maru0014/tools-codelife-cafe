@@ -73,4 +73,44 @@ test.describe('JSON Formatter', () => {
 		);
 		expect(resize).toBe('none');
 	});
+
+	test('output placeholder textarea allows vertical resize with min/max height on desktop', async ({
+		page,
+		createToolPage,
+	}) => {
+		const toolPage = createToolPage('json-formatter');
+		await toolPage.goto();
+		await page.setViewportSize({ width: 1280, height: 900 });
+
+		// 未入力状態では読み取り専用のプレースホルダーtextareaが出力欄として表示される
+		const outputArea = page.getByPlaceholder('整形結果がここに表示されます...');
+		const style = await outputArea.evaluate((el) => {
+			const computed = getComputedStyle(el);
+			return {
+				resize: computed.resize,
+				minHeight: computed.minHeight,
+				maxHeight: computed.maxHeight,
+			};
+		});
+
+		expect(style.resize).toBe('vertical');
+		expect(style.minHeight).toBe('240px');
+		// 80dvh はビューポート高さ 900px の80% = 720px
+		expect(style.maxHeight).toBe('720px');
+	});
+
+	test('output placeholder textarea disables resize on mobile viewport', async ({
+		page,
+		createToolPage,
+	}) => {
+		const toolPage = createToolPage('json-formatter');
+		await page.setViewportSize({ width: 390, height: 844 });
+		await toolPage.goto();
+
+		const outputArea = page.getByPlaceholder('整形結果がここに表示されます...');
+		const resize = await outputArea.evaluate(
+			(el) => getComputedStyle(el).resize,
+		);
+		expect(resize).toBe('none');
+	});
 });

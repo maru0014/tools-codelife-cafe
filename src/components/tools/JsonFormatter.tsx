@@ -309,7 +309,8 @@ export default function JsonFormatter() {
 								? '入力JSONにエラーがあります'
 								: '整形結果がここに表示されます...'
 						}
-						className={`min-h-[200px] font-mono-tool rounded-xl bg-muted/50`}
+						resize="vertical"
+						className="min-h-[240px] max-h-[80dvh] font-mono-tool rounded-xl bg-muted/50"
 						spellCheck={false}
 					/>
 				)}
