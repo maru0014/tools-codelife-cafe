@@ -55,7 +55,7 @@ function MonthDaySelects({
 					value={String(month)}
 					onValueChange={(v) => onMonthChange(Number(v))}
 				>
-					<SelectTrigger className="rounded-xl w-full">
+					<SelectTrigger aria-label="月（任意）" className="rounded-xl w-full">
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
@@ -74,7 +74,7 @@ function MonthDaySelects({
 					value={String(day)}
 					onValueChange={(v) => onDayChange(Number(v))}
 				>
-					<SelectTrigger className="rounded-xl w-full">
+					<SelectTrigger aria-label="日（任意）" className="rounded-xl w-full">
 						<SelectValue />
 					</SelectTrigger>
 					<SelectContent>
@@ -108,6 +108,16 @@ export default function WarekiConverter() {
 	const [warekiInput, setWarekiInput] = useState<string>('令和元年');
 	const [warekiMonth, setWarekiMonth] = useState<number>(NO_MONTH_DAY);
 	const [warekiDay, setWarekiDay] = useState<number>(NO_MONTH_DAY);
+
+	// 月を「未指定」へ戻した場合は、日も「未指定」へ戻す（片方だけの指定はエラーになるため）
+	const handleSeirekiMonthChange = (value: number) => {
+		setSeirekiMonth(value);
+		if (value === NO_MONTH_DAY) setSeirekiDay(NO_MONTH_DAY);
+	};
+	const handleWarekiMonthChange = (value: number) => {
+		setWarekiMonth(value);
+		if (value === NO_MONTH_DAY) setWarekiDay(NO_MONTH_DAY);
+	};
 
 	const { result, error } = useMemo((): {
 		result: ConversionResult | null;
@@ -186,6 +196,9 @@ export default function WarekiConverter() {
 							</Label>
 							<Input
 								type="number"
+								inputMode="numeric"
+								step={1}
+								min={1}
 								value={seirekiYearInput}
 								onChange={(e) => setSeirekiYearInput(e.target.value)}
 								className="rounded-xl focus:ring-2 focus:ring-primary"
@@ -194,7 +207,7 @@ export default function WarekiConverter() {
 						<MonthDaySelects
 							month={seirekiMonth}
 							day={seirekiDay}
-							onMonthChange={setSeirekiMonth}
+							onMonthChange={handleSeirekiMonthChange}
 							onDayChange={setSeirekiDay}
 						/>
 					</>
@@ -215,7 +228,7 @@ export default function WarekiConverter() {
 						<MonthDaySelects
 							month={warekiMonth}
 							day={warekiDay}
-							onMonthChange={setWarekiMonth}
+							onMonthChange={handleWarekiMonthChange}
 							onDayChange={setWarekiDay}
 						/>
 					</>
