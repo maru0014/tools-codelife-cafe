@@ -46,7 +46,10 @@ test.describe('Wareki Converter Tool', () => {
 
 		await expect(page.getByRole('cell', { name: '1867年' })).toBeVisible();
 		await expect(
-			page.getByText('旧暦月日を新暦月日に変換した結果ではありません'),
+			page.getByText(
+				'年単位の対応候補です。旧暦月日を新暦月日に変換した結果ではありません。',
+				{ exact: true },
+			),
 		).toBeVisible();
 	});
 
