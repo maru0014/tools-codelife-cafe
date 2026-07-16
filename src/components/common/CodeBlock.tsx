@@ -1,3 +1,4 @@
+import { MoveDiagonal2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
@@ -16,6 +17,10 @@ interface CodeBlockProps {
 	highlightLines?: Set<number>;
 	/** 最小高さ */
 	minHeight?: string;
+	/** 最大高さ(resize="vertical" と併用してリサイズ上限を設定する) */
+	maxHeight?: string;
+	/** デスクトップ幅で縦方向にリサイズ可能にする */
+	resize?: 'vertical';
 }
 
 export default function CodeBlock({
@@ -26,6 +31,8 @@ export default function CodeBlock({
 	showLineNumbers = true,
 	highlightLines,
 	minHeight = '200px',
+	maxHeight,
+	resize,
 }: CodeBlockProps) {
 	const contentRef = useRef<HTMLPreElement>(null);
 	const gutterRef = useRef<HTMLDivElement>(null);
@@ -47,10 +54,13 @@ export default function CodeBlock({
 	return (
 		<div
 			className={cn(
-				'flex rounded-xl border border-border bg-card overflow-hidden font-mono-tool text-sm',
+				'group/codeblock relative flex rounded-xl border border-border bg-card font-mono-tool text-sm',
+				resize === 'vertical'
+					? 'resize-none md:resize-y overflow-auto'
+					: 'overflow-hidden',
 				className,
 			)}
-			style={{ minHeight }}
+			style={{ minHeight, ...(maxHeight ? { maxHeight } : {}) }}
 		>
 			{/* 行番号ガター */}
 			{showLineNumbers && (
@@ -91,6 +101,15 @@ export default function CodeBlock({
 					<code>{content}</code>
 				)}
 			</pre>
+			{resize === 'vertical' && (
+				<span
+					aria-hidden="true"
+					data-slot="codeblock-resize-handle"
+					className="pointer-events-none absolute bottom-1 right-1 hidden items-center justify-center text-muted-foreground/50 transition-colors duration-150 motion-reduce:transition-none md:flex md:group-hover/codeblock:text-muted-foreground md:group-focus-within/codeblock:text-muted-foreground"
+				>
+					<MoveDiagonal2 className="h-3.5 w-3.5" />
+				</span>
+			)}
 		</div>
 	);
 }
