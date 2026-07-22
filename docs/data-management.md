@@ -140,3 +140,69 @@ wrangler r2 bucket cors set codelife-models --file scripts/r2-cors.json
 - `src/workers/bg-remove.worker.ts`: 背景削除用 Web Worker。モデル配信元の切り替え、ブラウザキャッシュ利用、推論処理を管理します。
 - `scripts/upload-models-to-r2.sh`: HuggingFace 由来のモデルファイルを Cloudflare R2 バケットへアップロードする運用スクリプトです。
 - `scripts/r2-cors.json`: R2 バケットへ適用する CORS ポリシー定義です。
+
+---
+
+## 3. 文字起こしモデルの配信 (/transcribe)
+
+「文字起こし（ローカル）」ツールは、上記2ツールとは**配信方式が異なります**。音声・文字起こし結果を
+一切外部に出さないことを不変条件とするため、`/transcribe` では CSP の `connect-src` を `'self'` に
+限定しています。クロスオリジンの `models.tools.codelife.cafe` を直接叩く方式はこれと両立しないため、
+**同一オリジン `/models/transcribe/**` 経由で R2 をプロキシ**します。
+
+### 3.1 マニフェスト（正本）
+
+配信対象・コミットハッシュ・SHA-256・dtype は `src/lib/transcribe/model-manifest.ts` が正本です。
+このファイルは自動生成であり、手で編集しません。
+
+```bash
+npm run transcribe:manifest   # HuggingFace を参照してマニフェストを再生成（手動実行）
+```
+
+マニフェストに列挙されていないファイルは、Pages Function 側でも 404 になります
+（暗黙のパス解決・HuggingFace へのフォールバックを禁止するため）。
+
+### 3.2 dtype の選定（実測ベース）
+
+transformers.js / ONNX Runtime Web の組み合わせによって、動作する dtype が変わります。
+採用値は whisper-tiny で全 dtype を総当たりして決定したもので、根拠は
+`scripts/generate-transcribe-manifest.mjs` の冒頭コメントに表として残しています。
+
+| デバイス | dtype | 配信量（tiny / base / small） |
+|---|---|---|
+| WebGPU | `q8` | 39MB / 73MB / 238MB |
+| WASM | `bnb4` | 90MB / 133MB / 274MB |
+
+**ライブラリを更新した場合は、この表を取り直してから dtype を変更してください。**
+
+### 3.3 ローカル開発
+
+モデル実体（数百MB）と ONNX Runtime の WASM はリポジトリに含めず、`.gitignore` 対象です。
+
+```bash
+npm run transcribe:models              # public/models/transcribe/ へ tiny を取得（SHA-256 検証つき）
+npm run transcribe:models -- --model all --device all
+npm run transcribe:wasm                # public/vendor/onnx-wasm/ へ WASM を配置（npm run build が自動実行）
+```
+
+`copy-onnx-wasm.mjs` は、`@huggingface/transformers` が解決している `onnxruntime-web` の
+バージョン・SHA-256 がマニフェストと一致しない場合に `exit 1` します
+（JS 側と WASM 側の版ずれをビルド時に検出するため）。
+
+### 3.4 R2 配置 (Phase A2)
+
+```bash
+node scripts/fetch-transcribe-models.mjs --model all --device all
+bash scripts/upload-transcribe-models-to-r2.sh codelife-models
+```
+
+- オブジェクトキーは `transcribe/<model>/<path>`（既存の `/bg-remove` 用オブジェクトと分離）。
+- ブラウザへの配信は `functions/models/transcribe/[[path]].ts`（R2 バインディング `TRANSCRIBE_MODELS`）が担当します。
+- 必要権限: Cloudflare アカウントの **Workers R2 Storage: Edit**（`npx wrangler login` 済みであること）。
+
+### 3.5 関連ファイル
+- `src/lib/transcribe/model-manifest.ts`: 配信対象の正本（自動生成）。
+- `scripts/generate-transcribe-manifest.mjs`: マニフェスト生成。dtype 選定の実測表もここ。
+- `scripts/fetch-transcribe-models.mjs` / `scripts/copy-onnx-wasm.mjs`: ローカル取得・版ずれ検出。
+- `functions/models/transcribe/[[path]].ts`: 同一オリジン配信の Pages Function。
+- `src/workers/transcribe.worker.ts`: 推論 Worker（`allowRemoteModels = false`、`wasmPaths` 固定）。
