@@ -118,8 +118,9 @@
         -moz-osx-font-smoothing: grayscale;
     }
 
-    /* 縦リサイズ可能なtextareaのWebKit標準グリップは、独自グリップアイコンと重ならないよう配色のみ調整する */
-    textarea[data-resize='vertical']::-webkit-resizer {
+    /* 縦リサイズ可能な要素（textarea単体、または高さ責務を持つ外枠div）のWebKit標準グリップは、
+       独自グリップアイコンと重ならないよう配色のみ調整する */
+    [data-resize='vertical']::-webkit-resizer {
         background-color: transparent;
     }
 }

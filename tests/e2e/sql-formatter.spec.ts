@@ -96,13 +96,14 @@ test.describe('SQL Formatter Tool', () => {
 		).toBeVisible();
 	});
 
-	test('input textarea allows vertical resize with min/max height on desktop', async ({
+	test('input frame (wrapper) allows vertical resize with min/max height on desktop', async ({
 		page,
 	}) => {
 		await page.setViewportSize({ width: 1280, height: 900 });
 
-		const inputArea = page.locator('textarea');
-		const style = await inputArea.evaluate((el) => {
+		// 高さの責務は入力外枠（data-resize="vertical"）に一本化されている
+		const inputFrame = page.locator('#line-numbers').locator('xpath=..');
+		const style = await inputFrame.evaluate((el) => {
 			const computed = getComputedStyle(el);
 			return {
 				resize: computed.resize,
@@ -115,18 +116,69 @@ test.describe('SQL Formatter Tool', () => {
 		expect(style.minHeight).toBe('240px');
 		// 80dvh はビューポート高さ 900px の80% = 720px
 		expect(style.maxHeight).toBe('720px');
+
+		// textarea本体は二重の高さ責務を持たないよう、自身の縦リサイズは無効化されている
+		const inputArea = page.locator('textarea');
+		const textareaResize = await inputArea.evaluate(
+			(el) => getComputedStyle(el).resize,
+		);
+		expect(textareaResize).toBe('none');
 	});
 
-	test('input textarea disables resize on mobile viewport', async ({
-		page,
-	}) => {
+	test('input frame disables resize on mobile viewport', async ({ page }) => {
 		await page.setViewportSize({ width: 390, height: 844 });
 
-		const inputArea = page.locator('textarea');
-		const resize = await inputArea.evaluate(
+		const inputFrame = page.locator('#line-numbers').locator('xpath=..');
+		const resize = await inputFrame.evaluate(
 			(el) => getComputedStyle(el).resize,
 		);
 		expect(resize).toBe('none');
+	});
+
+	test('input frame, gutter, and textarea heights stay in sync as line count grows', async ({
+		page,
+	}) => {
+		await page.setViewportSize({ width: 1280, height: 900 });
+
+		const inputFrame = page.locator('#line-numbers').locator('xpath=..');
+		const gutter = page.locator('#line-numbers');
+		const inputArea = page.locator('textarea');
+
+		// ブラウザのボーダー計算・サブピクセル丸めによる数px程度の誤差は許容する
+		const HEIGHT_TOLERANCE_PX = 3;
+
+		const initialFrameBox = await inputFrame.boundingBox();
+		expect(initialFrameBox).not.toBeNull();
+		const initialFrameHeight = initialFrameBox?.height ?? Number.NaN;
+
+		for (const lineCount of [10, 30, 100]) {
+			await inputArea.fill(
+				Array.from({ length: lineCount }, (_, i) => `-- line ${i}`).join('\n'),
+			);
+
+			const frameBox = await inputFrame.boundingBox();
+			const gutterBox = await gutter.boundingBox();
+			const textareaBox = await inputArea.boundingBox();
+			expect(frameBox).not.toBeNull();
+			expect(gutterBox).not.toBeNull();
+			expect(textareaBox).not.toBeNull();
+
+			const frameHeight = frameBox?.height ?? Number.NaN;
+			const gutterHeight = gutterBox?.height ?? Number.NaN;
+			const textareaHeight = textareaBox?.height ?? Number.NaN;
+
+			expect(Math.abs(frameHeight - gutterHeight)).toBeLessThanOrEqual(
+				HEIGHT_TOLERANCE_PX,
+			);
+			expect(Math.abs(frameHeight - textareaHeight)).toBeLessThanOrEqual(
+				HEIGHT_TOLERANCE_PX,
+			);
+
+			// 行数が増えても外枠は自動拡張せず、初期高さ付近を維持する（内部スクロールになる）
+			expect(Math.abs(frameHeight - initialFrameHeight)).toBeLessThanOrEqual(
+				HEIGHT_TOLERANCE_PX,
+			);
+		}
 	});
 
 	test('restores full-size layout from a shared settings URL', async ({

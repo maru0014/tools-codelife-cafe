@@ -1,4 +1,11 @@
-import { AlertCircle, Download, Minimize2, Share2, Wand2 } from 'lucide-react';
+import {
+	AlertCircle,
+	Download,
+	Minimize2,
+	MoveDiagonal2,
+	Share2,
+	Wand2,
+} from 'lucide-react';
 import { type UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import CodeBlock from '@/components/common/CodeBlock';
 import CopyButton from '@/components/common/CopyButton';
@@ -241,11 +248,14 @@ export default function JsonFormatter() {
 				>
 					入力JSON
 				</Label>
-				<div className="relative rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden flex">
+				<div
+					className="group/json-input relative flex h-[250px] min-h-[240px] max-h-[80dvh] resize-none overflow-hidden rounded-xl border border-input bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary md:resize-y"
+					data-resize="vertical"
+				>
 					{/* 行番号ガター */}
 					<div
 						id="json-input-line-numbers"
-						className="w-12 border-r bg-muted/40 text-right pr-2 py-3 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none"
+						className="h-full min-h-0 w-12 border-r bg-muted/40 text-right pr-2 py-3 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none"
 					>
 						{inputLines.map((num) => (
 							<div
@@ -260,17 +270,24 @@ export default function JsonFormatter() {
 							</div>
 						))}
 					</div>
-					{/* Textarea */}
+					{/* Textarea（縦リサイズは外枠が担うため無効化） */}
 					<Textarea
 						id="json-input-textarea"
 						value={input}
 						onChange={(e) => handleInputChange(e.target.value)}
 						onScroll={handleInputScroll}
 						placeholder={'{"name":"太郎","age":30,"city":"東京"}'}
-						resize="vertical"
-						className="flex-1 h-[250px] min-h-[240px] max-h-[80dvh] bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 border-none ring-0 shadow-none focus-visible:ring-0 rounded-none whitespace-pre"
+						resize="none"
+						className="h-full min-h-0 flex-1 overflow-auto bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 border-none ring-0 shadow-none focus-visible:ring-0 rounded-none whitespace-pre"
 						spellCheck={false}
 					/>
+					<span
+						aria-hidden="true"
+						data-slot="textarea-resize-handle"
+						className="pointer-events-none absolute bottom-1 right-1 hidden cursor-ns-resize items-center justify-center text-muted-foreground/50 transition-colors duration-150 motion-reduce:transition-none md:flex md:group-hover/json-input:text-muted-foreground md:group-focus-within/json-input:text-muted-foreground"
+					>
+						<MoveDiagonal2 className="h-3.5 w-3.5" />
+					</span>
 				</div>
 			</div>
 
