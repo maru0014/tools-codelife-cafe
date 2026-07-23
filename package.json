@@ -8,12 +8,16 @@
 	},
 	"scripts": {
 		"dev": "astro dev",
-		"build": "astro build && node scripts/generate-og-images.mjs && node scripts/generate-sw.mjs",
+		"build": "node scripts/copy-onnx-wasm.mjs && astro build && node scripts/generate-og-images.mjs && node scripts/generate-sw.mjs",
 		"test": "playwright test",
 		"test:unit": "node --test \"tests/unit/*.test.ts\"",
 		"preview": "astro preview --host",
 		"preview:ci": "astro preview",
 		"generate:fixtures": "node scripts/generate-qr-fixtures.ts",
+		"transcribe:manifest": "node scripts/generate-transcribe-manifest.mjs",
+		"transcribe:models": "node scripts/fetch-transcribe-models.mjs",
+		"transcribe:wasm": "node scripts/copy-onnx-wasm.mjs",
+		"transcribe:verify": "node scripts/verify-transcribe-delivery.mjs",
 		"lint": "biome check src/ tests/",
 		"lint:fix": "biome check --write src/ tests/",
 		"astro": "astro",
@@ -83,6 +87,7 @@
 	"overrides": {
 		"esbuild": "^0.28.1",
 		"yaml": "^2.9.0",
-		"adm-zip": "^0.6.0"
+		"adm-zip": "^0.6.0",
+		"sharp": "^0.35.3"
 	}
 }

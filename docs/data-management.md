@@ -140,3 +140,128 @@ wrangler r2 bucket cors set codelife-models --file scripts/r2-cors.json
 - `src/workers/bg-remove.worker.ts`: 背景削除用 Web Worker。モデル配信元の切り替え、ブラウザキャッシュ利用、推論処理を管理します。
 - `scripts/upload-models-to-r2.sh`: HuggingFace 由来のモデルファイルを Cloudflare R2 バケットへアップロードする運用スクリプトです。
 - `scripts/r2-cors.json`: R2 バケットへ適用する CORS ポリシー定義です。
+
+---
+
+## 3. 文字起こしモデルの配信 (/transcribe)
+
+「文字起こし（ローカル）」ツールは、上記2ツールとは**配信方式が異なります**。音声・文字起こし結果を
+一切外部に出さないことを不変条件とするため、`/transcribe` では CSP の `connect-src` を `'self'` に
+限定しています。クロスオリジンの `models.tools.codelife.cafe` を直接叩く方式はこれと両立しないため、
+**同一オリジン `/models/transcribe/**` 経由で R2 をプロキシ**します。
+
+### 3.1 配信パスの規約（revision を含める）
+
+モデルと ONNX Runtime WASM の配信 URL には、**内容を一意に決める識別子をパスへ含めます**。
+
+```
+/models/transcribe/<model>/<revision>/config.json
+/models/transcribe/<model>/<revision>/onnx/<file>.onnx
+/vendor/onnx-wasm/<onnxruntime-web のバージョン>/<file>
+```
+
+例:
+
+```
+/models/transcribe/whisper-tiny/ff4177021cc41f7db950912b73ea4fdf7d01d8e7/config.json
+```
+
+R2 のオブジェクトキーも同じ構造です（`transcribe/<model>/<revision>/...`）。
+
+**なぜそうするか**: これらは `Cache-Control: public, max-age=31536000, immutable` で配信します。
+固定 URL の内容を差し替える運用にすると、ブラウザ・CDN・Service Worker に残った旧成果物が
+最大1年間使われ続けます。パスに revision を含めておけば、モデルを更新しても URL が変わるため
+その事故が原理的に起きません。**固定 URL のまま中身を差し替えないでください。**
+
+transformers.js の `pipeline()` へ渡すモデル識別子も同じ `<model>/<revision>` です
+（`isValidHfModelId` の正規表現はスラッシュ1個までを許可するため、この形が通ります）。
+暗黙のパス変換には依存せず、すべてマニフェストから導出しています。
+
+### 3.2 マニフェスト（正本）
+
+配信対象・コミットハッシュ・SHA-256・dtype は `src/lib/transcribe/model-manifest.ts` が正本です。
+このファイルは自動生成であり、手で編集しません。
+
+```bash
+npm run transcribe:manifest   # HuggingFace を参照してマニフェストを再生成（手動実行）
+```
+
+マニフェストに列挙されていないファイルは、Pages Function 側でも 404 になります
+（暗黙のパス解決・HuggingFace へのフォールバックを禁止するため）。
+
+### 3.3 dtype の選定（実測ベース）
+
+transformers.js / ONNX Runtime Web の組み合わせによって、動作する dtype が変わります。
+採用値は whisper-tiny で全 dtype を総当たりして決定したもので、根拠は
+`scripts/generate-transcribe-manifest.mjs` の冒頭コメントに表として残しています。
+
+| デバイス | dtype | 配信量（tiny / base / small） |
+|---|---|---|
+| WebGPU | `q8` | 39MB / 73MB / 238MB |
+| WASM | `bnb4` | 90MB / 133MB / 274MB |
+
+**ライブラリを更新した場合は、この表を取り直してから dtype を変更してください。**
+
+### 3.4 ローカル開発
+
+モデル実体（数百MB）と ONNX Runtime の WASM はリポジトリに含めず、`.gitignore` 対象です。
+
+```bash
+npm run transcribe:models              # public/models/transcribe/ へ tiny を取得（SHA-256 検証つき）
+npm run transcribe:models -- --model all --device all
+npm run transcribe:wasm                # public/vendor/onnx-wasm/ へ WASM を配置（npm run build が自動実行）
+```
+
+`copy-onnx-wasm.mjs` は、`@huggingface/transformers` が解決している `onnxruntime-web` の
+バージョン・SHA-256 がマニフェストと一致しない場合に `exit 1` します
+（JS 側と WASM 側の版ずれをビルド時に検出するため）。
+
+### 3.5 R2 配置 (Phase A2)
+
+```bash
+node scripts/fetch-transcribe-models.mjs --model all --device all
+node scripts/upload-transcribe-models-to-r2.mjs codelife-models --dry-run
+node scripts/upload-transcribe-models-to-r2.mjs codelife-models
+```
+
+- オブジェクトキーは `transcribe/<model>/<revision>/<path>`（既存の `/bg-remove` 用オブジェクトと分離）。
+- ブラウザへの配信は `functions/models/transcribe/[[path]].ts`（R2 バインディング `TRANSCRIBE_MODELS`）が担当します。
+- 必要権限: Cloudflare アカウントの **Workers R2 Storage: Edit**（`wrangler login` 済みであること）。
+- アップロード前にマニフェストの SHA-256 を再検証します。同じキーへの上書きなので、途中で中断しても再実行すれば続きから揃います。
+- **モデルを更新するときは新しい revision のキーへ置き、旧キーは実配信確認後に削除します。**
+  同じキーの内容を差し替えると、`immutable` で配った旧成果物が最大1年キャッシュに残ります。
+
+> **WSL から実行する場合の注意**: Windows 側にグローバルインストールした wrangler を WSL から呼ぶと、
+> `workerd` のネイティブバイナリがプラットフォーム不一致で起動できません
+> （`@cloudflare/workerd-windows-64` is present but this platform needs ...-linux-64）。
+> Windows 側（PowerShell / Git Bash）で実行するか、WSL 側に Linux 版を入れて
+> `WRANGLER_BIN=./node_modules/.bin/wrangler` を指定してください。
+
+デプロイ後は、実配信を検証してからリリースします。
+
+```bash
+npm run transcribe:verify                       # 本番に対して実行
+npm run transcribe:verify -- --base <URL>       # 任意の環境
+npm run transcribe:verify -- --full             # 全ファイルの SHA-256 まで照合
+```
+
+検証内容:
+
+1. 全モデルファイルと ONNX Runtime WASM を HEAD し、`200` / `Content-Length` / `Content-Type` /
+   `Cache-Control`（`immutable`）を確認する
+2. スモークテストで実際に使う tiny の WebGPU / WASM 成果物と WASM ランタイムは、
+   配信レスポンスを取得して **SHA-256 をマニフェストと照合**する
+3. `--full` で全ファイルの SHA-256 を照合する（転送量に注意）
+
+`Content-Length` の一致だけでは、同じサイズの破損ファイルや誤った内容を検出できません。
+`immutable` で1年配るため、誤配信は長期間残ります。だから最低限 tiny は中身まで確認します。
+
+> 今後の改善案: R2 オブジェクトへマニフェストの SHA-256 をカスタムメタデータとして保存し、
+> HEAD だけで内容まで照合できるようにする（転送量ゼロで完全性を確認できる）。
+
+### 3.6 関連ファイル
+- `src/lib/transcribe/model-manifest.ts`: 配信対象の正本（自動生成）。
+- `scripts/generate-transcribe-manifest.mjs`: マニフェスト生成。dtype 選定の実測表もここ。
+- `scripts/fetch-transcribe-models.mjs` / `scripts/copy-onnx-wasm.mjs`: ローカル取得・版ずれ検出。
+- `functions/models/transcribe/[[path]].ts`: 同一オリジン配信の Pages Function。
+- `src/workers/transcribe.worker.ts`: 推論 Worker（`allowRemoteModels = false`、`wasmPaths` 固定）。
