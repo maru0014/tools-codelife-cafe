@@ -13,8 +13,10 @@ test.describe('textareaのリサイズ視覚ヒント（グリップ）', () => 
 		const toolPage = createToolPage('sql-formatter');
 		await toolPage.goto();
 
-		const textarea = page.locator('textarea[data-resize="vertical"]').first();
-		await expect(textarea).toHaveCount(1);
+		// SQL整形の入力欄は行番号ガターと高さを揃えるため、縦リサイズの責務が
+		// textarea本体ではなく外枠divに一本化されている
+		const resizable = page.locator('[data-resize="vertical"]').first();
+		await expect(resizable).toHaveCount(1);
 
 		const grip = page.locator(GRIP_SELECTOR).first();
 		await expect(grip).toBeVisible();
