@@ -7,7 +7,9 @@
 //
 // そのため本ファイルは外部ネットワークに依存しない。
 
+import { getModelArtifact } from '../../src/lib/transcribe/model-manifest';
 import { expect, test } from './fixtures/base';
+import { installMock } from './helpers/transcribe-mock-worker';
 
 declare global {
 	interface Window {
@@ -17,72 +19,7 @@ declare global {
 	}
 }
 
-/**
- * 本物の推論 Worker を差し替えるモック。
- * src/lib/transcribe/client.ts の `window.__TRANSCRIBE_WORKER_FACTORY__` フックを使う。
- * `window.__TRANSCRIBE_MOCK_MODE__` で挙動を切り替える。
- */
-const MOCK_WORKER = `
-window.__TRANSCRIBE_MOCK_MODE__ = window.__TRANSCRIBE_MOCK_MODE__ || 'ok';
-window.__TRANSCRIBE_MOCK_TERMINATED__ = 0;
-window.__TRANSCRIBE_WORKER_FACTORY__ = () => {
-	const listeners = { message: [], error: [] };
-	let alive = true;
-	const emit = (data) => {
-		if (!alive) return;
-		for (const fn of listeners.message) fn({ data });
-	};
-	const later = (ms, fn) => setTimeout(() => { if (alive) fn(); }, ms);
-	return {
-		addEventListener(type, fn) { (listeners[type] || []).push(fn); },
-		removeEventListener(type, fn) {
-			const list = listeners[type] || [];
-			const i = list.indexOf(fn);
-			if (i >= 0) list.splice(i, 1);
-		},
-		terminate() { alive = false; window.__TRANSCRIBE_MOCK_TERMINATED__++; },
-		postMessage(request) {
-			const mode = window.__TRANSCRIBE_MOCK_MODE__;
-			if (request.type === 'load') {
-				if (mode === 'stall') return;
-				if (mode === 'load-error') {
-					later(30, () => emit({ type: 'error', code: 'model-load-failed', message: 'mock load failure' }));
-					return;
-				}
-				later(20, () => emit({ type: 'progress', kind: 'model', pct: 40 }));
-				later(40, () => emit({ type: 'progress', kind: 'model', pct: 100 }));
-				later(60, () => emit({ type: 'ready', modelId: request.modelId }));
-				return;
-			}
-			if (request.type === 'transcribe') {
-				if (mode === 'infer-error') {
-					later(30, () => emit({ type: 'error', code: 'oom', message: 'mock oom' }));
-					return;
-				}
-				later(20, () => emit({ type: 'progress', kind: 'infer', pct: 0, elapsedMs: 0, processedChunks: 0, totalChunks: 2 }));
-				later(40, () => emit({ type: 'segment', segment: { id: 1, start: 0, end: 1.5, text: 'こんにちは' } }));
-				later(60, () => emit({ type: 'progress', kind: 'infer', pct: 50, elapsedMs: 500, processedChunks: 1, totalChunks: 2 }));
-				later(90, () => emit({
-					type: 'done',
-					segments: [
-						{ id: 1, start: 0, end: 1.5, text: 'こんにちは' },
-						{ id: 2, start: 1.5, end: 3, text: 'テストです' },
-					],
-				}));
-			}
-		},
-	};
-};
-`;
-
 const FIXTURE = 'tests/e2e/fixtures/transcribe-sample.wav';
-
-async function installMock(page: import('@playwright/test').Page, mode = 'ok') {
-	await page.addInitScript(
-		`window.__TRANSCRIBE_MOCK_MODE__ = ${JSON.stringify(mode)};`,
-	);
-	await page.addInitScript(MOCK_WORKER);
-}
 
 test('ページが表示され、SafetyBadge とモデル選択が出る', async ({
 	page,
@@ -278,17 +215,80 @@ test('CSP・計測: connect-src が self に限定され、外部通信と計測
 	expect(disallowed).toEqual([]);
 });
 
-test('モデル取得先は同一オリジンの /models/transcribe/ に固定されている', async ({
+test('モデル取得先は同一オリジンかつ revision 付きのパスに固定されている', async ({
 	page,
 }) => {
 	await page.goto('/transcribe');
-	// マニフェストが示す配信ルートが同一オリジンであること（実モデル取得は行わない）
-	const paths = await page.evaluate(async () => {
-		const res = await fetch('/models/transcribe/whisper-tiny/config.json', {
+
+	// 実モデル取得は行わず、配信ルートが同一オリジンであることだけを確認する。
+	// revision なしの旧パスは配信対象ではない（Pages Function の許可リスト外）。
+	const tiny = getModelArtifact('tiny');
+	expect(tiny.repositoryPath).toBe(`${tiny.name}/${tiny.revision}/`);
+
+	const status = await page.evaluate(async (repositoryPath: string) => {
+		const revisioned = await fetch(
+			`/models/transcribe/${repositoryPath}config.json`,
+			{ method: 'HEAD' },
+		);
+		const legacy = await fetch('/models/transcribe/whisper-tiny/config.json', {
 			method: 'HEAD',
 		});
-		return res.status;
-	});
+		return { revisioned: revisioned.status, legacy: legacy.status };
+	}, tiny.repositoryPath);
+
 	// ローカル未取得なら 404、取得済みなら 200。いずれにせよ外部へは出ない
-	expect([200, 404]).toContain(paths);
+	expect([200, 404]).toContain(status.revisioned);
+	// revision なしの旧パスは配信対象ではない
+	expect(status.legacy).toBe(404);
+});
+
+test('smallの「推奨」表示は WebGPU とメモリ安全判定の両方を通過したときだけ出る', async ({
+	page,
+}) => {
+	const stub = (gpu: boolean, deviceMemory: number | undefined) => `
+		${
+			gpu
+				? "Object.defineProperty(navigator, 'gpu', { configurable: true, value: { requestAdapter: async () => ({ features: new Set(['shader-f16']) }) } });"
+				: "Object.defineProperty(navigator, 'gpu', { configurable: true, value: undefined });"
+		}
+		Object.defineProperty(navigator, 'deviceMemory', { configurable: true, value: ${
+			deviceMemory === undefined ? 'undefined' : deviceMemory
+		} });
+	`;
+	const badge = () => page.getByTestId('transcribe-small-recommended');
+
+	// 1. WebGPU あり × メモリ十分 × ファイル選択済み → 推奨する
+	await installMock(page, 'ok', [stub(true, 16)]);
+	await page.goto('/transcribe');
+	await expect(badge()).toHaveCount(0); // ファイル未選択では出さない
+	await page.locator('input[type=file]').setInputFiles(FIXTURE);
+	await expect(badge()).toBeVisible();
+
+	// 2. WebGPU あり × メモリ 4GB（small は危険） → 推奨しない
+	const risky = await page.context().newPage();
+	await installMock(risky, 'ok', [stub(true, 4)]);
+	await risky.goto('/transcribe');
+	await risky.locator('input[type=file]').setInputFiles(FIXTURE);
+	await expect(risky.getByTestId('transcribe-small-recommended')).toHaveCount(
+		0,
+	);
+	await risky.close();
+
+	// 3. WebGPU あり × deviceMemory 取得不能 → 安全通過扱いにしない
+	const unknown = await page.context().newPage();
+	await installMock(unknown, 'ok', [stub(true, undefined)]);
+	await unknown.goto('/transcribe');
+	await unknown.locator('input[type=file]').setInputFiles(FIXTURE);
+	await expect(unknown.getByTestId('transcribe-small-recommended')).toHaveCount(
+		0,
+	);
+	await unknown.close();
+
+	// 4. WebGPU なし（WASM） → 推奨しない
+	const wasm = await page.context().newPage();
+	await installMock(wasm, 'ok', [stub(false, 32)]);
+	await wasm.goto('/transcribe');
+	await wasm.locator('input[type=file]').setInputFiles(FIXTURE);
+	await expect(wasm.getByTestId('transcribe-small-recommended')).toHaveCount(0);
+	await wasm.close();
 });
