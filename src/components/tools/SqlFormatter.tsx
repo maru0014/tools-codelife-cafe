@@ -483,11 +483,14 @@ export default function SqlFormatter() {
 							</Button>
 						</div>
 					</div>
-					<div className="relative rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden flex">
+					<div
+						className="group/sql-input relative flex h-[400px] min-h-[240px] max-h-[80dvh] resize-none overflow-hidden rounded-xl border border-input bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary md:resize-y"
+						data-resize="vertical"
+					>
 						{/* Gutter */}
 						<div
 							id="line-numbers"
-							className="w-12 border-r bg-muted/40 text-right pr-2 py-3 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none"
+							className="h-full min-h-0 w-12 border-r bg-muted/40 text-right pr-2 py-3 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none"
 						>
 							{lines.map((num) => (
 								<div key={num} className="leading-5 h-5">
@@ -495,16 +498,23 @@ export default function SqlFormatter() {
 								</div>
 							))}
 						</div>
-						{/* Textarea */}
+						{/* Textarea（縦リサイズは外枠が担うため無効化） */}
 						<Textarea
 							value={input}
 							onChange={(e) => setInput(e.target.value)}
 							onScroll={handleScroll}
 							placeholder="SELECT * FROM users WHERE active = 1"
 							spellCheck={false}
-							resize="vertical"
-							className="flex-1 h-[400px] min-h-[240px] max-h-[80dvh] bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 border-none ring-0 shadow-none focus-visible:ring-0 rounded-none whitespace-pre"
+							resize="none"
+							className="h-full min-h-0 flex-1 overflow-auto bg-transparent text-foreground font-mono-tool text-sm leading-5 p-3 border-none ring-0 shadow-none focus-visible:ring-0 rounded-none whitespace-pre"
 						/>
+						<span
+							aria-hidden="true"
+							data-slot="textarea-resize-handle"
+							className="pointer-events-none absolute bottom-1 right-1 hidden cursor-ns-resize items-center justify-center text-muted-foreground/50 transition-colors duration-150 motion-reduce:transition-none md:flex md:group-hover/sql-input:text-muted-foreground md:group-focus-within/sql-input:text-muted-foreground"
+						>
+							<MoveDiagonal2 className="h-3.5 w-3.5" />
+						</span>
 					</div>
 				</div>
 

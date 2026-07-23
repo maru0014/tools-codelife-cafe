@@ -1,4 +1,4 @@
-import { Share2, Trash2, XCircle } from 'lucide-react';
+import { MoveDiagonal2, Share2, Trash2, XCircle } from 'lucide-react';
 import { type UIEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import CopyButton from '@/components/common/CopyButton';
 import {
@@ -261,11 +261,14 @@ export default function RegexTester() {
 				</div>
 
 				{/* Highlight Overlay Container */}
-				<div className="relative rounded-xl border border-input shadow-sm focus-within:ring-2 focus-within:ring-primary bg-background overflow-hidden flex">
+				<div
+					className="group/regex-input relative flex h-[240px] min-h-[240px] max-h-[80dvh] resize-none overflow-hidden rounded-xl border border-input bg-background shadow-sm focus-within:ring-2 focus-within:ring-primary md:resize-y"
+					data-resize="vertical"
+				>
 					{/* 行番号ガター */}
 					<div
 						id="regex-line-numbers"
-						className="shrink-0 w-12 border-r bg-muted/40 text-right pr-2 py-2 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none z-10"
+						className="shrink-0 h-full min-h-0 w-12 border-r bg-muted/40 text-right pr-2 py-2 overflow-hidden text-xs text-muted-foreground font-mono-tool select-none z-10"
 						aria-hidden="true"
 					>
 						{Array.from(
@@ -278,7 +281,7 @@ export default function RegexTester() {
 						))}
 					</div>
 					{/* コンテンツラッパー */}
-					<div className="relative flex-1">
+					<div className="relative h-full min-h-0 flex-1">
 						{/* Highlight Layer */}
 						<div
 							id="highlight-overlay"
@@ -287,17 +290,24 @@ export default function RegexTester() {
 						>
 							{highlightNodes}
 						</div>
-						{/* Actual Textarea */}
+						{/* Actual Textarea（縦リサイズは外枠が担うため無効化） */}
 						<Textarea
 							id="regex-test-string-textarea"
 							value={text}
 							onChange={(e) => setText(e.target.value)}
 							onScroll={handleScroll}
-							resize="vertical"
-							className="w-full h-[240px] min-h-[240px] max-h-[80dvh] bg-transparent text-foreground font-mono-tool border-none ring-0 shadow-none focus-visible:ring-0 rounded-none"
+							resize="none"
+							className="h-full min-h-0 w-full overflow-auto bg-transparent text-foreground font-mono-tool border-none ring-0 shadow-none focus-visible:ring-0 rounded-none"
 							spellCheck={false}
 						/>
 					</div>
+					<span
+						aria-hidden="true"
+						data-slot="textarea-resize-handle"
+						className="pointer-events-none absolute bottom-1 right-1 hidden cursor-ns-resize items-center justify-center text-muted-foreground/50 transition-colors duration-150 motion-reduce:transition-none md:flex md:group-hover/regex-input:text-muted-foreground md:group-focus-within/regex-input:text-muted-foreground"
+					>
+						<MoveDiagonal2 className="h-3.5 w-3.5" />
+					</span>
 				</div>
 			</div>
 

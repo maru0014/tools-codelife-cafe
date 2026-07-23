@@ -27,7 +27,7 @@ test.describe('Regex Tester Tool', () => {
 		await expect(matchCount).toHaveText('4');
 	});
 
-	test('test string and replace textareas allow vertical resize with min/max height on desktop', async ({
+	test('replace output textarea allows vertical resize with min/max height on desktop', async ({
 		page,
 		createToolPage,
 	}) => {
@@ -35,25 +35,52 @@ test.describe('Regex Tester Tool', () => {
 		await toolPage.goto();
 		await page.setViewportSize({ width: 1280, height: 900 });
 
-		for (const id of [
-			'#regex-test-string-textarea',
-			'#regex-replace-output-textarea',
-		]) {
-			const textarea = page.locator(id);
-			const style = await textarea.evaluate((el) => {
-				const computed = getComputedStyle(el);
-				return {
-					resize: computed.resize,
-					minHeight: computed.minHeight,
-					maxHeight: computed.maxHeight,
-				};
-			});
+		// 置換結果欄は行番号ガターを持たないため、textarea本体が引き続き縦リサイズを担う
+		const textarea = page.locator('#regex-replace-output-textarea');
+		const style = await textarea.evaluate((el) => {
+			const computed = getComputedStyle(el);
+			return {
+				resize: computed.resize,
+				minHeight: computed.minHeight,
+				maxHeight: computed.maxHeight,
+			};
+		});
 
-			expect(style.resize).toBe('vertical');
-			expect(style.minHeight).toBe('240px');
-			// 80dvh はビューポート高さ 900px の80% = 720px
-			expect(style.maxHeight).toBe('720px');
-		}
+		expect(style.resize).toBe('vertical');
+		expect(style.minHeight).toBe('240px');
+		// 80dvh はビューポート高さ 900px の80% = 720px
+		expect(style.maxHeight).toBe('720px');
+	});
+
+	test('test string frame (wrapper) allows vertical resize with min/max height on desktop', async ({
+		page,
+		createToolPage,
+	}) => {
+		const toolPage = createToolPage('regex-tester');
+		await toolPage.goto();
+		await page.setViewportSize({ width: 1280, height: 900 });
+
+		// 高さの責務は入力外枠（data-resize="vertical"）に一本化されている
+		const inputFrame = page.locator('#regex-line-numbers').locator('xpath=..');
+		const style = await inputFrame.evaluate((el) => {
+			const computed = getComputedStyle(el);
+			return {
+				resize: computed.resize,
+				minHeight: computed.minHeight,
+				maxHeight: computed.maxHeight,
+			};
+		});
+
+		expect(style.resize).toBe('vertical');
+		expect(style.minHeight).toBe('240px');
+		// 80dvh はビューポート高さ 900px の80% = 720px
+		expect(style.maxHeight).toBe('720px');
+
+		// textarea本体は二重の高さ責務を持たないよう、自身の縦リサイズは無効化されている
+		const textareaResize = await page
+			.locator('#regex-test-string-textarea')
+			.evaluate((el) => getComputedStyle(el).resize);
+		expect(textareaResize).toBe('none');
 	});
 
 	test('test string and replace textareas disable resize on mobile viewport', async ({
@@ -64,15 +91,17 @@ test.describe('Regex Tester Tool', () => {
 		const toolPage = createToolPage('regex-tester');
 		await toolPage.goto();
 
-		for (const id of [
-			'#regex-test-string-textarea',
-			'#regex-replace-output-textarea',
-		]) {
-			const resize = await page
-				.locator(id)
-				.evaluate((el) => getComputedStyle(el).resize);
-			expect(resize).toBe('none');
-		}
+		const testStringFrame = page
+			.locator('#regex-line-numbers')
+			.locator('xpath=..');
+		expect(
+			await testStringFrame.evaluate((el) => getComputedStyle(el).resize),
+		).toBe('none');
+
+		const replaceResize = await page
+			.locator('#regex-replace-output-textarea')
+			.evaluate((el) => getComputedStyle(el).resize);
+		expect(replaceResize).toBe('none');
 	});
 
 	test('test string textarea keeps a fixed height on mobile even with long content', async ({
@@ -92,5 +121,54 @@ test.describe('Regex Tester Tool', () => {
 
 		const heightAfter = await textarea.evaluate((el) => el.clientHeight);
 		expect(heightAfter).toBe(heightBefore);
+	});
+
+	test('test string frame, gutter, and textarea heights stay in sync as line count grows', async ({
+		page,
+		createToolPage,
+	}) => {
+		const toolPage = createToolPage('regex-tester');
+		await toolPage.goto();
+		await page.setViewportSize({ width: 1280, height: 900 });
+
+		const inputFrame = page.locator('#regex-line-numbers').locator('xpath=..');
+		const gutter = page.locator('#regex-line-numbers');
+		const textarea = page.locator('#regex-test-string-textarea');
+
+		// ブラウザのボーダー計算・サブピクセル丸めによる数px程度の誤差は許容する
+		const HEIGHT_TOLERANCE_PX = 3;
+
+		const initialFrameBox = await inputFrame.boundingBox();
+		expect(initialFrameBox).not.toBeNull();
+		const initialFrameHeight = initialFrameBox?.height ?? Number.NaN;
+
+		for (const lineCount of [8, 30, 100]) {
+			await textarea.fill(
+				Array.from({ length: lineCount }, (_, i) => `line ${i}`).join('\n'),
+			);
+
+			const frameBox = await inputFrame.boundingBox();
+			const gutterBox = await gutter.boundingBox();
+			const textareaBox = await textarea.boundingBox();
+			expect(frameBox).not.toBeNull();
+			expect(gutterBox).not.toBeNull();
+			expect(textareaBox).not.toBeNull();
+
+			const frameHeight = frameBox?.height ?? Number.NaN;
+			const gutterHeight = gutterBox?.height ?? Number.NaN;
+			const textareaHeight = textareaBox?.height ?? Number.NaN;
+
+			expect(Math.abs(frameHeight - gutterHeight)).toBeLessThanOrEqual(
+				HEIGHT_TOLERANCE_PX,
+			);
+			expect(Math.abs(frameHeight - textareaHeight)).toBeLessThanOrEqual(
+				HEIGHT_TOLERANCE_PX,
+			);
+
+			// 行数が増えても外枠は自動拡張せず、初期高さ付近を維持する（内部スクロールになる）
+			expect(Math.abs(frameHeight - initialFrameHeight)).toBeLessThanOrEqual(
+				HEIGHT_TOLERANCE_PX,
+			);
+		}
 	});
 });
