@@ -5,6 +5,9 @@
 //
 // 「transcribe 用キャッシュ全体を消す」ではなく、マニフェストに列挙された URL だけを
 // 削除することで、他ツール（/bg-remove 等）のキャッシュに影響を与えない。
+//
+// URL には revision が含まれる（`<name>/<revision>/...`）ため、旧 revision の
+// キャッシュが残っていても「キャッシュ済み」とは判定されない。
 
 import {
 	getModelArtifact,
@@ -14,49 +17,82 @@ import {
 import { requiredFiles } from './models.ts';
 import type { TranscribeDevice } from './protocol.ts';
 
-function modelFileUrls(id: ModelId, device: TranscribeDevice): string[] {
-	const artifact = getModelArtifact(id);
-	const origin = typeof location !== 'undefined' ? location.origin : '';
-	return requiredFiles(artifact, device).map(
-		(file) =>
-			`${origin}${MODEL_BASE_PATH}${artifact.repositoryPath}${file.path}`,
-	);
+/** Cache Storage の必要な部分だけを型にしたもの（テストで差し替えられるようにする） */
+export type CacheLike = {
+	match(request: string): Promise<unknown>;
+	delete(request: string): Promise<boolean>;
+};
+
+export type CacheStorageLike = {
+	keys(): Promise<string[]>;
+	open(cacheName: string): Promise<CacheLike>;
+	match(request: string): Promise<unknown>;
+};
+
+function defaultCacheStorage(): CacheStorageLike | null {
+	return typeof caches === 'undefined'
+		? null
+		: (caches as unknown as CacheStorageLike);
 }
 
-/** 最も大きい ONNX がキャッシュされていれば「キャッシュ済み」とみなす */
+function origin(): string {
+	return typeof location !== 'undefined' ? location.origin : '';
+}
+
+/**
+ * 指定デバイスで実際にロードされる全ファイルの配信 URL。
+ * config / generation_config / preprocessor_config / tokenizer / tokenizer_config と、
+ * そのデバイスの dtype に対応する ONNX が含まれる。
+ */
+export function listModelFileUrls(
+	id: ModelId,
+	device: TranscribeDevice,
+): string[] {
+	const artifact = getModelArtifact(id);
+	const base = `${origin()}${MODEL_BASE_PATH}${artifact.repositoryPath}`;
+	return requiredFiles(artifact, device).map((file) => `${base}${file.path}`);
+}
+
+/**
+ * 「キャッシュ済み（再ダウンロード不要）」を判定する。
+ *
+ * 必須ファイルが**すべて**存在するときだけ true。1件でも欠けていれば false を返す。
+ * 一部だけの確認では、破損キャッシュや途中で中断したダウンロードを
+ * 「キャッシュ済み」と誤表示してしまうため。
+ *
+ * Cache API が使えない場合・走査中に例外が出た場合はいずれも安全側の false。
+ */
 export async function isModelCached(
 	id: ModelId,
 	device: TranscribeDevice,
+	cacheStorage: CacheStorageLike | null = defaultCacheStorage(),
 ): Promise<boolean> {
-	if (typeof caches === 'undefined') return false;
-	const artifact = getModelArtifact(id);
-	const largest = requiredFiles(artifact, device)
-		.filter((f) => f.path.endsWith('.onnx'))
-		.sort((a, b) => b.bytes - a.bytes)[0];
-	if (!largest) return false;
-	const origin = typeof location !== 'undefined' ? location.origin : '';
-	const url = `${origin}${MODEL_BASE_PATH}${artifact.repositoryPath}${largest.path}`;
+	if (!cacheStorage) return false;
 	try {
-		return (await caches.match(url)) !== undefined;
+		for (const url of listModelFileUrls(id, device)) {
+			if ((await cacheStorage.match(url)) === undefined) return false;
+		}
+		return true;
 	} catch {
 		return false;
 	}
 }
 
 /**
- * 対象モデルのキャッシュエントリだけを削除する。削除できた件数を返す。
+ * 対象モデル・対象デバイスのキャッシュエントリだけを削除する。削除できた件数を返す。
  * 破損キャッシュからの復旧に使う（再取得は1回限り。無限再試行は禁止）。
  */
 export async function evictModelCache(
 	id: ModelId,
 	device: TranscribeDevice,
+	cacheStorage: CacheStorageLike | null = defaultCacheStorage(),
 ): Promise<number> {
-	if (typeof caches === 'undefined') return 0;
-	const urls = modelFileUrls(id, device);
+	if (!cacheStorage) return 0;
+	const urls = listModelFileUrls(id, device);
 	let deleted = 0;
 	try {
-		for (const name of await caches.keys()) {
-			const cache = await caches.open(name);
+		for (const name of await cacheStorage.keys()) {
+			const cache = await cacheStorage.open(name);
 			for (const url of urls) {
 				if (await cache.delete(url)) deleted++;
 			}

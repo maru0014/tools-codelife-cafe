@@ -26,6 +26,12 @@ type ModelSelectorProps = {
 	device: TranscribeDevice | null;
 	/** キャッシュ済みで初回ダウンロードが発生しないモデル */
 	cachedModelIds: readonly ModelId[];
+	/**
+	 * small を「推奨」表示してよいか。
+	 * 正本の条件は「WebGPU対応かつメモリ安全判定通過時のみ」なので、
+	 * 判定は models.ts の isSmallRecommended() に委ね、ここでは受け取るだけにする。
+	 */
+	smallRecommended: boolean;
 	disabled?: boolean;
 };
 
@@ -36,12 +42,12 @@ export function ModelSelector({
 	onLanguageChange,
 	device,
 	cachedModelIds,
+	smallRecommended,
 	disabled,
 }: ModelSelectorProps) {
 	const choices = listModelChoices(device ?? 'wasm');
 	const selected = choices.find((c) => c.id === modelId);
 	const isCached = cachedModelIds.includes(modelId);
-	const smallRecommended = device === 'webgpu';
 
 	return (
 		<div className="flex flex-col gap-4">
@@ -59,6 +65,11 @@ export function ModelSelector({
 				)}
 				{isCached && (
 					<Badge variant="outline">キャッシュ済み（再ダウンロード不要）</Badge>
+				)}
+				{smallRecommended && (
+					<Badge variant="secondary" data-testid="transcribe-small-recommended">
+						この音声なら高精度（small）も実行できます
+					</Badge>
 				)}
 			</div>
 
@@ -117,9 +128,8 @@ export function ModelSelector({
 			)}
 			{modelId === 'small' && device !== 'webgpu' && (
 				<p className="text-sm text-muted-foreground">
-					この端末では WebGPU が使えないため、high
-					精度モデルは処理に時間がかかります。まずは tiny / base
-					をおすすめします。
+					この端末では WebGPU が使えないため、高精度（small）モデルは処理に
+					時間がかかります。まずは tiny / base をおすすめします。
 				</p>
 			)}
 		</div>

@@ -3,7 +3,13 @@
 // 取得先・ファイル・サイズ・SHA-256 の正本は model-manifest.ts（自動生成）。
 // ここでは「どのファイルがどのデバイスで実際に読まれるか」と表示用メタデータだけを扱う。
 
-import { MODEL_PEAK_MEMORY_BYTES } from './audio-core.ts';
+import {
+	ASSUMED_CHANNELS,
+	ASSUMED_SAMPLE_RATE,
+	assessMemory,
+	estimatePeakMemoryBytes,
+	MODEL_PEAK_MEMORY_BYTES,
+} from './audio-core.ts';
 import {
 	type ArtifactFile,
 	type DtypeName,
@@ -106,6 +112,55 @@ export const MODEL_OPTIONS: readonly ModelOption[] = [
 		recommendOnlyWithWebGpu: true,
 	},
 ];
+
+export type SmallRecommendationInput = {
+	device: TranscribeDevice | null;
+	/** navigator.deviceMemory（GB）。取得不能なら null */
+	deviceMemoryGb: number | null;
+	/** 選択中ファイルの長さ（秒）。未選択・取得不能なら null */
+	durationSec: number | null;
+	/** デコード後に判明した実測値。未デコードなら最悪ケースを使う */
+	sampleRate?: number;
+	channels?: number;
+};
+
+/**
+ * small（高精度）を「推奨」表示してよいかを判定する。
+ *
+ * 正本の条件は「WebGPU対応**かつ**メモリ安全判定通過時のみ推奨」。
+ * WebGPU が使えるだけでは推奨しない。安全判定ができない場合
+ * （ファイル未選択・長さ不明・deviceMemory 取得不能）は推奨しない＝安全側に倒す。
+ *
+ * 実行時の memory-risk による停止判定はこれとは別に維持される。
+ */
+export function isSmallRecommended(input: SmallRecommendationInput): boolean {
+	const { device, deviceMemoryGb, durationSec } = input;
+	if (device !== 'webgpu') return false;
+	// deviceMemory を取得できない環境は「安全と判定できない」ため推奨しない
+	if (deviceMemoryGb === null || !Number.isFinite(deviceMemoryGb)) return false;
+	if (
+		durationSec === null ||
+		!Number.isFinite(durationSec) ||
+		durationSec <= 0
+	) {
+		return false;
+	}
+
+	const estimatedBytes = estimatePeakMemoryBytes({
+		durationSec,
+		sampleRate: input.sampleRate ?? ASSUMED_SAMPLE_RATE,
+		channels: input.channels ?? ASSUMED_CHANNELS,
+		modelPeakBytes: modelPeakBytes('small', device),
+	});
+	return (
+		assessMemory({
+			estimatedBytes,
+			deviceMemoryGb,
+			modelId: 'small',
+			device,
+		}).level === 'ok'
+	);
+}
 
 export function getModelOption(id: ModelId): ModelOption {
 	const option = MODEL_OPTIONS.find((m) => m.id === id);

@@ -16,6 +16,8 @@ import {
 	validateAudioFile,
 } from '@/lib/transcribe/audio-browser';
 import {
+	ASSUMED_CHANNELS,
+	ASSUMED_SAMPLE_RATE,
 	assessDuration,
 	assessMemory,
 	estimatePeakMemoryBytes,
@@ -27,7 +29,7 @@ import {
 	isBrowserSupported,
 	resolveDevice,
 } from '@/lib/transcribe/detect';
-import { modelPeakBytes } from '@/lib/transcribe/models';
+import { isSmallRecommended, modelPeakBytes } from '@/lib/transcribe/models';
 import {
 	ERROR_GUIDANCE,
 	type ErrorCode,
@@ -45,10 +47,6 @@ import { ExportBar } from './ExportBar';
 import { ModelSelector } from './ModelSelector';
 import { ProgressPanel } from './ProgressPanel';
 import { SegmentList } from './SegmentList';
-
-/** duration が取れなかった場合のメモリ事前見積もりに使う想定値（最悪ケース） */
-const ASSUMED_SAMPLE_RATE = 48000;
-const ASSUMED_CHANNELS = 2;
 
 export default function TranscribeApp() {
 	const [supported, setSupported] = useState(true);
@@ -412,6 +410,11 @@ export default function TranscribeApp() {
 				onLanguageChange={setLanguage}
 				device={device}
 				cachedModelIds={cachedModelIds}
+				smallRecommended={isSmallRecommended({
+					device,
+					deviceMemoryGb,
+					durationSec,
+				})}
 				disabled={busy}
 			/>
 

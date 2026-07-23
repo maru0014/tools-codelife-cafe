@@ -13,6 +13,14 @@ export const TARGET_SAMPLE_RATE = 16000;
 /** v1 の安定対象。全量デコード方式のため 15 分を上限とする（60分級は v1.1） */
 export const MAX_DURATION_SEC = 15 * 60;
 
+/**
+ * デコード前の見積もりに使う最悪ケース（48kHz ステレオ）。
+ * 実際のサンプルレート・チャンネル数はデコード後にしか分からないため、
+ * 事前判定では過小評価しないようこの値を使う。
+ */
+export const ASSUMED_SAMPLE_RATE = 48000;
+export const ASSUMED_CHANNELS = 2;
+
 /** 端末メモリのうち、この割合までしか使わない前提で見積もる */
 const MEMORY_BUDGET_RATIO = 0.6;
 
